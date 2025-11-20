@@ -206,13 +206,11 @@
 
         <nav class="tabs" id="tabNav">
             <button class="tab-button active" onclick="showTab(event, 'summary')">📋 Summary</button>
-            <button class="tab-button" onclick="showTab(event, 'overview')">📊 Overview</button>
             <button class="tab-button" onclick="showTab(event, 'social-cost')">💵 Social Cost</button>
             <button class="tab-button" onclick="showTab(event, 'employment')">👷 Employment</button>
             <button class="tab-button" onclick="showTab(event, 'health')">💚 Health & Safety</button>
                                 <button class="tab-button" onclick="showTab(event, 'ai')">🤖 Artificial Intelligence</button>
             <button class="tab-button" onclick="showTab(event, 'worldwide-costs')">🌍 Worldwide Costs</button>
-            <button class="tab-button" onclick="showTab(event, 'decarb-plan')">🌱 Decarb Plan</button>
             <button class="tab-button" onclick="showTab(event, 'bibliography')">📚 Bibliography</button>
 </nav>
 
@@ -275,20 +273,7 @@
                 <div class="chart-citation" style="margin-top: 2rem;">
                     <strong>Sources:</strong> Breakthrough Institute, "California's Nuclear Energy Policies Cost $12 Billion in Unrealized Capital Investments" (2022); U.S. Department of Energy, "Pathways to Commercial Liftoff: Advanced Nuclear" (2025); Britain Remade, "Nuclear Construction Cost Analysis: International Comparison of Post-2000 Projects" (2024) - South Korea $3,571/kW, China $4,174/kW construction costs; Liu, Shangwei, Daniel M. Kammen, et al., "Curbing Nuclear Power Plant Costs: Evidence from Learning in China, South Korea, and the United States," <em>Nature</em> (2025); Lazard, "Levelized Cost of Energy+ Version 18.0," June 2025; California Energy Commission, SMR Exemption Recommendations (August 2024); Markandya, Anil, and Paul Wilkinson, "Electricity Generation and Health," <em>The Lancet</em> 370, no. 9591 (2007): 979-990; Apergis, N., and J. Payne, "A Panel Study of Nuclear Energy Consumption and Economic Growth," <em>Energy Economics</em> 32, no. 3 (2010): 545-549; Wolde-Rufael, Y., and Kojo Menyah, "Nuclear Energy Consumption and Economic Growth in Nine Developed Countries," <em>Energy Economics</em> 32, no. 3 (2010): 582-593; Davis, Lucas W., and Catherine Hausman, "Market Impacts of a Nuclear Power Plant Closure," <em>American Economic Journal: Applied Economics</em> 8, no. 2 (2016): 92-122; California Independent System Operator, "Capacity Accreditation Methodology and Net CONE Values" (2025).
                 </div>
-            </div>
-        </section>
 
-        <!-- OVERVIEW SECTION -->
-        <section id="overview" class="content-section">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-label">Current CA Renewable Mix (2024)</div>
-                    <div class="stat-value">57%</div>
-                    <div class="stat-description">Including hydroelectric & solar</div>
-                </div>
-            </div>
-
-            <div class="dashboard">
                 <div class="chart-container">
                     <h3 class="chart-title">Carbon Emissions Reduction Scenarios</h3>
                     <div class="chart-wrapper">
@@ -301,21 +286,9 @@
                         <strong>Sources:</strong> U.S. Energy Information Administration, "California State Energy Profile," accessed November 2025, https://www.eia.gov/state/?sid=CA; U.S. Department of Energy, "Pathways to Commercial Liftoff: Advanced Nuclear" (2025) - projects SMR overnight costs of $3,600/kW after 10-20 deployments; Britain Remade, "Nuclear Construction Cost Analysis" (2024) - South Korea $3,571/kW, China $4,174/kW; Wang, Qiang, et al., "Is Nuclear Power a Cost-Effective Energy Transition Option?" <em>Environmental Research</em> 223 (2023): 115290; Liu, Shangwei, et al., "Curbing Nuclear Power Plant Costs: Evidence from Learning in China, South Korea, and the United States," <em>Nature</em> (2025).
                     </div>
                 </div>
-
-                <div class="chart-container">
-                    <h3 class="chart-title">California Energy Mix Projection (2025-2050)</h3>
-                    <div class="chart-wrapper">
-                        <canvas id="energyMixChart"></canvas>
-                    </div>
-                    <div class="chart-methodology">
-                        <strong>Methodology:</strong> SMR deployment scenario for California's 2045 carbon-free goal: Initial 300MW SMR units deployed 2032-2035 (4-year construction), scaling to 8-12 GW by 2040, reaching 20-25 GW (approximately 30-35% of generation) by 2045. Projection assumes South Korea/China cost learning curves ($3,571-4,174/kW) and capacity factors of 92%. Natural gas phases out proportionally as SMR capacity increases to meet Senate Bill 100 mandates.
-                    </div>
-                    <div class="chart-citation">
-                        <strong>Sources:</strong> California Energy Commission, "2024 Total System Electric Generation," accessed November 2025, https://www.energy.ca.gov/data-reports/energy-almanac/california-electricity-data/2024-total-system-electric-generation; Herran, Diego Silva, S. Fujimori, and M. Kainuma, "Implications of Japan's Long Term Climate Mitigation Target and the Relevance of Uncertain Nuclear Policy," <em>Climate Policy</em> 19, no. 9 (2019): 1117-1131, https://doi.org/10.1080/14693062.2019.1634507.
-                    </div>
-                </div>
             </div>
         </section>
+
 
         <!-- SOCIAL COST SECTION -->
 <section id="social-cost" class="content-section">
@@ -369,7 +342,7 @@
                 <canvas id="socialCostChart"></canvas>
             </div>
             <div class="chart-methodology">
-                <strong>Methodology:</strong> Social costs calculated using  $51/ton CO₂ estimate. Status quo assumes continued 35% natural gas dependence (98 million tons CO₂ over 50 years at current generation levels). Nuclear scenario replaces fossil generation with zero-carbon nuclear energy. Carbon emissions from natural gas: ~0.35 tons CO₂/MWh. Healthcare costs from Markandya & Wilkinson mortality rates. Does not include property damage from climate change, agricultural losses, or ecosystem degradation—actual costs are higher.
+                <strong>Methodology:</strong> Social costs calculated using $51/ton CO₂ estimate. Status quo assumes continued 35% natural gas dependence (98 million tons CO₂ over 50 years at current generation levels). Nuclear scenario replaces fossil generation with zero-carbon nuclear energy. Carbon emissions from natural gas: ~0.35 tons CO₂/MWh. Healthcare costs from Markandya & Wilkinson mortality rates. Does not include property damage from climate change, agricultural losses, or ecosystem degradation—actual costs are higher.
             </div>
             <div class="chart-citation">
                 <strong>Sources:</strong> Burke, Marshall, and Lawrence Goulder, "Professors Explain the Social Cost of Carbon," Stanford News, June 2021, https://news.stanford.edu/stories/2021/06/professors-explain-social-cost-carbon; Biden Administration social cost of carbon estimate ($51/ton, 2025); U.S. EPA emission factors for natural gas electricity generation; Markandya, Anil, and Paul Wilkinson, "Electricity Generation and Health," <em>The Lancet</em> 370, no. 9591 (2007): 979-990.
@@ -2927,92 +2900,11 @@
         }
 </script>
 
-        <!-- DECARB PLAN SECTION -->
-        <section id="decarb-plan" class="content-section">
-            <div class="chart-container">
-                <h2 class="chart-title">Including Nuclear in California's Decarbonization Plan</h2>
-                <p class="subtitle" style="margin-bottom: 2rem; font-size: 1.1rem;">I would like to acknowledge Prof. Leonard Rodberg's recent work in California energy decarbonization. See below for recent papers.</p>
-                
-                <div style="display: flex; flex-direction: column; gap: 2rem; margin-top: 2rem;">
-                    <div class="paper-card">
-                        <h3 style="color: var(--primary); margin-bottom: 1rem;">
-                            <a href="https://www.dropbox.com/scl/fi/iqzhdcgucdsof847u4avb/Can-Storage-Close-the-Gap-in-California-s-Decarbonization-Plan-LRodberg.pdf?rlkey=2mklupx81pnsrsp8v23oh89ai&e=2&st=2oo1toy2&dl=0" target="_blank" style="text-decoration: none; color: var(--primary);">
-                                📄 Can Storage Close the Gap in California's Decarbonization Plan?
-                            </a>
-                        </h3>
-                        <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">
-                            <strong>Author:</strong> Prof. Leonard Rodberg
-                        </p>
-                        <p style="color: var(--text-primary); line-height: 1.6;">
-                            An analysis examining whether energy storage technologies can bridge the gap in California's path to full decarbonization, considering the limitations and potential of battery storage systems in meeting the state's ambitious climate goals.
-                        </p>
-                        <a href="https://www.dropbox.com/scl/fi/iqzhdcgucdsof847u4avb/Can-Storage-Close-the-Gap-in-California-s-Decarbonization-Plan-LRodberg.pdf?rlkey=2mklupx81pnsrsp8v23oh89ai&e=2&st=2oo1toy2&dl=0" target="_blank" class="paper-link">
-                            View Paper →
-                        </a>
-                    </div>
-
-                    <div class="paper-card">
-                        <h3 style="color: var(--primary); margin-bottom: 1rem;">
-                            <a href="https://anthropoceneinstitute.com/wp-content/uploads/2024/09/A-New-View-of-Californias-Decarbonization-Plan-LRodberg.pdf" target="_blank" style="text-decoration: none; color: var(--primary);">
-                                📄 A New View of California's Decarbonization Plan
-                            </a>
-                        </h3>
-                        <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">
-                            <strong>Author:</strong> Prof. Leonard Rodberg
-                        </p>
-                        <p style="color: var(--text-primary); line-height: 1.6;">
-                            A comprehensive reassessment of California's decarbonization strategy, exploring alternative pathways and the potential role of various clean energy technologies, including nuclear power, in achieving the state's carbon neutrality objectives.
-                        </p>
-                        <a href="https://anthropoceneinstitute.com/wp-content/uploads/2024/09/A-New-View-of-Californias-Decarbonization-Plan-LRodberg.pdf" target="_blank" class="paper-link">
-                            View Paper →
-                        </a>
-                    </div>
-                </div>
-
-                <style>
-                .paper-card {
-                    background: #f8f9fa;
-                    padding: 2rem;
-                    border-radius: 12px;
-                    border-left: 4px solid var(--primary);
-                    transition: all 0.3s ease;
-                }
-
-                .paper-card:hover {
-                    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-                    transform: translateY(-2px);
-                }
-
-                .paper-card h3 a:hover {
-                    text-decoration: underline;
-                }
-
-                .paper-link {
-                    display: inline-block;
-                    margin-top: 1rem;
-                    padding: 0.75rem 1.5rem;
-                    background: linear-gradient(135deg, var(--primary), var(--secondary));
-                    color: white;
-                    text-decoration: none;
-                    border-radius: 8px;
-                    font-weight: 600;
-                    transition: all 0.3s ease;
-                }
-
-                .paper-link:hover {
-                    transform: translateX(5px);
-                    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-                }
-                </style>
-            </div>
-        </section>
-
         <!-- BIBLIOGRAPHY SECTION -->
         <section id="bibliography" class="content-section">
             <div class="chart-container">
 <div class="bibliography-content">
     <h2 class="chart-title">Bibliography</h2>
-    <p class="subtitle" style="margin-bottom: 2rem;">Sources in Chicago Manual of Style (17th Edition)</p>
     <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--primary);">Peer-Reviewed Journal Articles</h3>
     <div class="bibliography-entries">
         <div class="bib-entry">
@@ -3028,10 +2920,10 @@
             <span class="bib-authors">Herran, Diego Silva, S. Fujimori, and M. Kainuma.</span> <span class="bib-title">"Implications of Japan's Long Term Climate Mitigation Target and the Relevance of Uncertainty in Energy Policy."</span> <em>Climate Policy</em> 19, no. 9 (2019): 1117-1131. <a href="https://doi.org/10.1080/14693062.2019.1634507" target="_blank" class="bib-link">https://doi.org/10.1080/14693062.2019.1634507</a>
         </div>
         <div class="bib-entry">
-            <span class="bib-authors">Kim, Hana and E. Jeong.</span> <span class="bib-title">"Structural Changes to Industries and Effects Resulting from Nuclear Energy in South Korea."</span> <em>Energies</em> 13, no. 7 (2018). <a href="https://doi.org/10.3390/en13071806" target="_blank" class="bib-link">https://doi.org/10.3390/en13071806</a>
+            <span class="bib-authors">Kim, Hana and E. Jeong.</span> <span class="bib-title">"Structural Changes to Industries and Effects Resulting from Nuclear Energy in South Korea."</span> <em>Energies</em> (2018). <a href="https://doi.org/10.3390/en13071806" target="_blank" class="bib-link">https://doi.org/10.3390/en13071806</a>
         </div>
         <div class="bib-entry">
-            <span class="bib-authors">Liu, Shiwei, Daniel Kaffine, et al..</span> <span class="bib-title">"Nuclear Construction Costs: Evidence on Learning Curves in China and the United States."</span> <span class="bib-institution">Johns Hopkins University, Harvard Kennedy School, CUNY Stony Brook collaborative study.</span> (Recent). <a href="https://scholar.google.com/scholar?q=Nuclear+Construction+Costs+Evidence+Learning+Curves+China+United+States+Liu+Kaffine" target="_blank" class="bib-link">Google Scholar</a>
+            <span class="bib-authors">Liu, Shiwei, Daniel Kaffine, et al..</span> <span class="bib-title">"Nuclear Construction Costs: Evidence on Learning Curves in China and the United States."</span> <span class="bib-institution">Johns Hopkins University, Harvard Kennedy School, CUNY Stony Brook collaborative study.</span> (Recent). 
         </div>
         <div class="bib-entry">
             <span class="bib-authors">Markandya, Anil and Paul Wilkinson.</span> <span class="bib-title">"Electricity Generation and Health."</span> <em>The Lancet</em> 370 (2007): 979-990. <a href="https://doi.org/10.1016/S0140-6736(07)61253-7" target="_blank" class="bib-link">https://doi.org/10.1016/S0140-6736(07)61253-7</a>
@@ -3040,7 +2932,7 @@
             <span class="bib-authors">Sovacool, Benjamin.</span> <span class="bib-title">"Nuclear Risk for Energy Infrastructure is Highest in Conflicts, Lowest in Research."</span> <em>Social Science Research</em> <a href="https://www.bu.edu/igs/" target="_blank" class="bib-link">https://www.bu.edu/igs/</a>
         </div>
         <div class="bib-entry">
-            <span class="bib-authors">Wang, Qi, Jiale Guo, Rongrong Li, and Xue-er.</span> <span class="bib-title">"Comparative Analysis of Coal, Oil, Gas, Renewable Energy and Carbon Emissions."</span> <em>Environmental Research</em> (2023). <a href="https://doi.org/10.1016/j.envres.2023.116359" target="_blank" class="bib-link">https://doi.org/10.1016/j.envres.2023.116359</a>
+            <span class="bib-authors">Wang, Qi, Jiale Guo, Rongrong Li, and Xue-er.</span> <span class="bib-title">"Comparative Analysis of Coal, Oil, Gas, Renewable Energy and Carbon Emissions."</span> <em>Environmental Research</em> (2023). <a href="https://doi.org/10.1016/j.envres.2023.1" target="_blank" class="bib-link">https://doi.org/10.1016/j.envres.2023.1</a>
         </div>
         <div class="bib-entry">
             <span class="bib-authors">Wolde-Rufael, Y. and Kojo Menyah.</span> <span class="bib-title">"Nuclear Energy Consumption and Economic Growth."</span> (2010): 582-593. <a href="https://doi.org/10.1016/j.enpol.2010.01.004" target="_blank" class="bib-link">https://doi.org/10.1016/j.enpol.2010.01.004</a>
@@ -3052,10 +2944,13 @@
 <span class="bib-title">"Summary Report - Comprehensive Analysis of 55 Operating Nuclear Reactors with Detailed Cost Data."</span> <span class="bib-organization">Anthropocene Institute.</span> (2024). <a href="https://www.anthropoceneinstitute.com/" target="_blank" class="bib-link">https://www.anthropoceneinstitute.com/</a>
         </div>
         <div class="bib-entry">
-            <span class="bib-authors">Lovering, Jessica R., Arthur Yip, and Ted Nordhaus.</span> <span class="bib-title">"Historical Construction Costs of Global Nuclear Power Reactors."</span> <em>Energy Policy</em> 91 (2016): 371-382. <a href="https://doi.org/10.1016/j.enpol.2016.01.011" target="_blank" class="bib-link">https://doi.org/10.1016/j.enpol.2016.01.011</a><br><span class="bib-note">Analysis of post-2000 reactors showing costs of $3,571/kW (China), $4,174/kW (S. Korea), $5,833/kW (India), $7,934/kW (Russia) through $12 billion per reactor average</span>
+            <span class="bib-authors">Lovering, Jessica R., Arthur Yip, and Ted Nordhaus.</span> <span class="bib-title">"Historical Construction Costs of Global Nuclear Power Reactors."</span> <span class="bib-institution">Energy Policy.</span> (2016). <br><span class="bib-note">Analysis of post-2000 reactors showing costs of $3,571/kW (China), $4,174/kW (S. Korea), $5,833/kW (India), $7,934/kW (Russia) through $12 billion per reactor average</span>
         </div>
         <div class="bib-entry">
-<span class="bib-title">"Advanced Nuclear Reactor Deployment Pathways."</span> <span class="bib-organization">CATF (Clean Air Task Force).</span> (2024). <a href="https://www.catf.us/resource/advanced-nuclear-reactor-deployment/" target="_blank" class="bib-link">https://www.catf.us/</a><br><span class="bib-note">Modeled deployment curves showing cost reduction potential</span>
+            <span class="bib-authors">Burke, Marshall and Lawrence Goulder.</span> <span class="bib-title">"Professors Explain the Social Cost of Carbon."</span> <em>Stanford News</em> (2021). <a href="https://news.stanford.edu/stories/2021/06/professors-explain-social-cost-carbon" target="_blank" class="bib-link">https://news.stanford.edu/stories/2021/06/professors-explain-social-cost-carbon</a><br><span class="bib-note">Comprehensive explanation of social cost methodology and the $51/ton estimate used in federal policy analysis</span>
+        </div>
+        <div class="bib-entry">
+<span class="bib-title">"Advanced Nuclear Reactor Deployment Pathways."</span> <span class="bib-organization">CATF (Clean Air Task Force).</span> (2024). <br><span class="bib-note">Modeled deployment curves showing cost reduction potential</span>
         </div>
         <div class="bib-entry">
             <span class="bib-authors">Burke, Marshall and Lawrence Goulder.</span> <span class="bib-title">"Professional Analysis of Climate Impacts."</span> <em>Stanford News</em> (2021). <a href="https://news.stanford.edu/" target="_blank" class="bib-link">https://news.stanford.edu/</a>
@@ -3064,10 +2959,10 @@
 <span class="bib-title">"Electricity System Almanac."</span> <span class="bib-organization">California Energy Commission.</span> <a href="https://www.energy.ca.gov/data-reports/energy-almanac/california-electricity-data" target="_blank" class="bib-link">https://www.energy.ca.gov/data-reports/energy-almanac/california-electricity-data</a>
         </div>
         <div class="bib-entry">
-<span class="bib-title">"Small Modular Reactor Executive Recommendations."</span> <span class="bib-organization">California Governor's Office.</span> (2024). August. <a href="https://www.gov.ca.gov/" target="_blank" class="bib-link">https://www.gov.ca.gov/</a>
+<span class="bib-title">"Small Modular Reactor Executive Recommendations."</span> <span class="bib-organization">California Governor's Office.</span> (2024). August 
         </div>
         <div class="bib-entry">
-<span class="bib-title">"Capacity Accreditation Methodology and Net CONE Values."</span> <span class="bib-organization">CAISO (California Independent System Operator).</span> (2024). <a href="https://www.caiso.com/" target="_blank" class="bib-link">https://www.caiso.com/</a>
+<span class="bib-title">"Capacity Accreditation Methodology and Net CONE Values."</span> <span class="bib-organization">CAISO (California Independent System Operator).</span> (2024). 
         </div>
         <div class="bib-entry">
 <span class="bib-title">"Artificial Intelligence Brings Nuclear Power Back from the Dead - Maybe Even to California."</span> <em>Energy News</em> (2024). 
@@ -3076,25 +2971,25 @@
 <span class="bib-title">"French Nuclear Cost Forecasts 2026-2040."</span> <span class="bib-organization">CRE (Commission de Régulation de l'Énergie).</span> (2024). <a href="https://www.cre.fr/" target="_blank" class="bib-link">https://www.cre.fr/</a><br><span class="bib-note">LCOE projections: €60.7/MWh (2026-2030), €59.1/MWh (2031-2035), €57.3/MWh (2036-2040)</span>
         </div>
         <div class="bib-entry">
-<span class="bib-title">"GenCost 2024: Annual Update."</span> <span class="bib-organization">CSIRO (Commonwealth Scientific and Industrial Research Organisation).</span> (2024). Australia. <a href="https://www.csiro.au/en/research/technology-space/energy/gencost" target="_blank" class="bib-link">https://www.csiro.au/gencost</a>
+<span class="bib-title">"GenCost 2024: Annual Update."</span> <span class="bib-organization">CSIRO (Commonwealth Scientific and Industrial Research Organisation).</span> (2024). Australia. 
         </div>
         <div class="bib-entry">
-<span class="bib-title">"Financing Nuclear Energy - Final Report."</span> <span class="bib-organization">European Commission.</span> (2020). <a href="https://energy.ec.europa.eu/topics/nuclear-energy_en" target="_blank" class="bib-link">https://energy.ec.europa.eu/</a><br><span class="bib-note">Cost analysis including taxes in 2018-2020</span>
+<span class="bib-title">"Financing Nuclear Energy - Final Report."</span> <span class="bib-organization">European Commission.</span> (2020). <br><span class="bib-note">Cost analysis including taxes in 2018-2020</span>
         </div>
         <div class="bib-entry">
-<span class="bib-title">"Nuclear Energy Strategy."</span> <span class="bib-organization">Idaho National Laboratory.</span> (2024). April. <a href="https://inl.gov/nuclear-energy/" target="_blank" class="bib-link">https://inl.gov/</a>
+<span class="bib-title">"Nuclear Energy Strategy."</span> <span class="bib-organization">Idaho National Laboratory.</span> (2024). April 
         </div>
         <div class="bib-entry">
-<span class="bib-title">"Nuclear Capacity Analysis."</span> <span class="bib-organization">ITIF (Information Technology and Innovation Foundation).</span> (2024). <a href="https://itif.org/publications/" target="_blank" class="bib-link">https://itif.org/</a><br><span class="bib-note">Global capacity: 55,762 MWe with 30 reactors under construction (31,953 MWe)</span>
+<span class="bib-title">"Nuclear Capacity Analysis."</span> <span class="bib-organization">ITIF (Information Technology and Innovation Foundation).</span> (2024). <br><span class="bib-note">Global capacity: 55,762 MWe with 30 reactors under construction (31,953 MWe)</span>
         </div>
         <div class="bib-entry">
 <span class="bib-title">"Nuclear Power in the European Union."</span> <span class="bib-organization">IEA (International Energy Agency).</span> (2024). Paris. <a href="https://www.iea.org/" target="_blank" class="bib-link">https://www.iea.org/</a><br><span class="bib-note">Cost data: $2,157/kW (median) to $6,920/kW (Slovakia)</span>
         </div>
         <div class="bib-entry">
-<span class="bib-title">"Renewable Power Generation Costs."</span> <span class="bib-organization">IRENA (International Renewable Energy Agency).</span> (2024). <a href="https://www.irena.org/publications/" target="_blank" class="bib-link">https://www.irena.org/</a>
+<span class="bib-title">"Renewable Power Generation Costs."</span> <span class="bib-organization">IRENA (International Renewable Energy Agency).</span> (2024). 
         </div>
         <div class="bib-entry">
-<span class="bib-title">"Nuclear Cost Calculations."</span> <span class="bib-organization">KEEI (Korea Energy Economics Institute).</span> (2024). <a href="https://www.keei.re.kr/web_keei/en_main.nsf" target="_blank" class="bib-link">https://www.keei.re.kr/</a><br><span class="bib-note">Equilibrium gap analysis: 69.58 KRW/kWh ($0.05-0.06/kWh) at 85% capacity factor</span>
+<span class="bib-title">"Nuclear Cost Calculations."</span> <span class="bib-organization">KEEI (Korea Energy Economics Institute).</span> (2024). <br><span class="bib-note">Equilibrium gap analysis: 69.58 KRW/kWh ($0.05-0.06/kWh) at 85% capacity factor</span>
         </div>
         <div class="bib-entry">
 <span class="bib-title">"Levelized Cost of Energy Analysis 18.0."</span> <span class="bib-organization">Lazard.</span> (2024). <a href="https://www.lazard.com/research-insights/levelized-cost-of-energyplus/" target="_blank" class="bib-link">https://www.lazard.com/research-insights/levelized-cost-of-energyplus/</a>
@@ -3103,25 +2998,43 @@
             <span class="bib-authors">Lee, Sung-Tae and Sun-Moon.</span> <span class="bib-title">"Nuclear Energy Subsidization and Policy Shifts in Korea."</span> <em>SAGE</em> (2024). <a href="https://doi.org/10.1177/21582440241242554" target="_blank" class="bib-link">https://doi.org/10.1177/21582440241242554</a>
         </div>
         <div class="bib-entry">
-<span class="bib-title">"Annual Technology Baseline (ATB) 2024."</span> <span class="bib-organization">NREL (National Renewable Energy Laboratory).</span> (2024). <a href="https://atb.nrel.gov/" target="_blank" class="bib-link">https://atb.nrel.gov/</a><br><span class="bib-note">Flagship technology assessment</span>
+<span class="bib-title">"Annual Technology Baseline (ATB) 2024."</span> <span class="bib-organization">NREL (National Renewable Energy Laboratory).</span> (2024). <br><span class="bib-note">Flagship technology assessment</span>
         </div>
         <div class="bib-entry">
-<span class="bib-title">"Nordic Energy Cost Analysis."</span> <span class="bib-organization">Sveriges Riksbank (Swedish Central Bank).</span> (2024). <a href="https://www.riksbank.se/en-gb/" target="_blank" class="bib-link">https://www.riksbank.se/</a><br><span class="bib-note">Average cost approximately per kWe</span>
+<span class="bib-title">"Nordic Energy Cost Analysis."</span> <span class="bib-organization">Sveriges Riksbank (Swedish Central Bank).</span> (2024). <br><span class="bib-note">Average cost approximately per kWe</span>
         </div>
         <div class="bib-entry">
-<span class="bib-title">"Global Nuclear Energy Statistics."</span> <span class="bib-organization">Statista.</span> (2024). <a href="https://www.statista.com/topics/1031/nuclear-energy/" target="_blank" class="bib-link">https://www.statista.com/</a>
+<span class="bib-title">"Global Nuclear Energy Statistics."</span> <span class="bib-organization">Statista.</span> (2024). 
         </div>
         <div class="bib-entry">
-<span class="bib-title">"Nuclear Industry Employment Data."</span> <span class="bib-organization">U.S. Bureau of Occupational Employment.</span> (2024). <a href="https://www.bls.gov/" target="_blank" class="bib-link">https://www.bls.gov/</a>
+<span class="bib-title">"Nuclear Industry Employment Data."</span> <span class="bib-organization">U.S. Bureau of Occupational Employment.</span> (2024). 
         </div>
         <div class="bib-entry">
-<span class="bib-title">"Liftoff Report: Advanced Nuclear."</span> <span class="bib-organization">U.S. Department of Energy.</span> (2024). <a href="https://liftoff.energy.gov/" target="_blank" class="bib-link">https://liftoff.energy.gov/</a><br><span class="bib-note">Projection: costs declining 10-20 years after deployment, down from first-of-a-kind costs</span>
+<span class="bib-title">"Liftoff Report: Advanced Nuclear."</span> <span class="bib-organization">U.S. Department of Energy.</span> (2024). <br><span class="bib-note">Projection: costs declining 10-20 years after deployment, down from first-of-a-kind costs</span>
         </div>
         <div class="bib-entry">
 <span class="bib-title">"Annual Energy Outlook 2024."</span> <span class="bib-organization">EIA (U.S. Energy Information Administration).</span> (2024). Washington, DC. <a href="https://www.eia.gov/outlooks/aeo/" target="_blank" class="bib-link">https://www.eia.gov/outlooks/aeo/</a>
         </div>
         <div class="bib-entry">
-<span class="bib-title">"Guide to Nearly 50-Year-Old Nuclear Regulations and Environmental Protection."</span> <span class="bib-organization">U.S. EPA.</span> (2024). <a href="https://www.epa.gov/radtown/radioactive-waste-nuclear-reactors" target="_blank" class="bib-link">https://www.epa.gov/</a><br><span class="bib-note">Includes dual cost analysis ($2B+)</span>
+<span class="bib-title">"Guide to Nearly 50-Year-Old Nuclear Regulations and Environmental Protection."</span> <span class="bib-organization">U.S. EPA.</span> (2024). <br><span class="bib-note">Includes dual cost analysis ($2B+)</span>
+        </div>
+        <div class="bib-entry">
+<span class="bib-title">"Greenhouse Gas Equivalencies Calculator - Calculations and References."</span> <span class="bib-organization">U.S. EPA.</span> (2024). <a href="https://www.epa.gov/energy/greenhouse-gas-equivalencies-calculator-calculations-and-references" target="_blank" class="bib-link">https://www.epa.gov/energy/greenhouse-gas-equivalencies-calculator-calculations-and-references</a><br><span class="bib-note">Carbon dioxide coefficients and emission factors for natural gas and other fuels</span>
+        </div>
+        <div class="bib-entry">
+<span class="bib-title">"Social Cost of Carbon: What It Is, Why It Matters."</span> <span class="bib-organization">Brookings Institution.</span> (2023). <a href="https://www.brookings.edu/articles/what-is-the-social-cost-of-carbon/" target="_blank" class="bib-link">https://www.brookings.edu/articles/what-is-the-social-cost-of-carbon/</a><br><span class="bib-note">Analysis of Biden administration's $51/ton interim value and methodology</span>
+        </div>
+        <div class="bib-entry">
+<span class="bib-title">"Interagency Working Group on Social Cost of Greenhouse Gases: Technical Support Document."</span> <span class="bib-organization">Biden Administration / White House.</span> (2021). <br><span class="bib-note">Official guidance establishing $51/ton CO₂ interim value for federal regulatory analysis</span>
+        </div>
+        <div class="bib-entry">
+<span class="bib-title">"Life Cycle Assessment of a Natural Gas Combined-Cycle Power Generation System."</span> <span class="bib-organization">NREL (National Renewable Energy Laboratory).</span> (2000). Technical Report NREL/TP-570-27715. <br><span class="bib-note">Global warming potential: 499.1 g CO₂-equivalent/kWh for NGCC systems including upstream emissions</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">de Gouw, J.A., et al.</span> <span class="bib-title">"Reduced Emissions of CO₂, NOₓ, and SO₂ from U.S. Power Plants Owing to Switch from Coal to Natural Gas with Combined Cycle Technology."</span> <em>Earth's Future</em> 2, no. 2 (2014): 75-82. <a href="https://doi.org/10.1002/2013ef000196" target="_blank" class="bib-link">https://doi.org/10.1002/2013ef000196</a><br><span class="bib-note">Combined cycle natural gas plants emit approximately 400 g CO₂/kWh</span>
+        </div>
+        <div class="bib-entry">
+<span class="bib-title">"Social Cost of Carbon 101."</span> <span class="bib-organization">Resources for the Future (RFF).</span> (2025). <a href="https://www.rff.org/publications/explainers/social-cost-carbon-101/" target="_blank" class="bib-link">https://www.rff.org/publications/explainers/social-cost-carbon-101/</a><br><span class="bib-note">Comprehensive explainer on SCC methodology and policy applications</span>
         </div>
     </div>
 </div>
