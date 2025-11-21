@@ -199,9 +199,29 @@
 <body>
     <div class="container">
         <header>
-            <h1>California Nuclear Energy Standstill</h1>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                <!-- Nuclear Atom Icon -->
+                <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="32" cy="32" r="6" fill="#667eea"/>
+                    <ellipse cx="32" cy="32" rx="28" ry="12" stroke="#667eea" stroke-width="3" fill="none" transform="rotate(0 32 32)"/>
+                    <ellipse cx="32" cy="32" rx="28" ry="12" stroke="#764ba2" stroke-width="3" fill="none" transform="rotate(60 32 32)"/>
+                    <ellipse cx="32" cy="32" rx="28" ry="12" stroke="#43e97b" stroke-width="3" fill="none" transform="rotate(120 32 32)"/>
+                    <circle cx="32" cy="32" r="4" fill="#ffffff"/>
+                </svg>
+                
+                <h1 style="margin: 0;">California Nuclear Energy Standstill</h1>
+            </div>
+            
             <p class="subtitle">Economic and Health Impact Analysis</p>
-
+            
+            <!-- 2045 Carbon-Free Goal Card -->
+            <div style="display: flex; justify-content: center; margin-top: 1.5rem;">
+                <div class="stat-card" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); color: white; max-width: 400px;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">2045 Carbon-Free Goal</div>
+                    <div class="stat-value" style="color: white;">Achievable</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">With SMR deployment by 2030s</div>
+                </div>
+            </div>
         </header>
 
         <nav class="tabs" id="tabNav">
@@ -216,6 +236,50 @@
 
         <!-- SUMMARY SECTION -->
         <section id="summary" class="content-section active">
+            <!-- COLORFUL STAT CARDS AT TOP -->
+            <div class="stats-grid" style="margin-bottom: 2rem;">
+                <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">Nuclear Moratorium</div>
+                    <div class="stat-value" style="color: white;">1976</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">49 years blocking new construction</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">Unrealized Investments</div>
+                    <div class="stat-value" style="color: white;">$12B</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">Lost capital (2020-2040)</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">Potential Annual Economic Benefit</div>
+                    <div class="stat-value" style="color: white;">+$4.17B</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">With nuclear-inclusive transition</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">Lives Saved</div>
+                    <div class="stat-value" style="color: white;">11,300</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">Over 50 years (reduced air pollution)</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">SMR LCOE Target (2045)</div>
+                    <div class="stat-value" style="color: white;">$50-66</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">/MWh with learning curves</div>
+                </div>
+            </div>
+
+            <!-- CARBON EMISSIONS CHART -->
+            <div class="chart-container">
+                <h3 class="chart-title">Carbon Emissions Reduction Scenarios</h3>
+                <div class="chart-wrapper">
+                    <canvas id="emissionsChart"></canvas>
+                </div>
+                <div class="chart-methodology">
+                    <strong>Methodology:</strong> California emissions projections to achieve 2045 carbon neutrality mandate. SMR-inclusive scenario assumes: First SMR units operational 2032-2033, gradual build-out reaching 20-22 GW by 2045 (~32% generation), natural gas elimination by 2040. Renewable-only scenario requires extended natural gas peaker plants for grid reliability through 2045 due to intermittency, delaying full decarbonization. Emissions calculated using EIA carbon intensity factors: natural gas (0.41 kg CO₂/kWh), zero for nuclear/renewables.
+                </div>
+                <div class="chart-citation">
+                    <strong>Sources:</strong> U.S. Energy Information Administration, "California State Energy Profile," accessed November 2025, https://www.eia.gov/state/?sid=CA; U.S. Department of Energy, "Pathways to Commercial Liftoff: Advanced Nuclear" (2025) - projects SMR overnight costs of $3,600/kW after 10-20 deployments; Britain Remade, "Nuclear Construction Cost Analysis" (2024) - South Korea $3,571/kW, China $4,174/kW; Wang, Qiang, et al., "Is Nuclear Power a Cost-Effective Energy Transition Option?" <em>Environmental Research</em> 223 (2023): 115290; Liu, Shangwei, et al., "Curbing Nuclear Power Plant Costs: Evidence from Learning in China, South Korea, and the United States," <em>Nature</em> (2025).
+                </div>
+            </div>
+
+            <!-- MORATORIUM & POLICY IMPLICATIONS -->
             <div class="chart-container">
                 <h2 class="chart-title">California's Nuclear Moratorium & Policy Implications</h2>
                 
@@ -237,54 +301,8 @@
                     </p>
                 </div>
 
-                <div class="stats-grid" style="margin-top: 2rem;">
-                    <div class="stat-card">
-                        <div class="stat-label">Nuclear Moratorium</div>
-                        <div class="stat-value">1976</div>
-                        <div class="stat-description">49 years blocking new construction</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Unrealized Investments</div>
-                        <div class="stat-value">$12B</div>
-                        <div class="stat-description">Lost capital (2020-2040)</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Potential Annual Economic Benefit</div>
-                        <div class="stat-value">+$4.17B</div>
-                        <div class="stat-description">With nuclear-inclusive transition</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Lives Saved</div>
-                        <div class="stat-value">11,300</div>
-                        <div class="stat-description">Over 50 years (reduced air pollution)</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">SMR LCOE Target (2045)</div>
-                        <div class="stat-value">$50-66</div>
-                        <div class="stat-description">/MWh with learning curves</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">2045 Carbon-Free Goal</div>
-                        <div class="stat-value">Achievable</div>
-                        <div class="stat-description">With SMR deployment by 2030s</div>
-                    </div>
-                </div>
-
                 <div class="chart-citation" style="margin-top: 2rem;">
                     <strong>Sources:</strong> Breakthrough Institute, "California's Nuclear Energy Policies Cost $12 Billion in Unrealized Capital Investments" (2022); U.S. Department of Energy, "Pathways to Commercial Liftoff: Advanced Nuclear" (2025); Britain Remade, "Nuclear Construction Cost Analysis: International Comparison of Post-2000 Projects" (2024) - South Korea $3,571/kW, China $4,174/kW construction costs; Liu, Shangwei, Daniel M. Kammen, et al., "Curbing Nuclear Power Plant Costs: Evidence from Learning in China, South Korea, and the United States," <em>Nature</em> (2025); Lazard, "Levelized Cost of Energy+ Version 18.0," June 2025; California Energy Commission, SMR Exemption Recommendations (August 2024); Markandya, Anil, and Paul Wilkinson, "Electricity Generation and Health," <em>The Lancet</em> 370, no. 9591 (2007): 979-990; Apergis, N., and J. Payne, "A Panel Study of Nuclear Energy Consumption and Economic Growth," <em>Energy Economics</em> 32, no. 3 (2010): 545-549; Wolde-Rufael, Y., and Kojo Menyah, "Nuclear Energy Consumption and Economic Growth in Nine Developed Countries," <em>Energy Economics</em> 32, no. 3 (2010): 582-593; Davis, Lucas W., and Catherine Hausman, "Market Impacts of a Nuclear Power Plant Closure," <em>American Economic Journal: Applied Economics</em> 8, no. 2 (2016): 92-122; California Independent System Operator, "Capacity Accreditation Methodology and Net CONE Values" (2025).
-                </div>
-
-                <div class="chart-container">
-                    <h3 class="chart-title">Carbon Emissions Reduction Scenarios</h3>
-                    <div class="chart-wrapper">
-                        <canvas id="emissionsChart"></canvas>
-                    </div>
-                    <div class="chart-methodology">
-                        <strong>Methodology:</strong> California emissions projections to achieve 2045 carbon neutrality mandate. SMR-inclusive scenario assumes: First SMR units operational 2032-2033, gradual build-out reaching 20-22 GW by 2045 (~32% generation), natural gas elimination by 2040. Renewable-only scenario requires extended natural gas peaker plants for grid reliability through 2045 due to intermittency, delaying full decarbonization. Emissions calculated using EIA carbon intensity factors: natural gas (0.41 kg CO₂/kWh), zero for nuclear/renewables.
-                    </div>
-                    <div class="chart-citation">
-                        <strong>Sources:</strong> U.S. Energy Information Administration, "California State Energy Profile," accessed November 2025, https://www.eia.gov/state/?sid=CA; U.S. Department of Energy, "Pathways to Commercial Liftoff: Advanced Nuclear" (2025) - projects SMR overnight costs of $3,600/kW after 10-20 deployments; Britain Remade, "Nuclear Construction Cost Analysis" (2024) - South Korea $3,571/kW, China $4,174/kW; Wang, Qiang, et al., "Is Nuclear Power a Cost-Effective Energy Transition Option?" <em>Environmental Research</em> 223 (2023): 115290; Liu, Shangwei, et al., "Curbing Nuclear Power Plant Costs: Evidence from Learning in China, South Korea, and the United States," <em>Nature</em> (2025).
-                    </div>
                 </div>
             </div>
         </section>
