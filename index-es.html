@@ -1,0 +1,2261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estancamiento de la Energía Nuclear en California - Panel de Análisis Científico</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --border-radius: 20px;
+            --shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #ffffff;
+            color: var(--text-primary);
+            padding: 1rem;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* LANGUAGE SELECTOR */
+        .language-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .language-bar span {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .language-flags {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .lang-link {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.4rem 0.7rem;
+            background: rgba(255,255,255,0.15);
+            border-radius: 20px;
+            text-decoration: none;
+            color: white;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .lang-link:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        .lang-link.active {
+            background: white;
+            color: var(--primary);
+        }
+
+        .flag-icon {
+            font-size: 1.1rem;
+        }
+
+        header {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--text-primary);
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            margin-bottom: 1rem;
+        }
+
+        .disclaimer {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab-button:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .chart-container {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .chart-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+            margin-bottom: 1rem;
+        }
+
+        .chart-citation {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e0e0e0;
+            line-height: 1.4;
+        }
+
+        .chart-methodology {
+            font-size: 0.8rem;
+            color: #555;
+            font-style: italic;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            .chart-wrapper {
+                height: 300px;
+            }
+            .language-bar {
+                padding: 0.5rem;
+            }
+            .lang-link {
+                padding: 0.3rem 0.5rem;
+                font-size: 0.75rem;
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* =============================================
+           MORTALITY BUBBLE CHART STYLES
+           ============================================= */
+        .mortality-bubble-chart-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        
+        .mortality-bubble-chart {
+            position: relative;
+            width: 850px;
+            height: 580px;
+            min-width: 850px;
+        }
+        
+        .mortality-bubble {
+            position: absolute;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mortality-bubble:hover {
+            filter: brightness(1.15);
+            transform: scale(1.03);
+        }
+        
+        .mortality-bubble-coal {
+            width: 420px;
+            height: 420px;
+            background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+            top: 80px;
+            left: 20px;
+        }
+        
+        .mortality-bubble-oil {
+            width: 252px;
+            height: 252px;
+            background: linear-gradient(135deg, #c0392b 0%, #962d22 100%);
+            top: 40px;
+            left: 320px;
+        }
+        
+        .mortality-bubble-biomass {
+            width: 206px;
+            height: 206px;
+            background: linear-gradient(135deg, #d35400 0%, #a04000 100%);
+            top: 310px;
+            left: 380px;
+        }
+        
+        .mortality-bubble-gas {
+            width: 84px;
+            height: 84px;
+            background: linear-gradient(135deg, #f39c12 0%, #d68910 100%);
+            top: 450px;
+            left: 280px;
+        }
+        
+        .mortality-bubble-nuclear {
+            width: 9px;
+            height: 9px;
+            background: #27ae60;
+            top: 154px;
+            left: 150px;
+            box-shadow: 0 0 12px #27ae60, 0 0 24px #27ae60;
+            animation: mortality-pulse 2s infinite;
+        }
+        
+        .mortality-bubble-wind {
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, #ff1493 0%, #ff69b4 100%);
+            top: 173px;
+            left: 80px;
+        }
+        
+        .mortality-bubble-hydro {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            top: 447px;
+            left: 100px;
+        }
+        
+        .mortality-bubble-solar {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #f1c40f 0%, #d4ac0d 100%);
+            top: 365px;
+            left: 61px;
+        }
+        
+        @keyframes mortality-pulse {
+            0%, 100% { box-shadow: 0 0 12px #27ae60, 0 0 24px #27ae60; }
+            50% { box-shadow: 0 0 20px #27ae60, 0 0 40px #27ae60, 0 0 60px #27ae60; }
+        }
+        
+        .mortality-bubble-label {
+            position: absolute;
+            font-weight: 600;
+            pointer-events: none;
+            line-height: 1.3;
+        }
+        
+        .mortality-label-coal {
+            top: 250px;
+            left: 130px;
+            color: white;
+            font-size: 1.4rem;
+            text-align: center;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        
+        .mortality-label-oil {
+            top: 130px;
+            left: 390px;
+            color: white;
+            font-size: 1.1rem;
+            text-align: center;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        
+        .mortality-label-biomass {
+            top: 380px;
+            left: 425px;
+            color: white;
+            font-size: 1rem;
+            text-align: center;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        
+        .mortality-label-gas {
+            top: 475px;
+            left: 293px;
+            color: white;
+            font-size: 0.85rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        .mortality-label-small {
+            background: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-size: 0.85rem;
+        }
+        
+        .mortality-label-nuclear {
+            top: 110px;
+            left: 55px;
+            color: #27ae60;
+            font-weight: bold;
+            background: white;
+            border: 2px solid #27ae60;
+            font-size: 0.9rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+        }
+        
+        .mortality-label-wind { top: 192px; left: 55px; color: #ff1493; }
+        .mortality-label-hydro { top: 505px; left: 85px; color: #2980b9; }
+        .mortality-label-solar { top: 400px; left: 70px; color: #d4ac0d; }
+        
+        .mortality-tooltip {
+            position: fixed;
+            background: rgba(44, 62, 80, 0.95);
+            color: white;
+            padding: 1rem 1.25rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+            max-width: 280px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        
+        .mortality-tooltip-title {
+            font-weight: bold;
+            font-size: 1.15rem;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .mortality-tooltip-value {
+            color: #f39c12;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .mortality-tooltip-info {
+            font-size: 0.85rem;
+            line-height: 1.5;
+            opacity: 0.9;
+        }
+        
+        .mortality-tooltip-comparison {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            font-size: 0.85rem;
+            color: #2ecc71;
+            font-weight: 600;
+        }
+        
+        .mortality-insight-box {
+            background: linear-gradient(135deg, #27ae60, #1e8449);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .mortality-insight-box h3 { font-size: 1.6rem; margin-bottom: 1rem; }
+        
+        .mortality-insight-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .mortality-insight-stat { text-align: center; }
+        .mortality-insight-number { font-size: 2.5rem; font-weight: bold; }
+        .mortality-insight-label { font-size: 0.95rem; opacity: 0.9; }
+        
+        .mortality-legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.6rem;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .mortality-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.75rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            font-size: 0.8rem;
+        }
+        
+        .mortality-legend-color { width: 12px; height: 12px; border-radius: 50%; }
+        .mortality-legend-value { font-weight: bold; color: #2c3e50; }
+        
+        .mortality-methodology-box {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .mortality-methodology-box strong { color: #2c3e50; }
+        
+        .mortality-citation-box {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #ddd;
+            font-size: 0.8rem;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- LANGUAGE SELECTOR BAR -->
+        <div class="language-bar">
+            <span>🌐 Idiomas Disponibles:</span>
+            <div class="language-flags">
+                <a href="index.html" class="lang-link"><span class="flag-icon">🇺🇸</span> English</a>
+                <a href="index-se.html" class="lang-link"><span class="flag-icon">🇸🇪</span> Svenska</a>
+                <a href="index-fr.html" class="lang-link"><span class="flag-icon">🇫🇷</span> Français</a>
+                <a href="index-es.html" class="lang-link active"><span class="flag-icon">🇪🇸</span> Español</a>
+                <a href="index-zh.html" class="lang-link"><span class="flag-icon">🇨🇳</span> 中文</a>
+                <a href="index-ko.html" class="lang-link"><span class="flag-icon">🇰🇷</span> 한국어</a>
+                <a href="index-ja.html" class="lang-link"><span class="flag-icon">🇯🇵</span> 日本語</a>
+            </div>
+        </div>
+
+        <header>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                <!-- Nuclear Atom Icon -->
+                <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="32" cy="32" r="6" fill="#667eea"/>
+                    <ellipse cx="32" cy="32" rx="28" ry="12" stroke="#667eea" stroke-width="3" fill="none" transform="rotate(0 32 32)"/>
+                    <ellipse cx="32" cy="32" rx="28" ry="12" stroke="#764ba2" stroke-width="3" fill="none" transform="rotate(60 32 32)"/>
+                    <ellipse cx="32" cy="32" rx="28" ry="12" stroke="#43e97b" stroke-width="3" fill="none" transform="rotate(120 32 32)"/>
+                    <circle cx="32" cy="32" r="4" fill="#ffffff"/>
+                </svg>
+                
+                <h1 style="margin: 0;">Estancamiento de la Energía Nuclear en California</h1>
+            </div>
+            
+            <p class="subtitle">Análisis de Impacto Económico y de Salud</p>
+            
+            <!-- Meta Libre de Carbono 2045 Card -->
+            <div style="display: flex; justify-content: center; margin-top: 1.5rem;">
+                <div class="stat-card" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); color: white; max-width: 400px;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">Meta Libre de Carbono 2045</div>
+                    <div class="stat-value" style="color: white;">Alcanzable</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">Con despliegue de SMR para los años 2030</div>
+                </div>
+            </div>
+        </header>
+
+        <nav class="tabs" id="tabNav">
+            <button class="tab-button active" onclick="showTab(event, 'summary')">📋 Resumen</button>
+            <button class="tab-button" onclick="showTab(event, 'social-cost')">💵 Costo Social</button>
+            <button class="tab-button" onclick="showTab(event, 'employment')">👷 Empleo</button>
+            <button class="tab-button" onclick="showTab(event, 'health')">💚 Salud y Seguridad</button>
+            <button class="tab-button" onclick="showTab(event, 'ai')">🤖 Inteligencia Artificial</button>
+            <button class="tab-button" onclick="showTab(event, 'worldwide-costs')">🌍 Costos Mundiales</button>
+            <button class="tab-button" onclick="showTab(event, 'bibliography')">📚 Bibliografía</button>
+        </nav>
+
+        <!-- SUMMARY SECTION -->
+        <section id="summary" class="content-section active">
+            <!-- COLORFUL STAT CARDS AT TOP -->
+            <div class="stats-grid" style="margin-bottom: 2rem;">
+                <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">Moratoria Nuclear</div>
+                    <div class="stat-value" style="color: white;">1976</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">49 años bloqueando nueva construcción</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">Inversiones No Realizadas</div>
+                    <div class="stat-value" style="color: white;">$12B</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">Capital perdido (2020-2040)</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">Beneficio Económico Anual Potencial</div>
+                    <div class="stat-value" style="color: white;">+$4.17B</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">Con transición que incluye nuclear</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">Vidas Salvadas</div>
+                    <div class="stat-value" style="color: white;">11,300</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">En 50 años (reducción de contaminación)</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">Objetivo LCOE de SMR (2045)</div>
+                    <div class="stat-value" style="color: white;">$50-66</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">/MWh con curvas de aprendizaje</div>
+                </div>
+            </div>
+
+            <!-- CARBON EMISSIONS CHART -->
+            <div class="chart-container">
+                <h3 class="chart-title">Escenarios de Reducción de Emisiones de Carbono</h3>
+                <div class="chart-wrapper">
+                    <canvas id="emissionsChart"></canvas>
+                </div>
+                <div class="chart-methodology">
+                    <strong>Metodología:</strong> California emissions projections to achieve 2045 carbon neutrality mandate. SMR-inclusive scenario assumes: First SMR units operational 2032-2033, gradual build-out reaching 20-22 GW by 2045 (~32% generation), natural gas elimination by 2040. Renewable-only scenario requires extended natural gas peaker plants for grid reliability through 2045 due to intermittency, delaying full decarbonization. Emissions calculated using EIA carbon intensity factors: natural gas (0.41 kg CO₂/kWh), zero for nuclear/renewables.
+                </div>
+                <div class="chart-citation">
+                    <strong>Fuentes:</strong> U.S. Energy Information Administration, "California State Energy Profile," accessed November 2025, https://www.eia.gov/state/?sid=CA; U.S. Department of Energy, "Pathways to Commercial Liftoff: Advanced Nuclear" (2025) - projects SMR overnight costs of $3,600/kW after 10-20 deployments; Britain Remade, "Nuclear Construction Cost Analysis" (2024) - Corea del Sur $3,571/kW, China $4,174/kW; Wang, Qiang, et al., "Is Nuclear Power a Cost-Effective Energy Transition Option?" <em>Environmental Research</em> 223 (2023): 115290; Liu, Shangwei, et al., "Curbing Nuclear Power Plant Costs: Evidence from Learning in China, Corea del Sur, and the United States," <em>Nature</em> (2025).
+                </div>
+            </div>
+
+            <!-- MORATORIUM & POLICY IMPLICATIONS -->
+            <div class="chart-container">
+                <h2 class="chart-title">California's Moratoria Nuclear & Policy Implications</h2>
+                
+                <div style="background: #f8f9fa; padding: 2rem; border-radius: 10px; margin-bottom: 2rem;">
+                    <p style="margin-bottom: 1rem; line-height: 1.8;">
+                        Since 1976, California has maintained a moratorium on new nuclear power plant construction, enacted through amendments to the Warren-Alquist Act following intense public debate and environmental concerns. The moratorium requires the California Energy Commission to determine that the federal government has established both a demonstrated technology for nuclear fuel reprocessing and a permanent solution for high-level radioactive waste disposal before any new nuclear facilities can be licensed. Nearly five decades later, neither condition has been met, effectively blocking all new nuclear development in the state despite California's ambitious climate goals to achieve carbon neutrality by 2045.
+                    </p>
+                    
+                    <p style="margin-bottom: 1rem; line-height: 1.8;">
+                        This study analyzes the economic implications of deploying small modular reactors (SMRs) in California to achieve the state's 2045 carbon-free mandate under Senate Bill 100. With Diablo Canyon—California's last operating nuclear plant—now extended to 2030, policymakers face a critical decision point. Recent analysis by the Breakthrough Institute estimates California is losing up to <strong>$12 billion in unrealized capital investments</strong> between 2020 and 2040 due to laws limiting nuclear power, as major technology companies increasingly seek reliable, carbon-free electricity for AI data centers. SMRs offer a transformative solution: peer-reviewed research demonstrates that Corea del Sur achieves nuclear construction costs of <strong>$3,571/kW</strong> through standardized designs, while China reaches <strong>$4,174/kW</strong> through serial production. The U.S. Department of Energy projects that American SMRs could reach <strong>$3,600/kW</strong> after 10-20 deployments, with levelized costs of $50-66/MWh—competitive with solar and wind when firming costs are included. California could deploy initial 300MW SMR units by 2032-2033, scaling to 20-22 GW by 2045 to provide approximately 32% of electricity generation.
+                    </p>
+                    
+                    <p style="margin-bottom: 1rem; line-height: 1.8;">
+                        The economic analysis demonstrates that an SMR-inclusive energy transition could generate significant benefits for California's $3.9 trillion economy. Peer-reviewed research by Apergis & Payne (2010) and Wolde-Rufael & Menyah (2010) documents a positive correlation between nuclear energy consumption and GDP growth across developed economies. For California, deploying 20-22 GW of SMR capacity by 2045 would create high-paying jobs averaging <strong>$125,000 annually</strong> for nuclear engineers versus $55,000-$58,000 for solar and wind technicians, generating an estimated <strong>$4.17 billion in annual economic impact</strong>. SMRs' firm, dispatchable baseload power (92% capacity factor vs. 25% for solar) dramatically reduces the need for costly energy storage infrastructure—California Independent System Operator data shows grid-scale battery storage costs $18.92/kW-month. Furthermore, peer-reviewed research published in The Lancet indicates that replacing California's natural gas generation (currently 35-45% of in-state supply) with SMRs could save approximately <strong>11,300 lives over 50 years</strong> by eliminating air pollution mortality, as natural gas causes 2.8 deaths per TWh compared to nuclear's 0.07 deaths per TWh.
+                    </p>
+                    
+                    <p style="margin-bottom: 1rem; line-height: 1.8;">
+                        For California policymakers considering whether to lift or modify the nuclear moratorium, this analysis provides data-driven insights into the trade-offs involved. The state faces a stark choice: maintain the status quo and rely heavily on intermittent renewables requiring massive storage build-outs and continued dependence on natural gas for reliability, or embrace an "all-of-the-above" clean energy strategy that includes advanced nuclear technologies such as <strong>small modular reactors (SMRs)</strong>. SMRs offer significant advantages over traditional large reactors: factory fabrication reduces construction time from 9 years to 4-5.5 years, overnight costs projected at $3,600-4,200/kW after initial deployments (compared to $5,833/kW for recent U.S. large reactors), and modular scaling allows California to deploy capacity incrementally to meet the state's 2045 carbon-free mandate. Several states including Illinois have recently created SMR exemptions to their nuclear restrictions, and California's own Energy Commission recommended in August 2024 that the legislature consider similar exemptions. With proven international experience—Corea del Sur achieves $3,571/kW construction costs and China reaches $4,174/kW through serial production—and nuclear offering unparalleled capacity factors (92% vs. 25% for solar), <strong>California's 2045 carbon-free goal and economic competitiveness may require embracing SMR deployment as a cornerstone of the transition</strong>.
+                    </p>
+                </div>
+
+                <div class="chart-citation" style="margin-top: 2rem;">
+                    <strong>Fuentes:</strong> Breakthrough Institute, "California's Nuclear Energy Policies Cost $12 Billion in Unrealized Capital Investments" (2022); U.S. Department of Energy, "Pathways to Commercial Liftoff: Advanced Nuclear" (2025); Britain Remade, "Nuclear Construction Cost Analysis: International Comparison of Post-2000 Projects" (2024) - Corea del Sur $3,571/kW, China $4,174/kW construction costs; Liu, Shangwei, Daniel M. Kammen, et al., "Curbing Nuclear Power Plant Costs: Evidence from Learning in China, Corea del Sur, and the United States," <em>Nature</em> (2025); Lazard, "Levelized Cost of Energy+ Version 18.0," June 2025; California Energy Commission, SMR Exemption Recommendations (August 2024); Markandya, Anil, and Paul Wilkinson, "Electricity Generation and Health," <em>The Lancet</em> 370, no. 9591 (2007): 979-990; Apergis, N., and J. Payne, "A Panel Study of Nuclear Energy Consumption and Economic Growth," <em>Energy Economics</em> 32, no. 3 (2010): 545-549; Wolde-Rufael, Y., and Kojo Menyah, "Nuclear Energy Consumption and Economic Growth in Nine Developed Countries," <em>Energy Economics</em> 32, no. 3 (2010): 582-593; Davis, Lucas W., and Catherine Hausman, "Market Impacts of a Nuclear Power Plant Closure," <em>American Economic Journal: Applied Economics</em> 8, no. 2 (2016): 92-122; California Independent System Operator, "Capacity Accreditation Methodology and Net CONE Values" (2025).
+                </div>
+            </div>
+        </section>
+
+        <!-- SOCIAL COST SECTION -->
+<section id="social-cost" class="content-section">
+    <div class="chart-container">
+        <h2 class="chart-title">El Costo Social del Carbono e Impactos del Status Quo</h2>
+        
+        <div style="background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%); padding: 2rem; border-radius: 10px; margin-bottom: 2rem; border-left: 5px solid #e74c3c;">
+            <h3 style="color: #c0392b; margin-bottom: 1rem;">⚠️ Los Costos Ocultos de Mantener la Dependencia de Combustibles Fósiles</h3>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                The <strong>social cost of carbon</strong> represents the total economic damage caused by emitting one additional ton of CO₂ into the atmosphere. According to Stanford economists Marshall Burke and Lawrence Goulder, this metric captures "what happens to the climate and how these changes affect economic outcomes, including changes in agricultural productivity, damages caused by sea level rise, and decline in human health and labor productivity." As of 2021, the estimates the social cost of carbon at <strong>$51 per ton</strong>, meaning every ton of CO₂ emissions costs society $51 in damages—costs that are not reflected in electricity prices but are paid through healthcare costs, reduced productivity, property damage, and lost lives.
+            </p>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                California's continued dependence on natural gas for 35-45% of in-state electricity generation imposes massive hidden costs on society. With annual electricity generation of approximately 280 TWh, California's natural gas plants emit roughly 35 million tons of CO₂ annually. At $51 per ton, <strong>this represents $1.79 billion in annual social costs</strong>—costs borne by society through degraded air quality, increased healthcare burdens, reduced worker productivity during heat waves, and accelerated climate change impacts including droughts and wildfires. These externalities do not appear on utility bills but are paid through insurance premiums, tax-funded disaster relief, and human suffering.
+            </p>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                Research shows that these costs fall disproportionately on vulnerable populations. Lower-income communities often cannot afford protective technologies like air conditioning during increasingly frequent heat waves, lack access to quality healthcare, and face greater exposure to air pollution from fossil fuel combustion. Stanford research demonstrates that "hotter temperatures lead to worse health outcomes"—including heat stroke, cardiovascular dysfunction, and increased mortality—and that "lower-income communities are often more harmed by a changing climate." Studies also show that labor productivity declines sharply as temperatures rise; when this affects an entire economy, "economy-wide effects can be quite large," reducing GDP growth and wage potential for all workers, but especially outdoor and industrial workers.
+            </p>
+        </div>
+    </div>
+
+    <div class="stats-grid" style="margin-bottom: 2rem;">
+        <div class="stat-card" style="background: linear-gradient(135deg, #ffe5e5 0%, #ffcccc 100%);">
+            <div class="stat-label">Costo Social Anual de Plantas de Gas de CA</div>
+            <div class="stat-value" style="color: #c0392b;">$1.79B</div>
+            <div class="stat-description">Costos ocultos a $51/ton CO₂</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #ffe5e5 0%, #ffcccc 100%);">
+            <div class="stat-label">Vidas Perdidas Anualmente por Combustibles Fósiles</div>
+            <div class="stat-value" style="color: #c0392b;">235+</div>
+            <div class="stat-description">Muertes por contaminación del aire en California</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #e5f5e5 0%, #ccffcc 100%);">
+            <div class="stat-label">Costo Social Nuclear</div>
+            <div class="stat-value" style="color: #27ae60;">Casi Cero</div>
+            <div class="stat-description">Sin emisiones de carbono, mortalidad mínima</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #e5f5e5 0%, #ccffcc 100%);">
+            <div class="stat-label">Costos Sociales Evitados en 50 Años</div>
+            <div class="stat-value" style="color: #27ae60;">$89.5B</div>
+            <div class="stat-description">Con transición nuclear</div>
+        </div>
+    </div>
+
+    <div class="dashboard">
+        <div class="chart-container">
+            <h3 class="chart-title">Costos Sociales Acumulados: Combustibles Fósiles vs. Nuclear (50 Años)</h3>
+            <div class="chart-wrapper">
+                <canvas id="socialCostChart"></canvas>
+            </div>
+            <div class="chart-methodology">
+                <strong>Metodología:</strong> Social costs calculated using $51/ton CO₂ estimate. Status quo assumes continued 35% natural gas dependence (98 million tons CO₂ over 50 years at current generation levels). Nuclear scenario replaces fossil generation with zero-carbon nuclear energy. Carbon emissions from natural gas: ~0.35 tons CO₂/MWh. Healthcare costs from Markandya & Wilkinson mortality rates. Does not include property damage from climate change, agricultural losses, or ecosystem degradation—actual costs are higher.
+            </div>
+            <div class="chart-citation">
+                <strong>Fuentes:</strong> Burke, Marshall, and Lawrence Goulder, "Professors Explain the Social Cost of Carbon," Stanford News, June 2021, https://news.stanford.edu/stories/2021/06/professors-explain-social-cost-carbon; Biden Administration social cost of carbon estimate ($51/ton, 2025); U.S. EPA emission factors for natural gas electricity generation; Markandya, Anil, and Paul Wilkinson, "Electricity Generation and Health," <em>The Lancet</em> 370, no. 9591 (2007): 979-990.
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h3 class="chart-title">Desglose del Costo Social por Categoría de Impacto (Anual)</h3>
+            <div class="chart-wrapper">
+                <canvas id="socialCostBreakdownChart"></canvas>
+            </div>
+            <div class="chart-methodology">
+                <strong>Metodología:</strong> Annual social costs allocated across impact categories based on Stanford analysis and EPA guidelines. Health impacts include mortality (EPA Value of Statistical Life at $11.7M), morbidity, and healthcare costs. Productivity losses from heat exposure affecting labor output. Property damage from sea level rise and extreme weather. Agricultural losses from altered precipitation and temperature. Climate damages include long-term warming effects, ecosystem disruption, and irreversible changes.
+            </div>
+            <div class="chart-citation">
+                <strong>Fuentes:</strong> Burke, Marshall, and Lawrence Goulder, Stanford News (2021); U.S. Environmental Protection Agency, "Guidelines for Preparing Economic Analyses" (2024); Intergovernmental Panel on Climate Change (IPCC) assessment reports on climate damages.
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <h3 class="chart-title">🌟 La Ventaja Nuclear: Cero Carbono, Costos Sociales Mínimos</h3>
+        
+        <div style="background: linear-gradient(135deg, #e8f8f5 0%, #d5f4e6 100%); padding: 2rem; border-radius: 10px; margin-top: 2rem; border-left: 5px solid #27ae60;">
+            <h3 style="color: #27ae60; margin-bottom: 1rem;">✓ Por Qué la Energía Nuclear Elimina los Costos Sociales</h3>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                <strong>Cero Emisiones de Carbono:</strong> Nuclear power plants emit no CO₂ during operation, completely eliminating the largest component of social costs. Over a 50-year transition to 45% nuclear, California would avoid emitting approximately 98 million tons of CO₂ that would otherwise come from natural gas plants—representing <strong>$50 billion in avoided climate damages</strong> at current social cost estimates. This benefit compounds over time as avoided emissions prevent irreversible warming, sea level rise, and ecosystem collapse.
+            </p>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                <strong>Récord de Seguridad Excepcional:</strong> Nuclear energy has the lowest mortality rate of any major energy source at just 0.07 deaths per TWh—less than solar panels (up to 0.44 deaths/TWh, 0.02 deaths from installation accidents aside, comparable when including supply chain) and 40 times safer than natural gas (2.8 deaths/TWh). This mortality rate includes all historical nuclear accidents—Chernobyl, Fukushima, and Three Mile Island. A California powered by 45% nuclear instead of natural gas would save approximately <strong>226 lives every year</strong>, or 11,300 lives over 50 years. At EPA's Value of Statistical Life ($11.7M per life), this represents $132.7 billion in value—not counting reduced healthcare costs, reduced suffering, and maintained productivity of saved lives.
+            </p>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                <strong>Energía Firme y Confiable Previene Disrupciones Económicas:</strong> Unlike intermittent renewables that require massive battery storage and continued gas "peaker" plants for reliability, nuclear provides constant baseload power with 92% capacity factor. This eliminates the hidden social costs of grid instability, rolling blackouts, and economic disruption from power shortages. California's 2020 rolling blackouts during heat waves demonstrated how renewable intermittency can fail when most needed—exactly when demand peaks and solar production ends at sunset. Stanford economist Lawrence Goulder notes that carbon pricing must account for "production and consumption decisions," and firm nuclear power enables both without requiring $18.92/kW-month in storage costs or continued fossil fuel backup.
+            </p>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                <strong>Beneficios de Justicia Ambiental:</strong> Nuclear energy particularly benefits low-income and disadvantaged communities who bear the brunt of fossil fuel pollution. Stanford economist Marshall Burke emphasizes that "lower-income communities are often more harmed by a changing climate" and "might not be able to easily afford protective technologies." By eliminating air pollution from fossil fuels and avoiding climate change acceleration, nuclear energy provides disproportionate benefits to environmental justice communities. Additionally, nuclear plants create high-paying union jobs ($125,000 average for nuclear engineers vs. $55,000-$58,000 for renewable energy technicians), providing economic mobility opportunities in communities that host these facilities.
+            </p>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                <strong>Sostenibilidad a Largo Plazo y Eficiencia de Recursos:</strong> Nuclear power plants operate for 60-80 years with minimal land use (1 square mile per GW vs. 75 square miles for solar), minimal resource extraction, and minimal waste generation. A single uranium fuel pellet the size of a fingertip contains as much energy as one ton of coal, 17,000 cubic feet of natural gas, or 1,780 pounds of oil. All nuclear waste ever produced in U.S. history would fit on a single football field at 10 yards deep—and 96% of spent fuel can be recycled. France has demonstrated that nuclear-powered electricity can be both affordable ($0.18/kWh vs. California's $0.28/kWh) and clean (carbon intensity of 60g CO₂/kWh vs. California's 200g CO₂/kWh), proving the model works at scale.
+            </p>
+        </div>
+    </div>
+
+    <div class="stats-grid" style="margin-top: 2rem;">
+        <div class="stat-card" style="background: linear-gradient(135deg, #e8f8f5 0%, #d5f4e6 100%);">
+            <div class="stat-label">Generación Libre de Carbono</div>
+            <div class="stat-value" style="color: #27ae60;">100%</div>
+            <div class="stat-description">Sin emisiones de CO₂ de la nuclear</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #e8f8f5 0%, #d5f4e6 100%);">
+            <div class="stat-label">Récord de Seguridad</div>
+            <div class="stat-value" style="color: #27ae60;">0.07</div>
+            <div class="stat-description">Muertes/TWh (incluye Chernóbil)</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #e8f8f5 0%, #d5f4e6 100%);">
+            <div class="stat-label">Factor de Capacidad</div>
+            <div class="stat-value" style="color: #27ae60;">92%</div>
+            <div class="stat-description">vs. 25% solar, 35% eólica</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #e8f8f5 0%, #d5f4e6 100%);">
+            <div class="stat-label">Eficiencia de Uso del Suelo</div>
+            <div class="stat-value" style="color: #27ae60;">75x</div>
+            <div class="stat-description">Menos tierra que solar por GW</div>
+        </div>
+    </div>
+
+    <div class="chart-citation" style="margin-top: 2rem; font-size: 0.85rem;">
+        <strong>Key Source:</strong> Burke, Marshall, and Lawrence Goulder. "Professors Explain the Social Cost of Carbon." Stanford News, June 2021. https://news.stanford.edu/stories/2021/06/professors-explain-social-cost-carbon. Burke is Associate Professor of Earth System Science at Stanford; Goulder is Shuzo Nishihara Professor in Environmental and Resource Economics. Article explains social cost methodology, calculation methods, policy applications, and environmental justice implications.  $51/ton estimate referenced throughout.
+    </div>
+</section>
+
+        <!-- EMPLOYMENT SECTION -->
+        <section id="employment" class="content-section">
+            <div class="dashboard">
+                <div class="chart-container">
+                    <h3 class="chart-title">Creación de Empleo por Sector Energético (Empleos por MW)</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="jobsChart"></canvas>
+                    </div>
+                    <div class="chart-methodology">
+                        <strong>Metodología:</strong> Job estimates calculated per megawatt of installed capacity including construction phase (temporary) and operations phase (permanent) employment. Nuclear figures include construction, operations, maintenance, and fuel cycle jobs. Renewable estimates include manufacturing, installation, and maintenance.
+                    </div>
+                    <div class="chart-citation">
+                        <strong>Fuentes:</strong> Kim, Hana, and E. Jeon, "Structural Changes to Nuclear Energy Industries and the Economic Effects Resulting from Energy Transition Policies in Corea del Sur," <em>Energies</em> 13, no. 7 (2020): 1806; California Governor's Office, "As Trump Embraces Dirty Fossil Fuels, California Hits Major Clean Energy Milestone," October 9, 2025, https://www.energy.ca.gov/news/2025-10/.
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3 class="chart-title">Salario Anual Promedio por Sector (USD)</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="salariesChart"></canvas>
+                    </div>
+                    <div class="chart-methodology">
+                        <strong>Metodología:</strong> Salary estimates represent median wages for skilled technical positions in each energy sector including engineers, technicians, and operators. Values adjusted to 2025 dollars using CPI.
+                    </div>
+                    <div class="chart-citation">
+                        <strong>Fuentes:</strong> U.S. Bureau of Labor Statistics, "Occupational Employment and Wage Statistics," 2024; California Energy Commission employment data from total system generation reports 2023-2024.
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3 class="chart-title">Distribución del Programa de Recapacitación Laboral (%)</h3>
+                <div class="chart-wrapper">
+                    <canvas id="retrainingChart"></canvas>
+                </div>
+                <div class="chart-methodology">
+                    <strong>Metodología:</strong> Distribution percentages based on input-output analysis of skills transferability between fossil fuel sectors and clean energy sectors. Technical training category includes nuclear, solar installation, and wind technician programs. Management includes project management and safety oversight roles.
+                </div>
+                <div class="chart-citation">
+                    <strong>Fuentes:</strong> Kim, Hana, and E. Jeon, "Structural Changes to Nuclear Energy Industries and the Economic Effects Resulting from Energy Transition Policies in Corea del Sur," <em>Energies</em> 13, no. 7 (2020): 1806; California workforce transition programs analysis.
+                </div>
+            </div>
+        </section>
+
+        <!-- HEALTH & SAFETY SECTION -->
+        <section id="health" class="content-section">
+            <!-- NEW BUBBLE CHART FOR MORTALITY -->
+            <div class="chart-container">
+                <h3 class="chart-title">Tasas de Mortalidad por Fuente de Energía (Muertes por TWh)</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem; text-align: center;">
+                    Las áreas de los círculos son proporcionales a las tasas de mortalidad. Pase el cursor sobre las burbujas para información detallada.
+                </p>
+                
+                <div class="mortality-bubble-chart-wrapper">
+                    <div class="mortality-bubble-chart">
+                        <!-- Fossil Fuels -->
+                        <div class="mortality-bubble mortality-bubble-coal" 
+                             data-source="Carbón" 
+                             data-deaths="100" 
+                             data-info="Contaminación del aire por partículas, SO₂, NOₓ; accidentes mineros; enfermedad del pulmón negro"
+                             data-comparison="Nuclear is 2,500× más segura que el carbón"></div>
+                        
+                        <div class="mortality-bubble mortality-bubble-oil" 
+                             data-source="Petróleo" 
+                             data-deaths="36" 
+                             data-info="Emisiones de combustión, accidentes de refinería, derrames de transporte, riesgos de extracción"
+                             data-comparison="Nuclear is 900× más segura que el petróleo"></div>
+                        
+                        <div class="mortality-bubble mortality-bubble-biomass" 
+                             data-source="Biomasa" 
+                             data-deaths="24" 
+                             data-info="Contaminación del aire interior por quema de madera/carbón, accidentes de cosecha y procesamiento"
+                             data-comparison="La nuclear es 600× más segura que la biomasa"></div>
+                        
+                        <div class="mortality-bubble mortality-bubble-gas" 
+                             data-source="Gas Natural" 
+                             data-deaths="4" 
+                             data-info="Combustible fósil más limpio pero aún emite NOₓ y metano; riesgos de tuberías y explosiones"
+                             data-comparison="La nuclear es 100× más segura que el gas natural"></div>
+                        
+                        <!-- Clean energy at clock positions around coal -->
+                        <div class="mortality-bubble mortality-bubble-nuclear" 
+                             data-source="Nuclear" 
+                             data-deaths="0.04" 
+                             data-info="Incluye TODAS las muertes de Chernóbil, Fukushima, Three Mile Island + muertes ocupacionales + exposición teórica a radiación (modelo lineal sin umbral)"
+                             data-comparison="La fuente de energía más segura por unidad de electricidad generada"></div>
+                        
+                        <div class="mortality-bubble mortality-bubble-wind" 
+                             data-source="Eólica" 
+                             data-deaths="0.15" 
+                             data-info="Accidentes de instalación y mantenimiento, colisiones de helicópteros, ahogamientos en alta mar"
+                             data-comparison="Nuclear is 4× más segura que la eólica"></div>
+                        
+                        <div class="mortality-bubble mortality-bubble-hydro" 
+                             data-source="Hidroeléctrica" 
+                             data-deaths="1.4" 
+                             data-info="Tasa dominada por la falla de la Presa Banqiao de 1975 (171,000 muertes); por lo demás muy segura a 0.04/TWh"
+                             data-comparison="La nuclear es 35× más segura que la hidroeléctrica (incluyendo fallas de presas)"></div>
+                        
+                        <div class="mortality-bubble mortality-bubble-solar" 
+                             data-source="Solar" 
+                             data-deaths="0.44" 
+                             data-info="Manufactura (procesamiento de silicio), caídas en instalación de techos, accidentes de cadena de suministro"
+                             data-comparison="Nuclear is 11× más segura que la solar"></div>
+                        
+                        <!-- Static Labels for large bubbles -->
+                        <div class="mortality-bubble-label mortality-label-coal">CARBÓN<br>100 muertes/TWh</div>
+                        <div class="mortality-bubble-label mortality-label-oil">PETRÓLEO<br>36</div>
+                        <div class="mortality-bubble-label mortality-label-biomass">BIOMASA<br>24</div>
+                        <div class="mortality-bubble-label mortality-label-gas">GAS 4</div>
+                        
+                        <!-- Static Labels for small bubbles -->
+                        <div class="mortality-bubble-label mortality-label-nuclear">Nuclear 0.04 ⭐</div>
+                        <div class="mortality-bubble-label mortality-label-small mortality-label-wind">Eólica 0.15</div>
+                        <div class="mortality-bubble-label mortality-label-small mortality-label-hydro">Hidro 1.4</div>
+                        <div class="mortality-bubble-label mortality-label-small mortality-label-solar">Solar 0.44</div>
+                    </div>
+                </div>
+                
+                <div class="mortality-insight-box">
+                    <h3>⚛️ Nuclear: La Fuente de Energía Más Segura</h3>
+                    <div class="mortality-insight-stats">
+                        <div class="mortality-insight-stat">
+                            <div class="mortality-insight-number">2,500×</div>
+                            <div class="mortality-insight-label">más segura que el carbón</div>
+                        </div>
+                        <div class="mortality-insight-stat">
+                            <div class="mortality-insight-number">900×</div>
+                            <div class="mortality-insight-label">más segura que el petróleo</div>
+                        </div>
+                        <div class="mortality-insight-stat">
+                            <div class="mortality-insight-number">11×</div>
+                            <div class="mortality-insight-label">más segura que la solar</div>
+                        </div>
+                        <div class="mortality-insight-stat">
+                            <div class="mortality-insight-number">4×</div>
+                            <div class="mortality-insight-label">más segura que la eólica</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mortality-legend">
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #2c3e50;"></div>
+                        <span>Coal: <span class="mortality-legend-value">100</span></span>
+                    </div>
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #c0392b;"></div>
+                        <span>Oil: <span class="mortality-legend-value">36</span></span>
+                    </div>
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #d35400;"></div>
+                        <span>Biomass: <span class="mortality-legend-value">24</span></span>
+                    </div>
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #f39c12;"></div>
+                        <span>Gas: <span class="mortality-legend-value">4</span></span>
+                    </div>
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #3498db;"></div>
+                        <span>Hydro: <span class="mortality-legend-value">1.4</span></span>
+                    </div>
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #f1c40f;"></div>
+                        <span>Solar: <span class="mortality-legend-value">0.44</span></span>
+                    </div>
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #ff1493;"></div>
+                        <span>Wind: <span class="mortality-legend-value">0.15</span></span>
+                    </div>
+                    <div class="mortality-legend-item" style="background: linear-gradient(135deg, #27ae60, #1e8449); color: white;">
+                        <div class="mortality-legend-color" style="background: #27ae60; box-shadow: 0 0 8px #27ae60;"></div>
+                        <span>Nuclear: <span class="mortality-legend-value" style="color: white;">0.04</span> ⭐</span>
+                    </div>
+                </div>
+                
+                <div class="mortality-methodology-box">
+                    <strong>Metodología:</strong> Circle areas are proportional to death rates (area = π × r², scaled to deaths/TWh). Deaths include both direct accidents (occupational and public) and air pollution mortality across the full fuel cycle. Nuclear rate (0.04 deaths/TWh) includes all historical accidents—Chernobyl, Fukushima, Three Mile Island—plus occupational deaths and theoretical radiation exposure using the conservative linear no-threshold model. Solar deaths (0.44/TWh) include manufacturing, supply chain, and installation accidents. Fossil fuel deaths are dominated by air pollution (particulate matter, NOₓ, SO₂).
+                    
+                    <div class="mortality-citation-box">
+                        <strong>Fuente:</strong> World Health Organization (WHO), global mortality rates by energy source. Data compiled from: Markandya, A. and Wilkinson, P., "Electricity Generation and Health," <em>The Lancet</em> 370 (2007): 979-990; Sovacool, B. et al., "Balancing Safety with Sustainability," <em>Energy Research & Social Science</em> (2016); Our World in Data, "What are the safest and cleanest sources of energy?" (2022 update). WHO figures reported in ResearchGate compilation: "Mortality rates for each energy source in deaths per billion kWh produced."
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard">
+                <div class="chart-container">
+                    <h3 class="chart-title">Vidas Salvadas: Nuclear Transition vs. Status Quo (Cumulative 50 years)</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="livesSavedChart"></canvas>
+                    </div>
+                    <div class="chart-methodology">
+                        <strong>Metodología:</strong> Lives saved calculated by comparing air pollution mortality from current fossil fuel mix (primarily natural gas) versus nuclear-inclusive scenario. California electricity generation assumed at 280 TWh annually. Status quo: 280 TWh × 30% natural gas × 2.8 deaths/TWh = 235 deaths/year. Nuclear scenario: 280 TWh × 45% nuclear × 0.07 deaths/TWh = 9 deaths/year. Difference: 226 lives saved annually × 50 years = 11,300 lives (rounded to 11,000 for conservative estimate).
+                    </div>
+                    <div class="chart-citation">
+                        <strong>Fuentes:</strong> Markandya, Anil, and Paul Wilkinson, "Electricity Generation and Health," <em>The Lancet</em> 370, no. 9591 (2007): 979-990; California Energy Commission, "2024 Total System Electric Generation"; calculations based on peer-reviewed mortality rates applied to California-specific generation projections.
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3 class="chart-title">Ahorros en Costos de Salud en 50 Años (Miles de Millones USD)</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="healthcareSavingsChart"></canvas>
+                    </div>
+                    <div class="chart-methodology">
+                        <strong>Metodología:</strong> Healthcare costs calculated using EPA Value of Statistical Life ($11.7M per life in 2025 dollars) plus direct medical costs for prevented illnesses. Cancer treatment costs average $150,000 per case. Respiratory illness costs average $8,000 per case. Cardiovascular treatment costs average $45,000 per episode. All values discounted at 3% annually and adjusted for inflation.
+                    </div>
+                    <div class="chart-citation">
+                        <strong>Fuentes:</strong> Markandya, Anil, and Paul Wilkinson, "Electricity Generation and Health," <em>The Lancet</em> 370, no. 9591 (2007); U.S. Environmental Protection Agency, "Guidelines for Preparing Economic Analyses," 2024; healthcare cost estimates from CDC and medical literature on air pollution health impacts.
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- MORTALITY BUBBLE TOOLTIP -->
+        <div class="mortality-tooltip" id="mortalityTooltip">
+            <div class="mortality-tooltip-title"></div>
+            <div class="mortality-tooltip-value"></div>
+            <div class="mortality-tooltip-info"></div>
+            <div class="mortality-tooltip-comparison"></div>
+        </div>
+
+        
+        <!-- ARTIFICIAL INTELLIGENCE SECTION -->
+        <section id="ai" class="content-section">
+            <div class="chart-container">
+                <h2 class="chart-title">🤖 Inteligencia Artificial & Nuclear Energy</h2>
+                
+                <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 1.5rem; margin: 2rem 0; border-radius: 8px;">
+                    <p style="font-size: 1.1rem; margin: 0;"><strong>Nota:</strong> La Inteligencia Artificial (IA) no está incluida en otros análisis de este estudio. Sin embargo, la IA creará un gran impulso para la nuclear. Ofrece potencial para estándares de seguridad impecables y sistemas eficientes. Lo siguiente es lo que podría ser con la IA asistiendo en tecnologías nucleares.</p>
+                </div>
+
+                <h3>La Relación Simbiótica: La IA Necesita Nuclear, Nuclear Necesita IA</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    La relación entre la inteligencia artificial y la energía nuclear es bidireccional y transformadora. Las enormes demandas energéticas de la IA hacen que la energía nuclear sea una solución ideal para los centros de datos, mientras que las capacidades analíticas de la IA pueden revolucionar el diseño, operación, seguridad y licenciamiento de plantas nucleares.
+                </p>
+
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                        <div class="stat-label" style="color: white;">Crecimiento de Demanda Energética de Centros de Datos</div>
+                        <div class="stat-value" style="color: white;">160%</div>
+                        <div class="stat-label" style="color: white;">para 2030 (vs 2023)</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                        <div class="stat-label" style="color: white;">Capacidad Nuclear Necesaria</div>
+                        <div class="stat-value" style="color: white;">85-90 GW</div>
+                        <div class="stat-label" style="color: white;">para alimentar el crecimiento de IA para 2030</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                        <div class="stat-label" style="color: white;">Potencial de Reducción de Costos</div>
+                        <div class="stat-value" style="color: white;">$100B+</div>
+                        <div class="stat-label" style="color: white;">mediante IA en infraestructura nuclear</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                        <div class="stat-label" style="color: white;">Reducción del Tiempo de Licenciamiento</div>
+                        <div class="stat-value" style="color: white;">50%</div>
+                        <div class="stat-label" style="color: white;">potencial con herramientas de IA</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">⚡ Proyecciones de Demanda Energética de Centros de Datos de IA</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    Las principales empresas tecnológicas (Google, Microsoft, Amazon, Meta) están firmando acuerdos de energía nuclear para satisfacer las enormes y crecientes demandas energéticas de los centros de datos de IA. La nuclear proporciona energía confiable 24/7, libre de carbono, que las energías renovables intermitentes no pueden igualar.
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="aiPowerDemandChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>Fuente:</strong> Singer, Brian, Jim Schneider, and Carly Davenport. "Data Center Power Demand and Nuclear Energy." Goldman Sachs Research, 2024. https://www.goldmansachs.com/insights/articles/is-nuclear-energy-the-answer-to-ai-data-centers-power-consumption.
+                </div>
+
+                <div class="chart-methodology">
+                    <strong>Calculation:</strong> Data based on Goldman Sachs Research projections of data center electricity consumption growth from 2023 baseline to 2030, accounting for AI workload increases, efficiency gains, and infrastructure expansion.
+                </div>
+
+                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1.5rem; margin: 2rem 0; border-radius: 8px;">
+                    <h4 style="margin-top: 0;">Hallazgo Clave: La "Prima de Confiabilidad Verde"</h4>
+                    <p>La energía libre de carbono las 24 horas requiere combinar fuentes o aceptar primas de costo. La nuclear proporciona energía base a $77/MWh (gran escala en sitio), comparado con $87/MWh para solución casi 100% renovable con almacenamiento, y $91/MWh para gas natural de ciclo combinado con precio de carbono de $100/ton.</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">🏢 Principales Acuerdos Nucleares de Empresas Tecnológicas (2024-2025)</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    Las principales empresas de IA se han comprometido con más de 10 GW de capacidad nuclear a través de acuerdos de compra de energía e inversiones directas, señalando el papel crítico de la nuclear en impulsar la revolución de la IA.
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="techNuclearDealsChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>Fuente:</strong> MIT Technology Review. "Can Nuclear Power Really Fuel the Rise of AI?" May 2025. https://www.technologyreview.com/2025/05/20/1116339/ai-nuclear-power-energy-reactors/.
+                </div>
+
+                <div class="dashboard">
+                    <div style="background: #e8f5e9; border-radius: 8px; padding: 1.5rem;">
+                        <h4>Google + Kairos Power</h4>
+                        <ul>
+                            <li><strong>Acuerdo:</strong> Hasta 500 MW para 2035</li>
+                            <li><strong>Tecnología:</strong> Pequeños reactores enfriados por sal fundida</li>
+                            <li><strong>Primera Unidad:</strong> Objetivo 2030</li>
+                            <li><strong>Estado:</strong> Aprobación de construcción de NRC otorgada</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: #fff3e0; border-radius: 8px; padding: 1.5rem;">
+                        <h4>Amazon + X-energy</h4>
+                        <ul>
+                            <li><strong>Acuerdo:</strong> 320-960 MW (expandible)</li>
+                            <li><strong>Tecnología:</strong> Reactores modulares pequeños</li>
+                            <li><strong>Cronograma:</strong> Principios de los 2030</li>
+                            <li><strong>Ubicación:</strong> Estado de Washington</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: #e3f2fd; border-radius: 8px; padding: 1.5rem;">
+                        <h4>Microsoft + Constellation</h4>
+                        <ul>
+                            <li><strong>Acuerdo:</strong> Three Mile Island Unidad 1</li>
+                            <li><strong>Capacidad:</strong> ~835 MW</li>
+                            <li><strong>Cronograma:</strong> Reapertura 2028</li>
+                            <li><strong>Nombre:</strong> Centro de Energía Limpia Crane</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: #f3e5f5; border-radius: 8px; padding: 1.5rem;">
+                        <h4>Estrategia Nuclear de Meta</h4>
+                        <ul>
+                            <li><strong>Enfoque:</strong> Apoyo a la relicenciación de plantas existentes</li>
+                            <li><strong>Plazo:</strong> Extensiones de 20 años</li>
+                            <li><strong>Justificación:</strong> Más rápido que nueva construcción</li>
+                            <li><strong>Objetivo:</strong> Energía libre de carbono 24/7</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">💰 Análisis Costo-Beneficio: Nuclear vs Alternativas para IA</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    Al considerar los requisitos de confiabilidad 24/7, la nuclear proporciona el costo total del sistema más bajo para la energía de centros de datos en comparación con las renovables intermitentes que requieren almacenamiento o el gas natural con precio de carbono.
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="aiEnergyCostComparisonChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>Fuente:</strong> Singer, Brian, Jim Schneider, and Carly Davenport. "Data Center Power Demand and Nuclear Energy." Goldman Sachs Research, 2024. Calculations based on U.S. market conditions with $100/ton carbon price applied to fossil fuels.
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">🔬 Impacto Transformador de la IA en Operaciones Nucleares</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    La IA y el aprendizaje automático están revolucionando el diseño, operación, mantenimiento y seguridad de plantas nucleares. Estas tecnologías prometen reducir costos en cientos de miles de millones mientras aceleran los cronogramas de despliegue.
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="aiNuclearBenefitsChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>Fuentes:</strong> Laurin-Kovitz, Kirsten, and Rick Stevens. "AI for Energy Report." Argonne National Laboratory, April 2024. https://www.anl.gov/ai/reference/ai-for-energy-report-2024; Ngoy Kubelwa, Nelly. "Enhancing Nuclear Power Production with Artificial Intelligence." International Atomic Energy Agency Bulletin, 2024. https://www.iaea.org/bulletin/enhancing-nuclear-power-production-with-artificial-intelligence.
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">⏱️ Cronograma de Despliegue de SMR con Asistencia de IA</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    La IA está ayudando a acelerar el despliegue de Reactores Modulares Pequeños a través de iteración de diseño más rápida, licenciamiento simplificado y procesos de construcción optimizados. La OIEA lidera la investigación coordinada sobre IA para el despliegue de SMR.
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="smrTimelineChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>Fuentes:</strong> Gencturk, Merve, and Karim Ahmed. "Nuclear Energy Could Power the Future of AI." Texas A&M University Engineering, August 2025. https://engineering.tamu.edu/news/2025/08/nuclear-energy-could-power-the-future-of-ai.html; International Atomic Energy Agency. "Coordinated Research Project on AI for SMR Deployment," 2024.
+                </div>
+            </div>
+        </section>
+
+<!-- WORLDWIDE COSTS SECTION -->
+        <section id="worldwide-costs" class="content-section">
+            <div class="chart-container">
+                <h2 class="chart-title">🌍 Costos de Construcción Nuclear Mundiales</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    Analysis of nuclear power plant construction costs across major nuclear nations reveals dramatic variations 
+                    that challenge assumptions about nuclear economics. China, Corea del Sur, and other Asian nations consistently 
+                    build nuclear plants at one-third to one-fifth the cost of recent U.S. projects.
+                </p>
+
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #de2910, #ff6b6b);">
+                        <div class="stat-label" style="color: white;">Costo de Construcción en China</div>
+                        <div class="stat-value" style="color: white;">$2,230/kW</div>
+                        <div class="stat-label" style="color: white;">55 reactores operativos</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #003478, #0066cc);">
+                        <div class="stat-label" style="color: white;">Costo de Corea del Sur</div>
+                        <div class="stat-value" style="color: white;">$2,200/kW</div>
+                        <div class="stat-label" style="color: white;">El más bajo a nivel mundial</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #3c3b6e, #b22234);">
+                        <div class="stat-label" style="color: white;">Costo de EE.UU. (Vogtle)</div>
+                        <div class="stat-value" style="color: white;">$10,000/kW</div>
+                        <div class="stat-label" style="color: white;">4-5x más alto</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #4caf50, #8bc34a);">
+                        <div class="stat-label" style="color: white;">Objetivo SMR de California</div>
+                        <div class="stat-value" style="color: white;">$3,600/kW</div>
+                        <div class="stat-label" style="color: white;">Proyección del DOE después de 10-20 unidades</div>
+                    </div>
+                </div>
+
+                <div class="chart-wrapper">
+                    <canvas id="worldwideConstructionCostsChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>Fuentes:</strong> Anthropocene Institute (2024) - Chinese Nuclear Power Generation and Costs Analysis; 
+                    World Nuclear Association (2024); IEA/OECD NEA Projected Costs of Generating Electricity 2020; 
+                    Britain Remade (2024); Johns Hopkins University Nature Study (2025)
+                </div>
+
+                <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 1.5rem; margin: 2rem 0; border-radius: 8px;">
+                    <h3 style="margin-top: 0;">Hallazgo Clave: El Costo No Es Inherente a la Tecnología Nuclear</h3>
+                    <p>The 450% variation in construction costs globally ($2,200/kW to $10,000/kW) demonstrates that high costs 
+                    reflect policy, regulatory, and industrial organization factors—not fundamental technology limitations. 
+                    Countries with continuous building programs, standardized designs, and favorable financing achieve costs 
+                    comparable to or lower than renewable energy alternatives.</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">💰 Comparación de LCOE Nuclear Mundial</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    Levelized Cost of Electricity (LCOE) varies dramatically based on construction costs, financing, 
+                    and operational efficiency. At Asian cost levels, nuclear becomes the most economical zero-carbon baseload option.
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="worldwideLCOEChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>Fuentes:</strong> IEA Projected Costs 2020; Korean Energy Economics Institute 2024; 
+                    French CRE Projections 2023; European Commission LCOE Analysis 2020; U.S. EIA AEO 2025
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">📊 Costos Totales del Sistema: El Panorama Completo</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    Comparing only base LCOE is misleading. Variable renewables require expensive storage and backup generation. 
+                    When including these system-level costs, nuclear at optimized prices becomes highly competitive.
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="totalSystemCostsChart"></canvas>
+                </div>
+
+                <div style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 1.5rem; margin: 2rem 0; border-radius: 8px;">
+                    <h3 style="margin-top: 0;">Con Costos Optimizados, la Nuclear Gana en Economía Total del Sistema</h3>
+                    <ul style="margin: 0.5rem 0 0 1.5rem;">
+                        <li><strong>Nuclear (China costs):</strong> $72/MWh total system cost</li>
+                        <li><strong>Nuclear (Corea del Sur):</strong> $55-75/MWh total system cost</li>
+                        <li><strong>Nuclear (California optimized):</strong> $80-95/MWh total system cost</li>
+                        <li><strong>Wind + Storage:</strong> $103/MWh total system cost</li>
+                        <li><strong>Solar + Storage:</strong> $121/MWh total system cost</li>
+                        <li><strong>Nuclear (U.S. current):</strong> $137/MWh total system cost</li>
+                    </ul>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>Fuentes:</strong> IEA Projected Costs 2020; CSIRO GenCost 2024; U.S. EIA AEO 2025; 
+                    NREL Annual Technology Baseline 2024; Lazard LCOE+ 2025
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">💵 Análisis de Retorno de Inversión</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    Nuclear power's ROI varies dramatically based on construction costs. At Asian cost levels, 
+                    nuclear delivers exceptional returns over 60-year operational lifetimes.
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="roiComparisonChart"></canvas>
+                </div>
+
+                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1.5rem; margin: 2rem 0; border-radius: 8px;">
+                    <h3 style="margin-top: 0;">Resumen del Análisis de ROI (Vida Útil de 60 Años)</h3>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+                        <thead style="background: #f8f9fa;">
+                            <tr>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid #dee2e6;">Escenario</th>
+                                <th style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">Capital/GW</th>
+                                <th style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">Recuperación</th>
+                                <th style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">ROI de Vida Útil</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 0.75rem; border: 1px solid #dee2e6;">Modelo China</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">$2.23B</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">9.5 años</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6; font-weight: bold; color: #2e7d32;">640%</td>
+                            </tr>
+                            <tr style="background: #f8f9fa;">
+                                <td style="padding: 0.75rem; border: 1px solid #dee2e6;">Corea del Sur</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">$2.20B</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">12.5 años</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6; font-weight: bold; color: #388e3c;">545%</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.75rem; border: 1px solid #dee2e6;">California Optimizado</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">$3.50B</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">13 años</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6; font-weight: bold; color: #689f38;">470%</td>
+                            </tr>
+                            <tr style="background: #f8f9fa;">
+                                <td style="padding: 0.75rem; border: 1px solid #dee2e6;">Francia Nuevo</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">$5.70B</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">16 años</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6; font-weight: bold; color: #8bc34a;">380%</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.75rem; border: 1px solid #dee2e6;">EE.UU. Actual</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">$10.0B</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">22.5 años</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6; font-weight: bold;">275%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p style="margin-top: 1rem; font-size: 0.9rem;"><strong>Todos los escenarios son económicamente viables.</strong> 
+                    Los modelos asiáticos ofrecen rendimientos excepcionales debido a menores costos de construcción y operaciones optimizadas.</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">🎯 La Oportunidad Nuclear de California</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    California can learn from global nuclear success stories to deploy economically competitive clean energy.
+                    A Small Modular Reactor (SMR) fleet program using international best practices could achieve 
+                    $70-90/MWh LCOE—competitive with all alternatives.
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="californiaOpportunityChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>Fuentes:</strong> California Energy Commission 2024; CAISO capacity studies; 
+                    U.S. DOE Advanced Reactor Demonstration Program; NREL SMR Cost Analysis; 
+                    California AB 1632 analysis; Author projections based on international best practices
+                </div>
+            </div>
+        </section>
+
+        <!-- BIBLIOGRAPHY SECTION -->
+        <section id="bibliography" class="content-section">
+            <div class="chart-container">
+<div class="bibliography-content">
+    <h2 class="chart-title">Bibliografía</h2>
+    <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--primary);">Artículos de Revistas Revisados por Pares</h3>
+    <div class="bibliography-entries">
+        <div class="bib-entry">
+            <span class="bib-authors">Apergis, N., and J. Payne.</span> <span class="bib-title">"A Panel Study of Nuclear Energy Consumption and Economic Growth."</span> <em>Energy Economics</em> 32, no. 3 (2010): 545-549. <a href="https://doi.org/10.1016/j.eneco.2009.09.015" target="_blank" class="bib-link">https://doi.org/10.1016/j.eneco.2009.09.015</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Davis, Lucas W. and Catherine Hausman.</span> <span class="bib-title">"Market Impacts of a Nuclear Power Plant Closure."</span> <em>American Economic Journal: Applied Economics</em> 8, no. 2 (2016): 92-122. <a href="https://doi.org/10.1257/app.20140473" target="_blank" class="bib-link">https://doi.org/10.1257/app.20140473</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Fazeli, R., T. Longden, and F. J. Beck.</span> <span class="bib-title">"Clean Technology Energy Projects: Investment and Levelized Cost (Solar, Wind, Battery) and Hydrogen."</span> <em>Nature Scientific Data</em> (2025). <a href="https://doi.org/10.1038/s41597-025-05951-4" target="_blank" class="bib-link">https://doi.org/10.1038/s41597-025-05951-4</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Herran, Diego Silva, S. Fujimori, and M. Kainuma.</span> <span class="bib-title">"Implications of Japan's Long Term Climate Mitigation Target and the Relevance of Uncertainty in Energy Policy."</span> <em>Climate Policy</em> 19, no. 9 (2019): 1117-1131. <a href="https://doi.org/10.1080/14693062.2019.1634507" target="_blank" class="bib-link">https://doi.org/10.1080/14693062.2019.1634507</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Kim, Hana and E. Jeong.</span> <span class="bib-title">"Structural Changes to Industries and Effects Resulting from Nuclear Energy in Corea del Sur."</span> <em>Energies</em> (2018). <a href="https://doi.org/10.3390/en13071806" target="_blank" class="bib-link">https://doi.org/10.3390/en13071806</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Liu, Shiwei, Daniel Kaffine, et al.</span> <span class="bib-title">"Nuclear Construction Costs: Evidence on Learning Curves in China and the United States."</span> <span class="bib-institution">Johns Hopkins University, Harvard Kennedy School, CUNY Stony Brook collaborative study.</span> (Recent).
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Markandya, Anil and Paul Wilkinson.</span> <span class="bib-title">"Electricity Generation and Health."</span> <em>The Lancet</em> 370 (2007): 979-990. <a href="https://doi.org/10.1016/S0140-6736(07)61253-7" target="_blank" class="bib-link">https://doi.org/10.1016/S0140-6736(07)61253-7</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Sovacool, Benjamin.</span> <span class="bib-title">"Nuclear Risk for Energy Infrastructure is Highest in Conflicts, Lowest in Research."</span> <em>Social Science Research</em>. <a href="https://www.bu.edu/igs/" target="_blank" class="bib-link">https://www.bu.edu/igs/</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Wang, Qi, Jiale Guo, Rongrong Li, and Xue-er.</span> <span class="bib-title">"Comparative Analysis of Coal, Oil, Gas, Renewable Energy and Carbon Emissions."</span> <em>Environmental Research</em> (2023). <a href="https://doi.org/10.1016/j.envres.2023.115290" target="_blank" class="bib-link">https://doi.org/10.1016/j.envres.2023.115290</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Wolde-Rufael, Y. and Kojo Menyah.</span> <span class="bib-title">"Nuclear Energy Consumption and Economic Growth."</span> <em>Energy Policy</em> (2010): 582-593. <a href="https://doi.org/10.1016/j.enpol.2010.01.004" target="_blank" class="bib-link">https://doi.org/10.1016/j.enpol.2010.01.004</a>
+        </div>
+    </div>
+    <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--primary);">Informes y Documentos Técnicos</h3>
+    <div class="bibliography-entries">
+        <div class="bib-entry">
+            <span class="bib-title">"Summary Report - Comprehensive Analysis of 55 Operating Nuclear Reactors with Detailed Cost Data."</span> <span class="bib-organization">Anthropocene Institute.</span> (2024). <a href="https://www.anthropoceneinstitute.com/" target="_blank" class="bib-link">https://www.anthropoceneinstitute.com/</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Lovering, Jessica R., Arthur Yip, and Ted Nordhaus.</span> <span class="bib-title">"Historical Construction Costs of Global Nuclear Power Reactors."</span> <span class="bib-institution">Energy Policy.</span> (2016). <br><span class="bib-note">Analysis of post-2000 reactors showing costs of $3,571/kW (China), $4,174/kW (S. Korea), $5,833/kW (India), $7,934/kW (Russia) through $12 billion per reactor average</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Burke, Marshall and Lawrence Goulder.</span> <span class="bib-title">"Professors Explain the Social Cost of Carbon."</span> <em>Stanford News</em> (2021). <a href="https://news.stanford.edu/stories/2021/06/professors-explain-social-cost-carbon" target="_blank" class="bib-link">https://news.stanford.edu/stories/2021/06/professors-explain-social-cost-carbon</a><br><span class="bib-note">Comprehensive explanation of social cost methodology and the $51/ton estimate used in federal policy analysis</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Advanced Nuclear Reactor Deployment Pathways."</span> <span class="bib-organization">CATF (Clean Air Task Force).</span> (2024). <br><span class="bib-note">Modeled deployment curves showing cost reduction potential</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Electricity System Almanac."</span> <span class="bib-organization">California Energy Commission.</span> <a href="https://www.energy.ca.gov/data-reports/energy-almanac/california-electricity-data" target="_blank" class="bib-link">https://www.energy.ca.gov/data-reports/energy-almanac/california-electricity-data</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Small Modular Reactor Executive Recommendations."</span> <span class="bib-organization">California Governor's Office.</span> (August 2024).
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Capacity Accreditation Methodology and Net CONE Values."</span> <span class="bib-organization">CAISO (California Independent System Operator).</span> (2024).
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Artificial Intelligence Brings Nuclear Power Back from the Dead - Maybe Even to California."</span> <em>Energy News</em> (2024).
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"French Nuclear Cost Forecasts 2026-2040."</span> <span class="bib-organization">CRE (Commission de Régulation de l'Énergie).</span> (2024). <a href="https://www.cre.fr/" target="_blank" class="bib-link">https://www.cre.fr/</a><br><span class="bib-note">LCOE projections: €60.7/MWh (2026-2030), €59.1/MWh (2031-2035), €57.3/MWh (2036-2040)</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"GenCost 2024: Annual Update."</span> <span class="bib-organization">CSIRO (Commonwealth Scientific and Industrial Research Organisation).</span> (2024). Australia.
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Financing Nuclear Energy - Final Report."</span> <span class="bib-organization">European Commission.</span> (2020). <br><span class="bib-note">Cost analysis including taxes in 2018-2020</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Nuclear Energy Strategy."</span> <span class="bib-organization">Idaho National Laboratory.</span> (April 2024).
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Nuclear Capacity Analysis."</span> <span class="bib-organization">ITIF (Information Technology and Innovation Foundation).</span> (2024). <br><span class="bib-note">Global capacity: 55,762 MWe with 30 reactors under construction (31,953 MWe)</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Nuclear Power in the European Union."</span> <span class="bib-organization">IEA (International Energy Agency).</span> (2024). Paris. <a href="https://www.iea.org/" target="_blank" class="bib-link">https://www.iea.org/</a><br><span class="bib-note">Cost data: $2,157/kW (median) to $6,920/kW (Slovakia)</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Renewable Power Generation Costs."</span> <span class="bib-organization">IRENA (International Renewable Energy Agency).</span> (2024).
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Nuclear Cost Calculations."</span> <span class="bib-organization">KEEI (Korea Energy Economics Institute).</span> (2024). <br><span class="bib-note">Equilibrium gap analysis: 69.58 KRW/kWh ($0.05-0.06/kWh) at 85% capacity factor</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Levelized Cost of Energy Analysis 18.0."</span> <span class="bib-organization">Lazard.</span> (2024). <a href="https://www.lazard.com/research-insights/levelized-cost-of-energyplus/" target="_blank" class="bib-link">https://www.lazard.com/research-insights/levelized-cost-of-energyplus/</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Lee, Sung-Tae and Sun-Moon.</span> <span class="bib-title">"Nuclear Energy Subsidization and Policy Shifts in Korea."</span> <em>SAGE</em> (2024). <a href="https://doi.org/10.1177/21582440241242554" target="_blank" class="bib-link">https://doi.org/10.1177/21582440241242554</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Annual Technology Baseline (ATB) 2024."</span> <span class="bib-organization">NREL (National Renewable Energy Laboratory).</span> (2024). <br><span class="bib-note">Flagship technology assessment</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Nordic Energy Cost Analysis."</span> <span class="bib-organization">Sveriges Riksbank (Swedish Central Bank).</span> (2024). <br><span class="bib-note">Average cost approximately per kWe</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Global Nuclear Energy Statistics."</span> <span class="bib-organization">Statista.</span> (2024).
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Nuclear Industry Employment Data."</span> <span class="bib-organization">U.S. Bureau of Occupational Employment.</span> (2024).
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Liftoff Report: Advanced Nuclear."</span> <span class="bib-organization">U.S. Department of Energy.</span> (2024). <br><span class="bib-note">Projection: costs declining 10-20 years after deployment, down from first-of-a-kind costs</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Annual Energy Outlook 2024."</span> <span class="bib-organization">EIA (U.S. Energy Information Administration).</span> (2024). Washington, DC. <a href="https://www.eia.gov/outlooks/aeo/" target="_blank" class="bib-link">https://www.eia.gov/outlooks/aeo/</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Guide to Nearly 50-Year-Old Nuclear Regulations and Environmental Protection."</span> <span class="bib-organization">U.S. EPA.</span> (2024). <br><span class="bib-note">Includes dual cost analysis ($2B+)</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Greenhouse Gas Equivalencies Calculator - Calculations and References."</span> <span class="bib-organization">U.S. EPA.</span> (2024). <a href="https://www.epa.gov/energy/greenhouse-gas-equivalencies-calculator-calculations-and-references" target="_blank" class="bib-link">https://www.epa.gov/energy/greenhouse-gas-equivalencies-calculator-calculations-and-references</a><br><span class="bib-note">Carbon dioxide coefficients and emission factors for natural gas and other fuels</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Social Cost of Carbon: What It Is, Why It Matters."</span> <span class="bib-organization">Brookings Institution.</span> (2023). <a href="https://www.brookings.edu/articles/what-is-the-social-cost-of-carbon/" target="_blank" class="bib-link">https://www.brookings.edu/articles/what-is-the-social-cost-of-carbon/</a><br><span class="bib-note">Analysis of Biden administration's $51/ton interim value and methodology</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Interagency Working Group on Social Cost of Greenhouse Gases: Technical Support Document."</span> <span class="bib-organization">Biden Administration / White House.</span> (2021). <br><span class="bib-note">Official guidance establishing $51/ton CO₂ interim value for federal regulatory analysis</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Life Cycle Assessment of a Natural Gas Combined-Cycle Power Generation System."</span> <span class="bib-organization">NREL (National Renewable Energy Laboratory).</span> (2000). Technical Report NREL/TP-570-27715. <br><span class="bib-note">Global warming potential: 499.1 g CO₂-equivalent/kWh for NGCC systems including upstream emissions</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">de Gouw, J.A., et al.</span> <span class="bib-title">"Reduced Emissions of CO₂, NOₓ, and SO₂ from U.S. Power Plants Owing to Switch from Coal to Natural Gas with Combined Cycle Technology."</span> <em>Earth's Future</em> 2, no. 2 (2014): 75-82. <a href="https://doi.org/10.1002/2013ef000196" target="_blank" class="bib-link">https://doi.org/10.1002/2013ef000196</a><br><span class="bib-note">Combined cycle natural gas plants emit approximately 400 g CO₂/kWh</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Social Cost of Carbon 101."</span> <span class="bib-organization">Resources for the Future (RFF).</span> (2025). <a href="https://www.rff.org/publications/explainers/social-cost-carbon-101/" target="_blank" class="bib-link">https://www.rff.org/publications/explainers/social-cost-carbon-101/</a><br><span class="bib-note">Comprehensive explainer on SCC methodology and policy applications</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Global Mortality Rates by Energy Source."</span> <span class="bib-organization">World Health Organization (WHO).</span> Data compiled from multiple peer-reviewed sources including Markandya & Wilkinson (2007), Sovacool et al. (2016), and Our World in Data energy safety analyses. <a href="https://www.who.int/" target="_blank" class="bib-link">https://www.who.int/</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.bibliography-content {
+    line-height: 1.8;
+}
+
+.bibliography-entries {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.bib-entry {
+    padding: 1rem;
+    background: #f8f9fa;
+    border-left: 3px solid var(--primary);
+    border-radius: 4px;
+}
+
+.bib-authors {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.bib-title {
+    color: var(--text-primary);
+}
+
+.bib-organization {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.bib-institution {
+    font-style: italic;
+    color: var(--text-secondary);
+}
+
+.bib-link {
+    color: var(--primary);
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.bib-link:hover {
+    text-decoration: underline;
+}
+
+.bib-note {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    display: block;
+    margin-top: 0.5rem;
+}
+</style>
+            </div>
+        </section>
+
+        <footer>
+            <p><strong>Aviso Legal:</strong> Este panel presenta proyecciones de impacto económico y de salud con fines educativos y analíticos. Todos los datos provienen de investigaciones revisadas por pares y agencias gubernamentales. Las proyecciones implican suposiciones y deben interpretarse como escenarios en lugar de predicciones.</p>
+            <p style="margin-top: 1rem;">© 2025 Análisis de Transición Energética de California | Todas las fuentes citadas usando el Manual de Estilo de Chicago</p>
+            <p style="margin-top: 0.5rem; font-size: 0.8rem;">Panel creado: 9 de noviembre de 2025 | Última actualización: Diciembre 2025</p>
+        </footer>
+    </div><!-- end container -->
+
+<script>
+        // Tab functionality
+        function showTab(event, tabId) {
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(s => s.classList.remove('active'));
+            
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // Initialize all charts
+        document.addEventListener('DOMContentLoaded', function() {
+            const isMobile = window.innerWidth < 768;
+            
+            // Set Chart.js defaults
+            Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+            Chart.defaults.responsive = true;
+            Chart.defaults.maintainAspectRatio = false;
+
+            // Carbon Emissions Chart
+            new Chart(document.getElementById('emissionsChart'), {
+                type: 'line',
+                data: {
+                    labels: ['2025', '2030', '2035', '2040', '2045'],
+                    datasets: [{
+                        label: 'Solo Renovables (Sin Nuclear)',
+                        data: [100, 92, 78, 52, 18],
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4
+                    }, {
+                        label: 'Inclusivo con SMR (Meta 2045)',
+                        data: [100, 85, 58, 22, 0],
+                        borderColor: '#27ae60',
+                        backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { font: { size: isMobile ? 11 : 14 } }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Año', font: { size: 14, weight: 'bold' } }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: { display: true, text: 'Emisiones (% de Línea Base 2025)', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Jobs Chart
+            new Chart(document.getElementById('jobsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Nuclear', 'Solar', 'Eólica', 'Gas Natural'],
+                    datasets: [{
+                        label: 'Empleos por MW',
+                        data: [0.75, 3.5, 2.8, 0.25],
+                        backgroundColor: ['#9b59b6', '#f39c12', '#3498db', '#95a5a6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Sector Energético', font: { size: 14, weight: 'bold' } }
+                        },
+                        y: {
+                            title: { display: true, text: 'Empleos Creados por MW', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Salaries Chart
+            new Chart(document.getElementById('salariesChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Ingeniero Nuclear', 'Técnico Solar', 'Técnico Eólico', 'Operador de Planta de Gas'],
+                    datasets: [{
+                        label: 'Salario Anual Promedio',
+                        data: [125000, 55000, 58000, 72000],
+                        backgroundColor: ['#9b59b6', '#f39c12', '#3498db', '#95a5a6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Categoría de Empleo', font: { size: 14, weight: 'bold' } }
+                        },
+                        y: {
+                            title: { display: true, text: 'Salario Anual (USD)', font: { size: 14, weight: 'bold' } },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Retraining Chart
+            new Chart(document.getElementById('retrainingChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Capacitación Técnica (35%)', 'Gestión (25%)', 'Supervisión de Seguridad (20%)', 'Administrativo (15%)', 'Otros (5%)'],
+                    datasets: [{
+                        data: [35, 25, 20, 15, 5],
+                        backgroundColor: ['#9b59b6', '#3498db', '#f39c12', '#27ae60', '#95a5a6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { font: { size: isMobile ? 11 : 13 } }
+                        }
+                    }
+                }
+            });
+
+            // Vidas Salvadas Chart
+            new Chart(document.getElementById('livesSavedChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Status Quo\n(Mezcla Alta en Gas)', 'Transición Nuclear\n(45% Nuclear)'],
+                    datasets: [{
+                        label: 'Muertes Proyectadas',
+                        data: [11750, 450],
+                        backgroundColor: ['#e74c3c', '#27ae60']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    if (context.dataIndex === 0) {
+                                        return 'Diferencia: ~11,300 vidas salvadas';
+                                    }
+                                    return '';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Escenario', font: { size: 14, weight: 'bold' } }
+                        },
+                        y: {
+                            title: { display: true, text: 'Total de Muertes (período de 50 años)', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Healthcare Savings Chart
+            new Chart(document.getElementById('healthcareSavingsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Value of Vidas Salvadas', 'Tratamiento de Cáncer Evitado', 'Enfermedades Respiratorias Evitadas', 'Eventos Cardiovasculares Evitados'],
+                    datasets: [{
+                        label: 'Ahorros (Miles de Millones USD)',
+                        data: [132.7, 35.2, 8.9, 12.4],
+                        backgroundColor: ['#27ae60', '#e74c3c', '#3498db', '#9b59b6'],
+                        borderColor: '#2c3e50',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Ahorro Total: $189.2 Mil Millones en 50 años',
+                            font: { size: 15, weight: 'bold' },
+                            color: '#27ae60'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Categoría de Salud', font: { size: 14, weight: 'bold' } },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value + 'B';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Social Cost Cumulative Chart
+            new Chart(document.getElementById('socialCostChart'), {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 51}, (_, i) => 2025 + i),
+                    datasets: [{
+                        label: 'Status Quo (Combustibles Fósiles)',
+                        data: Array.from({length: 51}, (_, i) => 1.79 * i),
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Transición Nuclear',
+                        data: Array.from({length: 51}, (_, i) => 0),
+                        borderColor: '#27ae60',
+                        backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Avoided Social Costs: $89.5 Billion over 50 Years',
+                            font: { size: 15, weight: 'bold' },
+                            color: '#27ae60'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Año', font: { size: 14, weight: 'bold' } },
+                            ticks: {
+                                callback: function(value, index) {
+                                    return index % 5 === 0 ? this.getLabelForValue(value) : '';
+                                }
+                            }
+                        },
+                        y: {
+                            title: { display: true, text: 'Costo Social Acumulado (Miles de Millones USD)', font: { size: 14, weight: 'bold' } },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value + 'B';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Social Cost Breakdown Chart
+            new Chart(document.getElementById('socialCostBreakdownChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: [
+                        'Health Impacts (Mortality & Morbidity)',
+                        'Productivity Losses (Heat Effects)',
+                        'Property Damage (Climate Events)',
+                        'Pérdidas Agrícolas',
+                        'Long-Term Climate Damages'
+                    ],
+                    datasets: [{
+                        data: [42, 18, 15, 12, 13],
+                        backgroundColor: ['#e74c3c', '#f39c12', '#3498db', '#2ecc71', '#9b59b6'],
+                        borderColor: '#fff',
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Total Annual Social Cost: $1.79 Billion (Current Gas Dependence)',
+                            font: { size: 14, weight: 'bold' },
+                            color: '#e74c3c'
+                        },
+                        legend: {
+                            display: true,
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+
+            // AI Power Demand Chart
+            new Chart(document.getElementById('aiPowerDemandChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030'],
+                    datasets: [{
+                        label: 'Data Center Power Demand (TWh)',
+                        data: [147, 173, 206, 245, 291, 327, 361, 390],
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                        borderColor: '#667eea',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'U.S. Data Center Electricity Consumption Projection',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'TWh/year', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Tech Nuclear Deals Chart
+            new Chart(document.getElementById('techNuclearDealsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Google + Kairos', 'Amazon + X-energy', 'Microsoft + Constellation', 'Meta (Extensions)'],
+                    datasets: [{
+                        label: 'Committed Capacity (MW)',
+                        data: [500, 640, 835, 2000],
+                        backgroundColor: ['#4285f4', '#ff9900', '#00a4ef', '#1877f2'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Major Tech Company Nuclear Commitments (MW)',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Capacity (MW)', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // AI Energy Cost Comparison Chart
+            new Chart(document.getElementById('aiEnergyCostComparisonChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Nuclear (Onsite)', 'Renewables + Storage', 'Natural Gas + Carbon Price', 'Grid Mix'],
+                    datasets: [{
+                        label: 'LCOE ($/MWh)',
+                        data: [77, 87, 91, 95],
+                        backgroundColor: ['#27ae60', '#f39c12', '#e74c3c', '#95a5a6'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '24/7 Carbon-Free Power Cost Comparison',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '$/MWh', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // AI Nuclear Benefits Chart
+            new Chart(document.getElementById('aiNuclearBenefitsChart'), {
+                type: 'radar',
+                data: {
+                    labels: ['Cost Reduction', 'Safety Improvement', 'Efficiency Gains', 'Licensing Speed', 'Maintenance Optimization', 'Design Innovation'],
+                    datasets: [{
+                        label: 'AI Impact Potential (%)',
+                        data: [50, 40, 35, 50, 40, 45],
+                        backgroundColor: 'rgba(102, 126, 234, 0.3)',
+                        borderColor: '#667eea',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#667eea'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'AI Potential Impact on Nuclear Operations',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 60,
+                            ticks: { stepSize: 20 }
+                        }
+                    }
+                }
+            });
+
+            // SMR Timeline Chart
+            new Chart(document.getElementById('smrTimelineChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Traditional Process', 'With AI Assistance'],
+                    datasets: [{
+                        label: 'Design Phase (months)',
+                        data: [48, 24],
+                        backgroundColor: '#667eea'
+                    }, {
+                        label: 'Licensing (months)',
+                        data: [42, 21],
+                        backgroundColor: '#764ba2'
+                    }, {
+                        label: 'Construction (months)',
+                        data: [60, 42],
+                        backgroundColor: '#43e97b'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'SMR Deployment Timeline: Traditional vs AI-Assisted',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        x: { stacked: true },
+                        y: {
+                            stacked: true,
+                            title: { display: true, text: 'Meses', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Worldwide Construction Costs Chart
+            new Chart(document.getElementById('worldwideConstructionCostsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Corea del Sur', 'China', 'Japón', 'Francia (Histórico)', 'Reino Unido (Hinkley C)', 'EE.UU. (Vogtle)'],
+                    datasets: [{
+                        label: 'Costo de Construcción ($/kW)',
+                        data: [2200, 2230, 3900, 4500, 8500, 10000],
+                        backgroundColor: ['#003478', '#de2910', '#bc002d', '#002395', '#012169', '#3c3b6e'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Costos de Construcción Nuclear por País ($/kW)',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '$/kW', font: { size: 14, weight: 'bold' } },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Worldwide LCOE Chart
+            new Chart(document.getElementById('worldwideLCOEChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Corea del Sur', 'China', 'Francia (Existente)', 'Japón', 'Reino Unido', 'EE.UU.'],
+                    datasets: [{
+                        label: 'LCOE ($/MWh)',
+                        data: [55, 72, 45, 85, 110, 137],
+                        backgroundColor: ['#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ff9800', '#f44336'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'LCOE Nuclear por País ($/MWh)',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '$/MWh', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Total System Costs Chart
+            new Chart(document.getElementById('totalSystemCostsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Nuclear (Corea)', 'Nuclear (China)', 'Nuclear (CA Opt.)', 'Eólica + Almacenamiento', 'Solar + Almacenamiento', 'Nuclear (EE.UU. Actual)'],
+                    datasets: [{
+                        label: 'LCOE Base',
+                        data: [55, 72, 80, 45, 42, 137],
+                        backgroundColor: '#3498db'
+                    }, {
+                        label: 'Costos de Integración/Almacenamiento',
+                        data: [0, 0, 0, 58, 79, 0],
+                        backgroundColor: '#e74c3c'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Comparación de Costo Total del Sistema ($/MWh)',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        x: { stacked: true },
+                        y: {
+                            stacked: true,
+                            title: { display: true, text: '$/MWh', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // ROI Comparison Chart
+            new Chart(document.getElementById('roiComparisonChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Modelo China', 'Corea del Sur', 'California Optimizado', 'Francia Nuevo', 'EE.UU. Actual'],
+                    datasets: [{
+                        label: 'ROI de Vida Útil (%)',
+                        data: [640, 545, 470, 380, 275],
+                        backgroundColor: ['#2e7d32', '#388e3c', '#689f38', '#8bc34a', '#aed581'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '60-Year ROI de Vida Útil by Construction Cost Escenario',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'ROI (%)', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // California Opportunity Chart
+            new Chart(document.getElementById('californiaOpportunityChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Nuclear EE.UU. Actual', 'Objetivo SMR de California', 'Solar + Almacenamiento', 'Eólica + Almacenamiento', 'Mejores Prácticas Internacionales'],
+                    datasets: [{
+                        label: 'Costo Total del Sistema ($/MWh)',
+                        data: [137, 85, 121, 103, 65],
+                        backgroundColor: ['#e74c3c', '#f39c12', '#ffc107', '#3498db', '#27ae60'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Comparación de Costos de Energía de California ($/MWh)',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '$/MWh', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // =============================================
+            // MORTALITY BUBBLE CHART TOOLTIP FUNCTIONALITY
+            // =============================================
+            const mortalityTooltip = document.getElementById('mortalityTooltip');
+            const mortalityBubbles = document.querySelectorAll('.mortality-bubble');
+            
+            mortalityBubbles.forEach(bubble => {
+                bubble.addEventListener('mouseenter', function(e) {
+                    const source = this.dataset.source;
+                    const deaths = this.dataset.deaths;
+                    const info = this.dataset.info;
+                    const comparison = this.dataset.comparison;
+                    
+                    mortalityTooltip.querySelector('.mortality-tooltip-title').textContent = source;
+                    mortalityTooltip.querySelector('.mortality-tooltip-value').textContent = deaths + ' muertes/TWh';
+                    mortalityTooltip.querySelector('.mortality-tooltip-info').textContent = info;
+                    mortalityTooltip.querySelector('.mortality-tooltip-comparison').textContent = comparison;
+                    
+                    mortalityTooltip.style.display = 'block';
+                });
+                
+                bubble.addEventListener('mousemove', function(e) {
+                    const tooltipWidth = mortalityTooltip.offsetWidth;
+                    const tooltipHeight = mortalityTooltip.offsetHeight;
+                    const windowWidth = window.innerWidth;
+                    const windowHeight = window.innerHeight;
+                    
+                    let left = e.clientX + 15;
+                    let top = e.clientY + 15;
+                    
+                    // Prevent tooltip from going off right edge
+                    if (left + tooltipWidth > windowWidth - 20) {
+                        left = e.clientX - tooltipWidth - 15;
+                    }
+                    
+                    // Prevent tooltip from going off bottom edge
+                    if (top + tooltipHeight > windowHeight - 20) {
+                        top = e.clientY - tooltipHeight - 15;
+                    }
+                    
+                    mortalityTooltip.style.left = left + 'px';
+                    mortalityTooltip.style.top = top + 'px';
+                });
+                
+                bubble.addEventListener('mouseleave', function() {
+                    mortalityTooltip.style.display = 'none';
+                });
+            });
+
+        }); // End DOMContentLoaded
+    </script>
+</body>
+</html>

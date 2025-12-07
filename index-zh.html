@@ -1,0 +1,2097 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加州核能发展停滞 - 科学分析仪表盘</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --border-radius: 20px;
+            --shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: #ffffff;
+            color: var(--text-primary);
+            padding: 1rem;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* LANGUAGE SELECTOR */
+        .language-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .language-bar span {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .language-flags {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .lang-link {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.4rem 0.7rem;
+            background: rgba(255,255,255,0.15);
+            border-radius: 20px;
+            text-decoration: none;
+            color: white;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .lang-link:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        .lang-link.active {
+            background: white;
+            color: var(--primary);
+        }
+
+        .flag-icon {
+            font-size: 1.1rem;
+        }
+
+        header {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--text-primary);
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            margin-bottom: 1rem;
+        }
+
+        .disclaimer {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab-button:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .chart-container {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .chart-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+            margin-bottom: 1rem;
+        }
+
+        .chart-citation {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e0e0e0;
+            line-height: 1.4;
+        }
+
+        .chart-methodology {
+            font-size: 0.8rem;
+            color: #555;
+            font-style: italic;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            .chart-wrapper {
+                height: 300px;
+            }
+            .language-bar {
+                padding: 0.5rem;
+            }
+            .lang-link {
+                padding: 0.3rem 0.5rem;
+                font-size: 0.75rem;
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* =============================================
+           MORTALITY BUBBLE CHART STYLES
+           ============================================= */
+        .mortality-bubble-chart-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        
+        .mortality-bubble-chart {
+            position: relative;
+            width: 850px;
+            height: 580px;
+            min-width: 850px;
+        }
+        
+        .mortality-bubble {
+            position: absolute;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mortality-bubble:hover {
+            filter: brightness(1.15);
+            transform: scale(1.03);
+        }
+        
+        .mortality-bubble-coal {
+            width: 420px;
+            height: 420px;
+            background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+            top: 80px;
+            left: 20px;
+        }
+        
+        .mortality-bubble-oil {
+            width: 252px;
+            height: 252px;
+            background: linear-gradient(135deg, #c0392b 0%, #962d22 100%);
+            top: 40px;
+            left: 320px;
+        }
+        
+        .mortality-bubble-biomass {
+            width: 206px;
+            height: 206px;
+            background: linear-gradient(135deg, #d35400 0%, #a04000 100%);
+            top: 310px;
+            left: 380px;
+        }
+        
+        .mortality-bubble-gas {
+            width: 84px;
+            height: 84px;
+            background: linear-gradient(135deg, #f39c12 0%, #d68910 100%);
+            top: 450px;
+            left: 280px;
+        }
+        
+        .mortality-bubble-nuclear {
+            width: 9px;
+            height: 9px;
+            background: #27ae60;
+            top: 154px;
+            left: 150px;
+            box-shadow: 0 0 12px #27ae60, 0 0 24px #27ae60;
+            animation: mortality-pulse 2s infinite;
+        }
+        
+        .mortality-bubble-wind {
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, #ff1493 0%, #ff69b4 100%);
+            top: 173px;
+            left: 80px;
+        }
+        
+        .mortality-bubble-hydro {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            top: 447px;
+            left: 100px;
+        }
+        
+        .mortality-bubble-solar {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #f1c40f 0%, #d4ac0d 100%);
+            top: 365px;
+            left: 61px;
+        }
+        
+        @keyframes mortality-pulse {
+            0%, 100% { box-shadow: 0 0 12px #27ae60, 0 0 24px #27ae60; }
+            50% { box-shadow: 0 0 20px #27ae60, 0 0 40px #27ae60, 0 0 60px #27ae60; }
+        }
+        
+        .mortality-bubble-label {
+            position: absolute;
+            font-weight: 600;
+            pointer-events: none;
+            line-height: 1.3;
+        }
+        
+        .mortality-label-coal {
+            top: 250px;
+            left: 130px;
+            color: white;
+            font-size: 1.4rem;
+            text-align: center;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        
+        .mortality-label-oil {
+            top: 130px;
+            left: 390px;
+            color: white;
+            font-size: 1.1rem;
+            text-align: center;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        
+        .mortality-label-biomass {
+            top: 380px;
+            left: 425px;
+            color: white;
+            font-size: 1rem;
+            text-align: center;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        
+        .mortality-label-gas {
+            top: 475px;
+            left: 293px;
+            color: white;
+            font-size: 0.85rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        .mortality-label-small {
+            background: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-size: 0.85rem;
+        }
+        
+        .mortality-label-nuclear {
+            top: 110px;
+            left: 55px;
+            color: #27ae60;
+            font-weight: bold;
+            background: white;
+            border: 2px solid #27ae60;
+            font-size: 0.9rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+        }
+        
+        .mortality-label-wind { top: 192px; left: 55px; color: #ff1493; }
+        .mortality-label-hydro { top: 505px; left: 85px; color: #2980b9; }
+        .mortality-label-solar { top: 400px; left: 70px; color: #d4ac0d; }
+        
+        .mortality-tooltip {
+            position: fixed;
+            background: rgba(44, 62, 80, 0.95);
+            color: white;
+            padding: 1rem 1.25rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+            max-width: 280px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        
+        .mortality-tooltip-title {
+            font-weight: bold;
+            font-size: 1.15rem;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .mortality-tooltip-value {
+            color: #f39c12;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .mortality-tooltip-info {
+            font-size: 0.85rem;
+            line-height: 1.5;
+            opacity: 0.9;
+        }
+        
+        .mortality-tooltip-comparison {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            font-size: 0.85rem;
+            color: #2ecc71;
+            font-weight: 600;
+        }
+        
+        .mortality-insight-box {
+            background: linear-gradient(135deg, #27ae60, #1e8449);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .mortality-insight-box h3 { font-size: 1.6rem; margin-bottom: 1rem; }
+        
+        .mortality-insight-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .mortality-insight-stat { text-align: center; }
+        .mortality-insight-number { font-size: 2.5rem; font-weight: bold; }
+        .mortality-insight-label { font-size: 0.95rem; opacity: 0.9; }
+        
+        .mortality-legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.6rem;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .mortality-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.75rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            font-size: 0.8rem;
+        }
+        
+        .mortality-legend-color { width: 12px; height: 12px; border-radius: 50%; }
+        .mortality-legend-value { font-weight: bold; color: #2c3e50; }
+        
+        .mortality-methodology-box {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .mortality-methodology-box strong { color: #2c3e50; }
+        
+        .mortality-citation-box {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #ddd;
+            font-size: 0.8rem;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- LANGUAGE SELECTOR BAR -->
+        <div class="language-bar">
+            <span>🌐 可用语言:</span>
+            <div class="language-flags">
+                <a href="index.html" class="lang-link"><span class="flag-icon">🇺🇸</span> English</a>
+                <a href="index-se.html" class="lang-link"><span class="flag-icon">🇸🇪</span> Svenska</a>
+                <a href="index-fr.html" class="lang-link"><span class="flag-icon">🇫🇷</span> Français</a>
+                <a href="index-es.html" class="lang-link"><span class="flag-icon">🇪🇸</span> Español</a>
+                <a href="index-zh.html" class="lang-link active"><span class="flag-icon">🇨🇳</span> 中文</a>
+                <a href="index-ko.html" class="lang-link"><span class="flag-icon">🇰🇷</span> 한국어</a>
+                <a href="index-ja.html" class="lang-link"><span class="flag-icon">🇯🇵</span> 日本語</a>
+            </div>
+        </div>
+
+        <header>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                <!-- Nuclear Atom Icon -->
+                <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="32" cy="32" r="6" fill="#667eea"/>
+                    <ellipse cx="32" cy="32" rx="28" ry="12" stroke="#667eea" stroke-width="3" fill="none" transform="rotate(0 32 32)"/>
+                    <ellipse cx="32" cy="32" rx="28" ry="12" stroke="#764ba2" stroke-width="3" fill="none" transform="rotate(60 32 32)"/>
+                    <ellipse cx="32" cy="32" rx="28" ry="12" stroke="#43e97b" stroke-width="3" fill="none" transform="rotate(120 32 32)"/>
+                    <circle cx="32" cy="32" r="4" fill="#ffffff"/>
+                </svg>
+                
+                <h1 style="margin: 0;">加州核能发展停滞</h1>
+            </div>
+            
+            <p class="subtitle">经济与健康影响分析</p>
+            
+            <!-- 2045 Carbon-Free Goal Card -->
+            <div style="display: flex; justify-content: center; margin-top: 1.5rem;">
+                <div class="stat-card" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); color: white; max-width: 400px;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">2045年碳中和目标</div>
+                    <div class="stat-value" style="color: white;">可实现</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">通过2030年代部署SMR</div>
+                </div>
+            </div>
+        </header>
+
+        <nav class="tabs" id="tabNav">
+            <button class="tab-button active" onclick="showTab(event, 'summary')">📋 概要</button>
+            <button class="tab-button" onclick="showTab(event, 'social-cost')">💵 社会成本</button>
+            <button class="tab-button" onclick="showTab(event, 'employment')">👷 就业</button>
+            <button class="tab-button" onclick="showTab(event, 'health')">💚 健康与安全</button>
+            <button class="tab-button" onclick="showTab(event, 'ai')">🤖 人工智能</button>
+            <button class="tab-button" onclick="showTab(event, 'worldwide-costs')">🌍 全球成本</button>
+            <button class="tab-button" onclick="showTab(event, 'bibliography')">📚 参考文献</button>
+        </nav>
+
+        <!-- SUMMARY SECTION -->
+        <section id="summary" class="content-section active">
+            <!-- COLORFUL STAT CARDS AT TOP -->
+            <div class="stats-grid" style="margin-bottom: 2rem;">
+                <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">核能禁令</div>
+                    <div class="stat-value" style="color: white;">1976年</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">49年阻止新建核电站</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">未实现投资</div>
+                    <div class="stat-value" style="color: white;">120亿美元</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">损失资本（2020-2040）</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">潜在年度经济效益</div>
+                    <div class="stat-value" style="color: white;">+41.7亿美元</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">包含核能的能源转型</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">挽救生命</div>
+                    <div class="stat-value" style="color: white;">11,300人</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">50年内（减少空气污染）</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">SMR平准化成本目标（2045）</div>
+                    <div class="stat-value" style="color: white;">$50-66</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">/兆瓦时（含学习曲线）</div>
+                </div>
+            </div>
+
+            <!-- CARBON EMISSIONS CHART -->
+            <div class="chart-container">
+                <h3 class="chart-title">碳排放减少情景</h3>
+                <div class="chart-wrapper">
+                    <canvas id="emissionsChart"></canvas>
+                </div>
+                <div class="chart-methodology">
+                    <strong>方法论：</strong> 加州实现2045年碳中和目标的排放预测。包含SMR情景假设：首批SMR机组于2032-2033年投运，逐步建设至2045年达到20-22GW（约32%发电量），2040年前淘汰天然气。纯可再生能源情景由于间歇性需要延长天然气调峰电厂至2045年以保证电网可靠性，延迟完全脱碳。排放量使用EIA碳强度因子计算：天然气（0.41千克CO₂/千瓦时），核能/可再生能源为零。
+                </div>
+                <div class="chart-citation">
+                    <strong>来源：</strong> 美国能源信息署，"加州能源概况"，2025年11月访问，https://www.eia.gov/state/?sid=CA；美国能源部，"先进核能商业化路径"（2025）- 预测SMR单位造价在10-20次部署后降至3,600美元/千瓦；Britain Remade，"核电建设成本分析"（2024）- 韩国3,571美元/千瓦，中国4,174美元/千瓦；Wang, Qiang等，"核电是否是经济有效的能源转型选择？"《环境研究》223（2023）：115290；Liu, Shangwei等，"降低核电站成本：来自中国、韩国和美国的学习曲线证据"，《自然》（2025）。
+                </div>
+            </div>
+
+            <!-- MORATORIUM & POLICY IMPLICATIONS -->
+            <div class="chart-container">
+                <h2 class="chart-title">加州核能禁令与政策影响</h2>
+                
+                <div style="background: #f8f9fa; padding: 2rem; border-radius: 10px; margin-bottom: 2rem;">
+                    <p style="margin-bottom: 1rem; line-height: 1.8;">
+                        自1976年以来，加州一直维持着对新建核电站的禁令，该禁令通过对Warren-Alquist法案的修订在公众激烈辩论和环境担忧之后颁布。该禁令要求加州能源委员会在许可任何新核设施之前，必须确认联邦政府已经建立了核燃料后处理的成熟技术和高放废物的永久处置方案。近五十年后，这两个条件都未满足，尽管加州有着到2045年实现碳中和的雄心勃勃的气候目标，但所有新核能开发都被有效阻止。
+                    </p>
+                    
+                    <p style="margin-bottom: 1rem; line-height: 1.8;">
+                        本研究分析了在加州部署小型模块化反应堆（SMR）以实现SB100法案规定的2045年无碳目标的经济影响。随着加州最后一座运营中的核电站Diablo Canyon延寿至2030年，政策制定者面临关键抉择。Breakthrough Institute的最新分析估计，由于限制核能的法律，加州在2020年至2040年间损失高达<strong>120亿美元的未实现资本投资</strong>，因为大型科技公司越来越多地为AI数据中心寻求可靠的无碳电力。SMR提供了变革性的解决方案：同行评审研究表明，韩国通过标准化设计实现了<strong>3,571美元/千瓦</strong>的核电建设成本，而中国通过批量生产达到<strong>4,174美元/千瓦</strong>。美国能源部预测，美国SMR在10-20次部署后可达到<strong>3,600美元/千瓦</strong>，平准化成本为50-66美元/兆瓦时——当计入调峰成本时与太阳能和风能具有竞争力。加州可在2032-2033年部署首批300MW的SMR机组，到2045年扩展至20-22GW，提供约32%的发电量。
+                    </p>
+                    
+                    <p style="margin-bottom: 1rem; line-height: 1.8;">
+                        经济分析表明，包含SMR的能源转型可为加州3.9万亿美元的经济带来显著效益。Apergis & Payne（2010）和Wolde-Rufael & Menyah（2010）的同行评审研究记录了发达经济体中核能消费与GDP增长之间的正相关关系。对加州而言，到2045年部署20-22GW的SMR容量将创造平均年薪<strong>12.5万美元</strong>的高薪工作（核工程师），而太阳能和风能技术人员为5.5-5.8万美元，产生估计<strong>每年41.7亿美元的经济影响</strong>。SMR的稳定、可调度基荷电力（容量因子92% vs 太阳能25%）大大减少了对昂贵储能基础设施的需求——加州独立系统运营商数据显示电网规模电池储能成本为18.92美元/千瓦-月。此外，发表在《柳叶刀》上的同行评审研究表明，用SMR取代加州的天然气发电（目前占州内供应的35-45%）可在50年内挽救约<strong>11,300人的生命</strong>，因为消除了空气污染死亡率，天然气导致每太瓦时2.8人死亡，而核能仅为0.07人。
+                    </p>
+                    
+                    <p style="margin-bottom: 1rem; line-height: 1.8;">
+                        对于考虑解除或修改核能禁令的加州政策制定者，本分析提供了关于所涉权衡的数据驱动洞察。该州面临明确的选择：维持现状并严重依赖需要大规模储能建设和持续依赖天然气以保证可靠性的间歇性可再生能源，或者采取"全面"清洁能源战略，包括<strong>小型模块化反应堆（SMR）</strong>等先进核技术。与传统大型反应堆相比，SMR具有显著优势：工厂制造将建设时间从9年缩短至4-5.5年，首批部署后单位造价预计为3,600-4,200美元/千瓦（相比美国近期大型反应堆的5,833美元/千瓦），模块化扩展允许加州逐步部署容量以满足2045年无碳目标。伊利诺伊州等多个州最近创建了针对其核限制的SMR豁免，加州能源委员会在2024年8月也建议立法机构考虑类似豁免。凭借成熟的国际经验——韩国实现3,571美元/千瓦的建设成本，中国通过批量生产达到4,174美元/千瓦——以及核能提供无与伦比的容量因子（92% vs 太阳能25%），<strong>加州2045年无碳目标和经济竞争力可能需要将SMR部署作为转型的基石</strong>。
+                    </p>
+                </div>
+
+                <div class="chart-citation" style="margin-top: 2rem;">
+                    <strong>来源：</strong> Breakthrough Institute，"加州核能政策导致120亿美元未实现资本投资损失"（2022）；美国能源部，"先进核能商业化路径"（2025）；Britain Remade，"核电建设成本分析：2000年后项目国际比较"（2024）- 韩国3,571美元/千瓦，中国4,174美元/千瓦建设成本；Liu, Shangwei, Daniel M. Kammen等，"降低核电站成本：来自中国、韩国和美国的学习曲线证据"，《自然》（2025）；Lazard，"平准化能源成本+ 18.0版"，2025年6月；加州能源委员会，SMR豁免建议（2024年8月）；Markandya, Anil和Paul Wilkinson，"发电与健康"，《柳叶刀》370期，第9591号（2007）：979-990；Apergis, N.和J. Payne，"核能消费与经济增长的面板研究"，《能源经济学》32卷，第3期（2010）：545-549；Wolde-Rufael, Y.和Kojo Menyah，"九个发达国家的核能消费与经济增长"，《能源经济学》32卷，第3期（2010）：582-593；Davis, Lucas W.和Catherine Hausman，"核电站关闭的市场影响"，《美国经济杂志：应用经济学》8卷，第2期（2016）：92-122；加州独立系统运营商，"容量认证方法和净CONE值"（2025）。
+                </div>
+            </div>
+        </section>
+
+        <!-- SOCIAL COST SECTION -->
+<section id="social-cost" class="content-section">
+    <div class="chart-container">
+        <h2 class="chart-title">碳的社会成本与现状影响</h2>
+        
+        <div style="background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%); padding: 2rem; border-radius: 10px; margin-bottom: 2rem; border-left: 5px solid #e74c3c;">
+            <h3 style="color: #c0392b; margin-bottom: 1rem;">⚠️ 维持化石燃料依赖的隐性成本</h3>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                <strong>碳的社会成本</strong>代表向大气中额外排放一吨二氧化碳所造成的总经济损害。根据斯坦福大学经济学家Marshall Burke和Lawrence Goulder的说法，这一指标捕捉了"气候变化及其如何影响经济结果，包括农业生产力变化、海平面上升造成的损害，以及人类健康和劳动生产力的下降。"截至2021年，碳的社会成本估计为<strong>每吨51美元</strong>，这意味着每吨二氧化碳排放给社会造成51美元的损害——这些成本未反映在电价中，而是通过医疗保健成本、生产力降低、财产损失和生命损失来支付。
+            </p>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                加州继续依赖天然气提供35-45%的州内发电量，给社会带来了巨大的隐性成本。加州年发电量约为2800亿千瓦时，天然气电厂每年排放约3500万吨二氧化碳。按每吨51美元计算，<strong>这代表每年17.9亿美元的社会成本</strong>——社会通过空气质量恶化、医疗保健负担增加、热浪期间工人生产力降低，以及包括干旱和野火在内的气候变化影响加速来承担这些成本。这些外部性不会出现在电费账单上，而是通过保险费、税收资助的灾难救济和人类痛苦来支付。
+            </p>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                研究表明，这些成本不成比例地落在弱势群体身上。低收入社区往往无法负担在日益频繁的热浪期间使用空调等保护性技术，缺乏获得优质医疗保健的机会，并且更容易暴露于化石燃料燃烧造成的空气污染中。斯坦福大学的研究表明，"更高的温度导致更差的健康结果"——包括中暑、心血管功能障碍和死亡率增加——而且"低收入社区往往受气候变化的伤害更大。"研究还表明，随着温度上升，劳动生产力急剧下降；当这影响到整个经济时，"整体经济效应可能相当大"，降低所有工人的GDP增长和工资潜力，尤其是户外和工业工人。
+            </p>
+        </div>
+    </div>
+
+    <div class="stats-grid" style="margin-bottom: 2rem;">
+        <div class="stat-card" style="background: linear-gradient(135deg, #ffe5e5 0%, #ffcccc 100%);">
+            <div class="stat-label">加州天然气电厂年社会成本</div>
+            <div class="stat-value" style="color: #c0392b;">17.9亿美元</div>
+            <div class="stat-description">按51美元/吨CO₂计算的隐性成本</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #ffe5e5 0%, #ffcccc 100%);">
+            <div class="stat-label">化石燃料每年造成的死亡</div>
+            <div class="stat-value" style="color: #c0392b;">235+人</div>
+            <div class="stat-description">加州空气污染死亡</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #e5f5e5 0%, #ccffcc 100%);">
+            <div class="stat-label">核能社会成本</div>
+            <div class="stat-value" style="color: #27ae60;">接近零</div>
+            <div class="stat-description">无碳排放，死亡率极低</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #e5f5e5 0%, #ccffcc 100%);">
+            <div class="stat-label">50年避免的社会成本</div>
+            <div class="stat-value" style="color: #27ae60;">895亿美元</div>
+            <div class="stat-description">通过核能转型</div>
+        </div>
+    </div>
+
+    <div class="dashboard">
+        <div class="chart-container">
+            <h3 class="chart-title">累计社会成本：化石燃料 vs 核能（50年）</h3>
+            <div class="chart-wrapper">
+                <canvas id="socialCostChart"></canvas>
+            </div>
+            <div class="chart-methodology">
+                <strong>方法论：</strong> 社会成本使用51美元/吨CO₂估算计算。现状假设持续35%的天然气依赖（按当前发电水平50年内排放9800万吨CO₂）。核能情景用零碳核能取代化石燃料发电。天然气碳排放：约0.35吨CO₂/兆瓦时。医疗保健成本来自Markandya & Wilkinson死亡率。不包括气候变化造成的财产损失、农业损失或生态系统退化——实际成本更高。
+            </div>
+            <div class="chart-citation">
+                <strong>来源：</strong> Burke, Marshall和Lawrence Goulder，"教授解释碳的社会成本"，斯坦福新闻，2021年6月，https://news.stanford.edu/stories/2021/06/professors-explain-social-cost-carbon；拜登政府碳社会成本估算（51美元/吨，2025）；美国EPA天然气发电排放因子；Markandya, Anil和Paul Wilkinson，"发电与健康"，《柳叶刀》370期，第9591号（2007）：979-990。
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h3 class="chart-title">社会成本按影响类别细分（年度）</h3>
+            <div class="chart-wrapper">
+                <canvas id="socialCostBreakdownChart"></canvas>
+            </div>
+            <div class="chart-methodology">
+                <strong>方法论：</strong> 基于斯坦福分析和EPA指南，年度社会成本按影响类别分配。健康影响包括死亡率（EPA统计生命价值1170万美元）、发病率和医疗保健成本。热暴露影响劳动产出造成的生产力损失。海平面上升和极端天气造成的财产损失。降水和温度变化造成的农业损失。气候损害包括长期变暖效应、生态系统破坏和不可逆转的变化。
+            </div>
+            <div class="chart-citation">
+                <strong>来源：</strong> Burke, Marshall和Lawrence Goulder，斯坦福新闻（2021）；美国环境保护署，"经济分析准备指南"（2024）；政府间气候变化专门委员会（IPCC）气候损害评估报告。
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <h3 class="chart-title">🌟 核能优势：零碳、最小社会成本</h3>
+        
+        <div style="background: linear-gradient(135deg, #e8f8f5 0%, #d5f4e6 100%); padding: 2rem; border-radius: 10px; margin-top: 2rem; border-left: 5px solid #27ae60;">
+            <h3 style="color: #27ae60; margin-bottom: 1rem;">✓ 为什么核能消除社会成本</h3>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                <strong>零碳排放：</strong> 核电站运行期间不排放二氧化碳，完全消除了社会成本的最大组成部分。在50年内转型至45%核能，加州将避免排放约9800万吨否则将来自天然气电厂的二氧化碳——按当前社会成本估算代表<strong>500亿美元的避免气候损害</strong>。这一效益随时间复合，因为避免的排放防止了不可逆转的变暖、海平面上升和生态系统崩溃。
+            </p>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                <strong>卓越的安全记录：</strong> 核能是所有主要能源中死亡率最低的，仅为每太瓦时0.07人死亡——低于太阳能电池板（每太瓦时高达0.44人死亡，除安装事故外的0.02人死亡，包括供应链时可比）且比天然气安全40倍（每太瓦时2.8人死亡）。这一死亡率包括所有历史核事故——切尔诺贝利、福岛和三里岛。以45%核能而非天然气供电的加州每年将挽救约<strong>226人的生命</strong>，或50年内挽救11,300人。按EPA的统计生命价值（每人1170万美元），这代表1327亿美元的价值——还不包括减少的医疗保健成本、减少的痛苦和挽救生命的生产力保持。
+            </p>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                <strong>稳定可靠的电力防止经济中断：</strong> 与需要大量电池储能和持续天然气"调峰"电厂以保证可靠性的间歇性可再生能源不同，核能以92%的容量因子提供恒定的基荷电力。这消除了电网不稳定、轮流停电和电力短缺造成经济中断的隐性社会成本。加州2020年热浪期间的轮流停电表明，可再生能源间歇性在最需要的时候可能失效——恰恰是需求高峰且太阳能生产在日落后结束的时候。斯坦福大学经济学家Lawrence Goulder指出，碳定价必须考虑"生产和消费决策"，而稳定的核能在不需要每千瓦-月18.92美元的储能成本或持续化石燃料备用的情况下实现两者。
+            </p>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                <strong>环境正义效益：</strong> 核能特别有利于承受化石燃料污染重负的低收入和弱势社区。斯坦福大学经济学家Marshall Burke强调，"低收入社区往往受气候变化的伤害更大"且"可能无法轻易负担保护性技术。"通过消除化石燃料的空气污染和避免加速气候变化，核能为环境正义社区提供不成比例的效益。此外，核电站创造高薪工会工作（核工程师平均12.5万美元 vs 可再生能源技术人员5.5-5.8万美元），为托管这些设施的社区提供经济向上流动机会。
+            </p>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                <strong>长期可持续性和资源效率：</strong> 核电站运行60-80年，土地使用最少（每吉瓦1平方英里 vs 太阳能75平方英里），资源开采最少，废物产生最少。一粒指尖大小的铀燃料芯块包含的能量相当于一吨煤、17,000立方英尺天然气或1,780磅石油。美国历史上产生的所有核废料可以放在一个足球场大小、10码深的区域内——96%的乏燃料可以回收利用。法国已经证明核电可以既实惠（0.18美元/千瓦时 vs 加州0.28美元/千瓦时）又清洁（碳强度60克CO₂/千瓦时 vs 加州200克CO₂/千瓦时），证明该模式在规模上是可行的。
+            </p>
+        </div>
+    </div>
+
+    <div class="stats-grid" style="margin-top: 2rem;">
+        <div class="stat-card" style="background: linear-gradient(135deg, #e8f8f5 0%, #d5f4e6 100%);">
+            <div class="stat-label">无碳发电</div>
+            <div class="stat-value" style="color: #27ae60;">100%</div>
+            <div class="stat-description">核能零CO₂排放</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #e8f8f5 0%, #d5f4e6 100%);">
+            <div class="stat-label">安全记录</div>
+            <div class="stat-value" style="color: #27ae60;">0.07</div>
+            <div class="stat-description">死亡/太瓦时（包括切尔诺贝利）</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #e8f8f5 0%, #d5f4e6 100%);">
+            <div class="stat-label">容量因子</div>
+            <div class="stat-value" style="color: #27ae60;">92%</div>
+            <div class="stat-description">vs 太阳能25%，风能35%</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #e8f8f5 0%, #d5f4e6 100%);">
+            <div class="stat-label">土地使用效率</div>
+            <div class="stat-value" style="color: #27ae60;">75倍</div>
+            <div class="stat-description">每吉瓦比太阳能少用土地</div>
+        </div>
+    </div>
+
+    <div class="chart-citation" style="margin-top: 2rem; font-size: 0.85rem;">
+        <strong>主要来源：</strong> Burke, Marshall和Lawrence Goulder。"教授解释碳的社会成本。"斯坦福新闻，2021年6月。https://news.stanford.edu/stories/2021/06/professors-explain-social-cost-carbon。Burke是斯坦福大学地球系统科学副教授；Goulder是西村修三环境与资源经济学教授。文章解释了社会成本方法论、计算方法、政策应用和环境正义影响。全文引用51美元/吨估算。
+    </div>
+</section>
+
+        <!-- EMPLOYMENT SECTION -->
+        <section id="employment" class="content-section">
+            <div class="dashboard">
+                <div class="chart-container">
+                    <h3 class="chart-title">各能源行业创造就业（每兆瓦就业人数）</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="jobsChart"></canvas>
+                    </div>
+                    <div class="chart-methodology">
+                        <strong>方法论：</strong> 就业估算按每兆瓦装机容量计算，包括建设阶段（临时）和运营阶段（永久）就业。核能数据包括建设、运营、维护和燃料循环就业。可再生能源估算包括制造、安装和维护。
+                    </div>
+                    <div class="chart-citation">
+                        <strong>来源：</strong> Kim, Hana和E. Jeon，"韩国能源转型政策导致的核能产业结构变化和经济影响"，《能源》13卷，第7期（2020）：1806；加州州长办公室，"当特朗普拥抱肮脏化石燃料时，加州达成重大清洁能源里程碑"，2025年10月9日，https://www.energy.ca.gov/news/2025-10/。
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3 class="chart-title">各行业平均年薪（美元）</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="salariesChart"></canvas>
+                    </div>
+                    <div class="chart-methodology">
+                        <strong>方法论：</strong> 薪资估算代表各能源行业熟练技术岗位的中位工资，包括工程师、技术人员和操作员。数值使用CPI调整至2025年美元。
+                    </div>
+                    <div class="chart-citation">
+                        <strong>来源：</strong> 美国劳工统计局，"职业就业和工资统计"，2024；加州能源委员会2023-2024年总系统发电报告中的就业数据。
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3 class="chart-title">工人再培训计划分布（%）</h3>
+                <div class="chart-wrapper">
+                    <canvas id="retrainingChart"></canvas>
+                </div>
+                <div class="chart-methodology">
+                    <strong>方法论：</strong> 分布百分比基于化石燃料行业和清洁能源行业之间技能可转移性的投入产出分析。技术培训类别包括核能、太阳能安装和风能技术人员项目。管理包括项目管理和安全监督角色。
+                </div>
+                <div class="chart-citation">
+                    <strong>来源：</strong> Kim, Hana和E. Jeon，"韩国能源转型政策导致的核能产业结构变化和经济影响"，《能源》13卷，第7期（2020）：1806；加州劳动力转型计划分析。
+                </div>
+            </div>
+        </section>
+
+        <!-- HEALTH & SAFETY SECTION -->
+        <section id="health" class="content-section">
+            <!-- NEW BUBBLE CHART FOR MORTALITY -->
+            <div class="chart-container">
+                <h3 class="chart-title">各能源死亡率（每太瓦时死亡人数）</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem; text-align: center;">
+                    圆圈面积与死亡率成比例。将鼠标悬停在气泡上可获取详细信息。
+                </p>
+                
+                <div class="mortality-bubble-chart-wrapper">
+                    <div class="mortality-bubble-chart">
+                        <!-- Fossil Fuels -->
+                        <div class="mortality-bubble mortality-bubble-coal" 
+                             data-source="煤炭" 
+                             data-deaths="100" 
+                             data-info="颗粒物、SO₂、NOₓ造成的空气污染；采矿事故；尘肺病"
+                             data-comparison="核能比煤炭安全2,500倍"></div>
+                        
+                        <div class="mortality-bubble mortality-bubble-oil" 
+                             data-source="石油" 
+                             data-deaths="36" 
+                             data-info="燃烧排放、炼油厂事故、运输泄漏、开采危险"
+                             data-comparison="核能比石油安全900倍"></div>
+                        
+                        <div class="mortality-bubble mortality-bubble-biomass" 
+                             data-source="生物质" 
+                             data-deaths="24" 
+                             data-info="燃烧木材/木炭造成的室内空气污染，收割和加工事故"
+                             data-comparison="核能比生物质安全600倍"></div>
+                        
+                        <div class="mortality-bubble mortality-bubble-gas" 
+                             data-source="天然气" 
+                             data-deaths="4" 
+                             data-info="最清洁的化石燃料但仍排放NOₓ和甲烷；管道和爆炸风险"
+                             data-comparison="核能比天然气安全100倍"></div>
+                        
+                        <!-- Clean energy at clock positions around coal -->
+                        <div class="mortality-bubble mortality-bubble-nuclear" 
+                             data-source="核能" 
+                             data-deaths="0.04" 
+                             data-info="包括切尔诺贝利、福岛、三里岛的所有死亡 + 职业死亡 + 理论辐射暴露（线性无阈值模型）"
+                             data-comparison="单位发电量最安全的能源"></div>
+                        
+                        <div class="mortality-bubble mortality-bubble-wind" 
+                             data-source="风能" 
+                             data-deaths="0.15" 
+                             data-info="安装和维护事故，直升机碰撞，海上溺水"
+                             data-comparison="核能比风能安全4倍"></div>
+                        
+                        <div class="mortality-bubble mortality-bubble-hydro" 
+                             data-source="水电" 
+                             data-deaths="1.4" 
+                             data-info="率由1975年板桥大坝溃坝（171,000人死亡）主导；否则在0.04/TWh非常安全"
+                             data-comparison="核能比水电安全35倍（包括大坝溃坝）"></div>
+                        
+                        <div class="mortality-bubble mortality-bubble-solar" 
+                             data-source="太阳能" 
+                             data-deaths="0.44" 
+                             data-info="制造（硅加工）、屋顶安装坠落、供应链事故"
+                             data-comparison="核能比太阳能安全11倍"></div>
+                        
+                        <!-- Static Labels for large bubbles -->
+                        <div class="mortality-bubble-label mortality-label-coal">煤炭<br>100 死亡/TWh</div>
+                        <div class="mortality-bubble-label mortality-label-oil">石油<br>36</div>
+                        <div class="mortality-bubble-label mortality-label-biomass">生物质<br>24</div>
+                        <div class="mortality-bubble-label mortality-label-gas">天然气 4</div>
+                        
+                        <!-- Static Labels for small bubbles -->
+                        <div class="mortality-bubble-label mortality-label-nuclear">核能 0.04 ⭐</div>
+                        <div class="mortality-bubble-label mortality-label-small mortality-label-wind">风能 0.15</div>
+                        <div class="mortality-bubble-label mortality-label-small mortality-label-hydro">水电 1.4</div>
+                        <div class="mortality-bubble-label mortality-label-small mortality-label-solar">太阳能 0.44</div>
+                    </div>
+                </div>
+                
+                <div class="mortality-insight-box">
+                    <h3>⚛️ 核能：最安全的能源</h3>
+                    <div class="mortality-insight-stats">
+                        <div class="mortality-insight-stat">
+                            <div class="mortality-insight-number">2,500倍</div>
+                            <div class="mortality-insight-label">比煤炭安全</div>
+                        </div>
+                        <div class="mortality-insight-stat">
+                            <div class="mortality-insight-number">900倍</div>
+                            <div class="mortality-insight-label">比石油安全</div>
+                        </div>
+                        <div class="mortality-insight-stat">
+                            <div class="mortality-insight-number">11倍</div>
+                            <div class="mortality-insight-label">比太阳能安全</div>
+                        </div>
+                        <div class="mortality-insight-stat">
+                            <div class="mortality-insight-number">4倍</div>
+                            <div class="mortality-insight-label">比风能安全</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mortality-legend">
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #2c3e50;"></div>
+                        <span>煤炭: <span class="mortality-legend-value">100</span></span>
+                    </div>
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #c0392b;"></div>
+                        <span>石油: <span class="mortality-legend-value">36</span></span>
+                    </div>
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #d35400;"></div>
+                        <span>生物质: <span class="mortality-legend-value">24</span></span>
+                    </div>
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #f39c12;"></div>
+                        <span>天然气: <span class="mortality-legend-value">4</span></span>
+                    </div>
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #3498db;"></div>
+                        <span>水电: <span class="mortality-legend-value">1.4</span></span>
+                    </div>
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #f1c40f;"></div>
+                        <span>太阳能: <span class="mortality-legend-value">0.44</span></span>
+                    </div>
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #ff1493;"></div>
+                        <span>风能: <span class="mortality-legend-value">0.15</span></span>
+                    </div>
+                    <div class="mortality-legend-item" style="background: linear-gradient(135deg, #27ae60, #1e8449); color: white;">
+                        <div class="mortality-legend-color" style="background: #27ae60; box-shadow: 0 0 8px #27ae60;"></div>
+                        <span>核能: <span class="mortality-legend-value" style="color: white;">0.04</span> ⭐</span>
+                    </div>
+                </div>
+                
+                <div class="mortality-methodology-box">
+                    <strong>方法论：</strong> 圆圈面积与死亡率成比例（面积 = π × r²，按死亡/TWh缩放）。死亡包括整个燃料循环中的直接事故（职业和公众）和空气污染死亡。核能率（0.04死亡/TWh）包括所有历史事故——切尔诺贝利、福岛、三里岛——加上职业死亡和使用保守线性无阈值模型的理论辐射暴露。太阳能死亡（0.44/TWh）包括制造、供应链和安装事故。化石燃料死亡主要由空气污染（颗粒物、NOₓ、SO₂）造成。
+                    
+                    <div class="mortality-citation-box">
+                        <strong>来源：</strong> 世界卫生组织（WHO），各能源全球死亡率。数据来自：Markandya, A.和Wilkinson, P.，"发电与健康"，《柳叶刀》370（2007）：979-990；Sovacool, B.等，"平衡安全与可持续性"，《能源研究与社会科学》（2016）；Our World in Data，"最安全、最清洁的能源是什么？"（2022年更新）。WHO数据来自ResearchGate汇编："每十亿千瓦时发电的各能源死亡率。"
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard">
+                <div class="chart-container">
+                    <h3 class="chart-title">挽救生命：核能转型 vs 现状（累计50年）</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="livesSavedChart"></canvas>
+                    </div>
+                    <div class="chart-methodology">
+                        <strong>方法论：</strong> 挽救生命通过比较当前化石燃料组合（主要是天然气）与包含核能情景的空气污染死亡率计算。假设加州年发电量为2800亿千瓦时。现状：2800亿千瓦时 × 30%天然气 × 2.8死亡/TWh = 235死亡/年。核能情景：2800亿千瓦时 × 45%核能 × 0.07死亡/TWh = 9死亡/年。差异：每年挽救226人 × 50年 = 11,300人（保守估计取整为11,000人）。
+                    </div>
+                    <div class="chart-citation">
+                        <strong>来源：</strong> Markandya, Anil和Paul Wilkinson，"发电与健康"，《柳叶刀》370期，第9591号（2007）：979-990；加州能源委员会，"2024年总系统发电"；基于同行评审死亡率应用于加州特定发电预测的计算。
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3 class="chart-title">50年医疗保健成本节省（十亿美元）</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="healthcareSavingsChart"></canvas>
+                    </div>
+                    <div class="chart-methodology">
+                        <strong>方法论：</strong> 医疗保健成本使用EPA统计生命价值（2025年美元1170万美元/人）加上预防疾病的直接医疗费用计算。癌症治疗平均每例15万美元。呼吸系统疾病平均每例8,000美元。心血管治疗平均每次4.5万美元。所有数值按每年3%折现并调整通胀。
+                    </div>
+                    <div class="chart-citation">
+                        <strong>来源：</strong> Markandya, Anil和Paul Wilkinson，"发电与健康"，《柳叶刀》370期，第9591号（2007）；美国环境保护署，"经济分析准备指南"，2024；CDC和关于空气污染健康影响的医学文献中的医疗保健成本估算。
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- MORTALITY BUBBLE TOOLTIP -->
+        <div class="mortality-tooltip" id="mortalityTooltip">
+            <div class="mortality-tooltip-title"></div>
+            <div class="mortality-tooltip-value"></div>
+            <div class="mortality-tooltip-info"></div>
+            <div class="mortality-tooltip-comparison"></div>
+        </div>
+
+        
+        <!-- ARTIFICIAL INTELLIGENCE SECTION -->
+        <section id="ai" class="content-section">
+            <div class="chart-container">
+                <h2 class="chart-title">🤖 人工智能与核能</h2>
+                
+                <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 1.5rem; margin: 2rem 0; border-radius: 8px;">
+                    <p style="font-size: 1.1rem; margin: 0;"><strong>说明：</strong> 人工智能（AI）未包含在本研究的其他分析中。然而，AI将为核能创造巨大推动力。它提供了实现完美安全标准和高效系统的潜力。以下是AI辅助核技术可能实现的前景。</p>
+                </div>
+
+                <h3>共生关系：AI需要核能，核能需要AI</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    人工智能和核能之间的关系是双向和变革性的。AI的巨大能源需求使核能成为数据中心的理想解决方案，而AI的分析能力可以彻底改变核电站的设计、运营、安全和许可。
+                </p>
+
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                        <div class="stat-label" style="color: white;">数据中心电力需求增长</div>
+                        <div class="stat-value" style="color: white;">160%</div>
+                        <div class="stat-label" style="color: white;">到2030年（vs 2023年）</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                        <div class="stat-label" style="color: white;">所需核能容量</div>
+                        <div class="stat-value" style="color: white;">85-90 GW</div>
+                        <div class="stat-label" style="color: white;">到2030年为AI增长供电</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                        <div class="stat-label" style="color: white;">成本降低潜力</div>
+                        <div class="stat-value" style="color: white;">1000亿美元+</div>
+                        <div class="stat-label" style="color: white;">通过AI优化核基础设施</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                        <div class="stat-label" style="color: white;">许可时间缩短</div>
+                        <div class="stat-value" style="color: white;">50%</div>
+                        <div class="stat-label" style="color: white;">AI工具的潜力</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">⚡ AI数据中心电力需求预测</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    主要科技公司（谷歌、微软、亚马逊、Meta）正在签署核能协议，以满足AI数据中心巨大且不断增长的能源需求。核能提供间歇性可再生能源无法匹配的24/7可靠、无碳电力。
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="aiPowerDemandChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>来源：</strong> Singer, Brian, Jim Schneider和Carly Davenport。"数据中心电力需求与核能。"高盛研究，2024。https://www.goldmansachs.com/insights/articles/is-nuclear-energy-the-answer-to-ai-data-centers-power-consumption。
+                </div>
+
+                <div class="chart-methodology">
+                    <strong>计算方法：</strong> 数据基于高盛研究对数据中心电力消费从2023年基线到2030年增长的预测，考虑了AI工作负载增加、效率提升和基础设施扩展。
+                </div>
+
+                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1.5rem; margin: 2rem 0; border-radius: 8px;">
+                    <h4 style="margin-top: 0;">关键洞察："绿色可靠性溢价"</h4>
+                    <p>全天候无碳电力需要组合来源或接受成本溢价。核能以77美元/兆瓦时提供基荷电力（现场大规模），相比之下，近100%可再生能源解决方案（含储能）为87美元/兆瓦时，天然气联合循环（含100美元/吨碳价）为91美元/兆瓦时。</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">🏢 大型科技公司核能协议（2024-2025）</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    领先的AI公司已通过电力购买协议和直接投资承诺超过10GW的核能容量，表明核能在推动AI革命中的关键作用。
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="techNuclearDealsChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>来源：</strong> MIT Technology Review。"核能真的能为AI崛起提供动力吗？"2025年5月。https://www.technologyreview.com/2025/05/20/1116339/ai-nuclear-power-energy-reactors/。
+                </div>
+
+                <div class="dashboard">
+                    <div style="background: #e8f5e9; border-radius: 8px; padding: 1.5rem;">
+                        <h4>谷歌 + Kairos Power</h4>
+                        <ul>
+                            <li><strong>协议：</strong> 到2035年最高500 MW</li>
+                            <li><strong>技术：</strong> 小型熔盐冷却反应堆</li>
+                            <li><strong>首台机组：</strong> 2030年目标</li>
+                            <li><strong>状态：</strong> NRC建设批准已获得</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: #fff3e0; border-radius: 8px; padding: 1.5rem;">
+                        <h4>亚马逊 + X-energy</h4>
+                        <ul>
+                            <li><strong>协议：</strong> 320-960 MW（可扩展）</li>
+                            <li><strong>技术：</strong> 小型模块化反应堆</li>
+                            <li><strong>时间线：</strong> 2030年代初</li>
+                            <li><strong>地点：</strong> 华盛顿州</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: #e3f2fd; border-radius: 8px; padding: 1.5rem;">
+                        <h4>微软 + Constellation</h4>
+                        <ul>
+                            <li><strong>协议：</strong> 三里岛1号机组</li>
+                            <li><strong>容量：</strong> 约835 MW</li>
+                            <li><strong>时间线：</strong> 2028年重新开放</li>
+                            <li><strong>名称：</strong> Crane清洁能源中心</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: #f3e5f5; border-radius: 8px; padding: 1.5rem;">
+                        <h4>Meta的核能战略</h4>
+                        <ul>
+                            <li><strong>重点：</strong> 支持现有电厂延寿</li>
+                            <li><strong>时间框架：</strong> 20年延期</li>
+                            <li><strong>理由：</strong> 比新建更快</li>
+                            <li><strong>目标：</strong> 24/7无碳电力</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">💰 成本效益分析：AI用核能 vs 替代方案</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    考虑到24/7可靠性要求时，与需要储能的间歇性可再生能源或带碳定价的天然气相比，核能为数据中心电力提供最低的总系统成本。
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="aiEnergyCostComparisonChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>来源：</strong> Singer, Brian, Jim Schneider和Carly Davenport。"数据中心电力需求与核能。"高盛研究，2024。基于美国市场条件的计算，化石燃料适用100美元/吨碳价。
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">🔬 AI对核能运营的变革性影响</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    AI和机器学习正在彻底改变核电站的设计、运营、维护和安全。这些技术承诺在加速部署时间线的同时降低数千亿美元的成本。
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="aiNuclearBenefitsChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>来源：</strong> Laurin-Kovitz, Kirsten和Rick Stevens。"能源AI报告。"阿贡国家实验室，2024年4月。https://www.anl.gov/ai/reference/ai-for-energy-report-2024；Ngoy Kubelwa, Nelly。"用人工智能提升核能生产。"国际原子能机构公报，2024。https://www.iaea.org/bulletin/enhancing-nuclear-power-production-with-artificial-intelligence。
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">⏱️ AI辅助的SMR部署时间线</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    AI通过更快的设计迭代、简化的许可和优化的建设过程帮助加速小型模块化反应堆部署。国际原子能机构领导AI用于SMR部署的协调研究。
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="smrTimelineChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>来源：</strong> Gencturk, Merve和Karim Ahmed。"核能可以为AI的未来提供动力。"德克萨斯A&M大学工程学院，2025年8月。https://engineering.tamu.edu/news/2025/08/nuclear-energy-could-power-the-future-of-ai.html；国际原子能机构。"AI用于SMR部署协调研究项目"，2024。
+                </div>
+            </div>
+        </section>
+
+<!-- WORLDWIDE COSTS SECTION -->
+        <section id="worldwide-costs" class="content-section">
+            <div class="chart-container">
+                <h2 class="chart-title">🌍 全球核电建设成本</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    对主要核电国家核电站建设成本的分析揭示了挑战核能经济假设的巨大差异。中国、韩国和其他亚洲国家建造核电站的成本始终是美国近期项目的三分之一到五分之一。
+                </p>
+
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #de2910, #ff6b6b);">
+                        <div class="stat-label" style="color: white;">中国建设成本</div>
+                        <div class="stat-value" style="color: white;">2,230美元/kW</div>
+                        <div class="stat-label" style="color: white;">55座运营反应堆</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #003478, #0066cc);">
+                        <div class="stat-label" style="color: white;">韩国成本</div>
+                        <div class="stat-value" style="color: white;">2,200美元/kW</div>
+                        <div class="stat-label" style="color: white;">全球最低</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #3c3b6e, #b22234);">
+                        <div class="stat-label" style="color: white;">美国成本（Vogtle）</div>
+                        <div class="stat-value" style="color: white;">10,000美元/kW</div>
+                        <div class="stat-label" style="color: white;">高4-5倍</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #4caf50, #8bc34a);">
+                        <div class="stat-label" style="color: white;">加州SMR目标</div>
+                        <div class="stat-value" style="color: white;">3,600美元/kW</div>
+                        <div class="stat-label" style="color: white;">DOE预测10-20台机组后</div>
+                    </div>
+                </div>
+
+                <div class="chart-wrapper">
+                    <canvas id="worldwideConstructionCostsChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>来源：</strong> Anthropocene Institute（2024）- 中国核发电量和成本分析；世界核能协会（2024）；IEA/OECD NEA发电成本预测2020；Britain Remade（2024）；约翰霍普金斯大学《自然》研究（2025）
+                </div>
+
+                <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 1.5rem; margin: 2rem 0; border-radius: 8px;">
+                    <h3 style="margin-top: 0;">关键洞察：成本不是核技术固有的</h3>
+                    <p>全球建设成本450%的差异（2,200美元/kW到10,000美元/kW）表明高成本反映的是政策、监管和产业组织因素——而非根本性技术限制。拥有持续建设计划、标准化设计和有利融资的国家实现了与可再生能源替代品相当或更低的成本。</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">💰 全球核电平准化成本比较</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    平准化电力成本（LCOE）因建设成本、融资和运营效率而差异巨大。在亚洲成本水平下，核能成为最经济的零碳基荷选择。
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="worldwideLCOEChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>来源：</strong> IEA发电成本预测2020；韩国能源经济研究院2024；法国CRE预测2023；欧盟委员会LCOE分析2020；美国EIA AEO 2025
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">📊 总系统成本：完整图景</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    仅比较基础LCOE是有误导性的。可变可再生能源需要昂贵的储能和备用发电。当包含这些系统级成本时，优化价格的核能变得极具竞争力。
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="totalSystemCostsChart"></canvas>
+                </div>
+
+                <div style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 1.5rem; margin: 2rem 0; border-radius: 8px;">
+                    <h3 style="margin-top: 0;">在优化成本下，核能在总系统经济性上胜出</h3>
+                    <ul style="margin: 0.5rem 0 0 1.5rem;">
+                        <li><strong>核能（中国成本）：</strong> 72美元/兆瓦时总系统成本</li>
+                        <li><strong>核能（韩国）：</strong> 55-75美元/兆瓦时总系统成本</li>
+                        <li><strong>核能（加州优化）：</strong> 80-95美元/兆瓦时总系统成本</li>
+                        <li><strong>风能 + 储能：</strong> 103美元/兆瓦时总系统成本</li>
+                        <li><strong>太阳能 + 储能：</strong> 121美元/兆瓦时总系统成本</li>
+                        <li><strong>核能（美国当前）：</strong> 137美元/兆瓦时总系统成本</li>
+                    </ul>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>来源：</strong> IEA发电成本预测2020；CSIRO GenCost 2024；美国EIA AEO 2025；NREL年度技术基准2024；Lazard LCOE+ 2025
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">💵 投资回报分析</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    核电的投资回报率因建设成本而差异巨大。在亚洲成本水平下，核能在60年运营寿命内提供卓越回报。
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="roiComparisonChart"></canvas>
+                </div>
+
+                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1.5rem; margin: 2rem 0; border-radius: 8px;">
+                    <h3 style="margin-top: 0;">投资回报分析摘要（60年寿命）</h3>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+                        <thead style="background: #f8f9fa;">
+                            <tr>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid #dee2e6;">情景</th>
+                                <th style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">资本/GW</th>
+                                <th style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">回收期</th>
+                                <th style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">寿命期ROI</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 0.75rem; border: 1px solid #dee2e6;">中国模式</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">22.3亿美元</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">9.5年</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6; font-weight: bold; color: #2e7d32;">640%</td>
+                            </tr>
+                            <tr style="background: #f8f9fa;">
+                                <td style="padding: 0.75rem; border: 1px solid #dee2e6;">韩国</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">22亿美元</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">12.5年</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6; font-weight: bold; color: #388e3c;">545%</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.75rem; border: 1px solid #dee2e6;">加州优化</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">35亿美元</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">13年</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6; font-weight: bold; color: #689f38;">470%</td>
+                            </tr>
+                            <tr style="background: #f8f9fa;">
+                                <td style="padding: 0.75rem; border: 1px solid #dee2e6;">法国新建</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">57亿美元</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">16年</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6; font-weight: bold; color: #8bc34a;">380%</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.75rem; border: 1px solid #dee2e6;">美国当前</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">100亿美元</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">22.5年</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6; font-weight: bold;">275%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p style="margin-top: 1rem; font-size: 0.9rem;"><strong>所有情景在经济上都是可行的。</strong>亚洲模式由于较低的建设成本和优化的运营提供卓越回报。</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">🎯 加州的核能机遇</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    加州可以从全球核能成功案例中学习，部署具有经济竞争力的清洁能源。采用国际最佳实践的小型模块化反应堆（SMR）机队计划可以实现70-90美元/兆瓦时的LCOE——与所有替代方案相比具有竞争力。
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="californiaOpportunityChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>来源：</strong> 加州能源委员会2024；CAISO容量研究；美国DOE先进反应堆示范计划；NREL SMR成本分析；加州AB 1632分析；基于国际最佳实践的作者预测
+                </div>
+            </div>
+        </section>
+
+        <!-- BIBLIOGRAPHY SECTION -->
+        <section id="bibliography" class="content-section">
+            <div class="chart-container">
+<div class="bibliography-content">
+    <h2 class="chart-title">参考文献</h2>
+    <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--primary);">同行评审期刊文章</h3>
+    <div class="bibliography-entries">
+        <div class="bib-entry">
+            <span class="bib-authors">Apergis, N.和J. Payne。</span> <span class="bib-title">"核能消费与经济增长的面板研究。"</span> <em>能源经济学</em> 32卷，第3期（2010）：545-549。<a href="https://doi.org/10.1016/j.eneco.2009.09.015" target="_blank" class="bib-link">https://doi.org/10.1016/j.eneco.2009.09.015</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Davis, Lucas W.和Catherine Hausman。</span> <span class="bib-title">"核电站关闭的市场影响。"</span> <em>美国经济杂志：应用经济学</em> 8卷，第2期（2016）：92-122。<a href="https://doi.org/10.1257/app.20140473" target="_blank" class="bib-link">https://doi.org/10.1257/app.20140473</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Fazeli, R., T. Longden和F. J. Beck。</span> <span class="bib-title">"清洁技术能源项目：投资和平准化成本（太阳能、风能、电池）和氢能。"</span> <em>自然科学数据</em>（2025）。<a href="https://doi.org/10.1038/s41597-025-05951-4" target="_blank" class="bib-link">https://doi.org/10.1038/s41597-025-05951-4</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Herran, Diego Silva, S. Fujimori和M. Kainuma。</span> <span class="bib-title">"日本长期气候减缓目标的影响及能源政策不确定性的相关性。"</span> <em>气候政策</em> 19卷，第9期（2019）：1117-1131。<a href="https://doi.org/10.1080/14693062.2019.1634507" target="_blank" class="bib-link">https://doi.org/10.1080/14693062.2019.1634507</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Kim, Hana和E. Jeong。</span> <span class="bib-title">"韩国核能的产业结构变化和效应。"</span> <em>能源</em>（2018）。<a href="https://doi.org/10.3390/en13071806" target="_blank" class="bib-link">https://doi.org/10.3390/en13071806</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Liu, Shiwei, Daniel Kaffine等。</span> <span class="bib-title">"核电建设成本：中国和美国学习曲线的证据。"</span> <span class="bib-institution">约翰霍普金斯大学、哈佛肯尼迪学院、纽约市立大学石溪分校合作研究。</span>（近期）。
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Markandya, Anil和Paul Wilkinson。</span> <span class="bib-title">"发电与健康。"</span> <em>柳叶刀</em> 370（2007）：979-990。<a href="https://doi.org/10.1016/S0140-6736(07)61253-7" target="_blank" class="bib-link">https://doi.org/10.1016/S0140-6736(07)61253-7</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Sovacool, Benjamin。</span> <span class="bib-title">"能源基础设施的核风险在冲突中最高，在研究中最低。"</span> <em>社会科学研究</em>。<a href="https://www.bu.edu/igs/" target="_blank" class="bib-link">https://www.bu.edu/igs/</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Wang, Qi, Jiale Guo, Rongrong Li和Xue-er。</span> <span class="bib-title">"煤炭、石油、天然气、可再生能源和碳排放的比较分析。"</span> <em>环境研究</em>（2023）。<a href="https://doi.org/10.1016/j.envres.2023.115290" target="_blank" class="bib-link">https://doi.org/10.1016/j.envres.2023.115290</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Wolde-Rufael, Y.和Kojo Menyah。</span> <span class="bib-title">"核能消费与经济增长。"</span> <em>能源政策</em>（2010）：582-593。<a href="https://doi.org/10.1016/j.enpol.2010.01.004" target="_blank" class="bib-link">https://doi.org/10.1016/j.enpol.2010.01.004</a>
+        </div>
+    </div>
+    <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--primary);">报告和技术文件</h3>
+    <div class="bibliography-entries">
+        <div class="bib-entry">
+            <span class="bib-title">"摘要报告 - 55座运营核反应堆详细成本数据综合分析。"</span> <span class="bib-organization">Anthropocene研究所。</span>（2024）。<a href="https://www.anthropoceneinstitute.com/" target="_blank" class="bib-link">https://www.anthropoceneinstitute.com/</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Lovering, Jessica R., Arthur Yip和Ted Nordhaus。</span> <span class="bib-title">"全球核电反应堆历史建设成本。"</span> <span class="bib-institution">能源政策。</span>（2016）。<br><span class="bib-note">2000年后反应堆分析显示成本为3,571美元/kW（中国）、4,174美元/kW（韩国）、5,833美元/kW（印度）、7,934美元/kW（俄罗斯）至平均每座反应堆120亿美元</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Burke, Marshall和Lawrence Goulder。</span> <span class="bib-title">"教授解释碳的社会成本。"</span> <em>斯坦福新闻</em>（2021）。<a href="https://news.stanford.edu/stories/2021/06/professors-explain-social-cost-carbon" target="_blank" class="bib-link">https://news.stanford.edu/stories/2021/06/professors-explain-social-cost-carbon</a><br><span class="bib-note">社会成本方法论和联邦政策分析中使用的51美元/吨估算的全面解释</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"先进核反应堆部署路径。"</span> <span class="bib-organization">CATF（清洁空气任务组）。</span>（2024）。<br><span class="bib-note">显示成本降低潜力的建模部署曲线</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"电力系统年鉴。"</span> <span class="bib-organization">加州能源委员会。</span> <a href="https://www.energy.ca.gov/data-reports/energy-almanac/california-electricity-data" target="_blank" class="bib-link">https://www.energy.ca.gov/data-reports/energy-almanac/california-electricity-data</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"小型模块化反应堆执行建议。"</span> <span class="bib-organization">加州州长办公室。</span>（2024年8月）。
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"容量认证方法和净CONE值。"</span> <span class="bib-organization">CAISO（加州独立系统运营商）。</span>（2024）。
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"全球各能源死亡率。"</span> <span class="bib-organization">世界卫生组织（WHO）。</span> 数据来自多个同行评审来源，包括Markandya & Wilkinson（2007）、Sovacool等（2016）和Our World in Data能源安全分析。<a href="https://www.who.int/" target="_blank" class="bib-link">https://www.who.int/</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.bibliography-content {
+    line-height: 1.8;
+}
+
+.bibliography-entries {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.bib-entry {
+    padding: 1rem;
+    background: #f8f9fa;
+    border-left: 3px solid var(--primary);
+    border-radius: 4px;
+}
+
+.bib-authors {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.bib-title {
+    color: var(--text-primary);
+}
+
+.bib-organization {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.bib-institution {
+    font-style: italic;
+    color: var(--text-secondary);
+}
+
+.bib-link {
+    color: var(--primary);
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.bib-link:hover {
+    text-decoration: underline;
+}
+
+.bib-note {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    display: block;
+    margin-top: 0.5rem;
+}
+</style>
+            </div>
+        </section>
+
+        <footer>
+            <p><strong>免责声明：</strong> 本仪表盘提供的经济和健康影响预测仅供教育和分析目的。所有数据来源于同行评审研究和政府机构。预测涉及假设，应作为情景而非预测来解读。</p>
+            <p style="margin-top: 1rem;">© 2025 加州能源转型分析 | 所有来源使用芝加哥引用格式</p>
+            <p style="margin-top: 0.5rem; font-size: 0.8rem;">仪表盘创建：2025年11月9日 | 最后更新：2025年12月</p>
+        </footer>
+    </div><!-- end container -->
+
+<script>
+        // Tab functionality
+        function showTab(event, tabId) {
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(s => s.classList.remove('active'));
+            
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // Initialize all charts
+        document.addEventListener('DOMContentLoaded', function() {
+            const isMobile = window.innerWidth < 768;
+            
+            // Set Chart.js defaults
+            Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft YaHei", "PingFang SC", sans-serif';
+            Chart.defaults.responsive = true;
+            Chart.defaults.maintainAspectRatio = false;
+
+            // Carbon Emissions Chart
+            new Chart(document.getElementById('emissionsChart'), {
+                type: 'line',
+                data: {
+                    labels: ['2025', '2030', '2035', '2040', '2045'],
+                    datasets: [{
+                        label: '纯可再生能源（无核能）',
+                        data: [100, 92, 78, 52, 18],
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4
+                    }, {
+                        label: '包含SMR（2045目标）',
+                        data: [100, 85, 58, 22, 0],
+                        borderColor: '#27ae60',
+                        backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { font: { size: isMobile ? 11 : 14 } }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: '年份', font: { size: 14, weight: 'bold' } }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: { display: true, text: '排放（2025年基准的%）', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Jobs Chart
+            new Chart(document.getElementById('jobsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['核能', '太阳能', '风能', '天然气'],
+                    datasets: [{
+                        label: '每兆瓦就业人数',
+                        data: [0.75, 3.5, 2.8, 0.25],
+                        backgroundColor: ['#9b59b6', '#f39c12', '#3498db', '#95a5a6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            title: { display: true, text: '能源行业', font: { size: 14, weight: 'bold' } }
+                        },
+                        y: {
+                            title: { display: true, text: '每兆瓦创造就业', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Salaries Chart
+            new Chart(document.getElementById('salariesChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['核工程师', '太阳能技术员', '风能技术员', '天然气电厂操作员'],
+                    datasets: [{
+                        label: '平均年薪',
+                        data: [125000, 55000, 58000, 72000],
+                        backgroundColor: ['#9b59b6', '#f39c12', '#3498db', '#95a5a6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            title: { display: true, text: '职位类别', font: { size: 14, weight: 'bold' } }
+                        },
+                        y: {
+                            title: { display: true, text: '年薪（美元）', font: { size: 14, weight: 'bold' } },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Retraining Chart
+            new Chart(document.getElementById('retrainingChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['技术培训 (35%)', '管理 (25%)', '安全监督 (20%)', '行政 (15%)', '其他 (5%)'],
+                    datasets: [{
+                        data: [35, 25, 20, 15, 5],
+                        backgroundColor: ['#9b59b6', '#3498db', '#f39c12', '#27ae60', '#95a5a6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { font: { size: isMobile ? 11 : 13 } }
+                        }
+                    }
+                }
+            });
+
+            // Lives Saved Chart
+            new Chart(document.getElementById('livesSavedChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['现状（化石燃料）', '核能转型'],
+                    datasets: [{
+                        label: '50年累计死亡',
+                        data: [11750, 450],
+                        backgroundColor: ['#e74c3c', '#27ae60']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '11,300人的生命可被挽救',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '累计死亡', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Healthcare Savings Chart
+            new Chart(document.getElementById('healthcareSavingsChart'), {
+                type: 'line',
+                data: {
+                    labels: ['第10年', '第20年', '第30年', '第40年', '第50年'],
+                    datasets: [{
+                        label: '累计节省',
+                        data: [26, 52, 78, 104, 132],
+                        borderColor: '#27ae60',
+                        backgroundColor: 'rgba(39, 174, 96, 0.2)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '总计：50年节省1320亿美元',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '十亿美元', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Social Cost Chart
+            new Chart(document.getElementById('socialCostChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['现状（化石燃料）', '核能转型'],
+                    datasets: [{
+                        label: '50年累计社会成本（十亿美元）',
+                        data: [89.5, 0],
+                        backgroundColor: ['#e74c3c', '#27ae60']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '避免895亿美元社会成本',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '十亿美元', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Social Cost Breakdown Chart
+            new Chart(document.getElementById('socialCostBreakdownChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['健康影响 (40%)', '生产力损失 (25%)', '财产损失 (15%)', '农业损失 (10%)', '气候损害 (10%)'],
+                    datasets: [{
+                        data: [40, 25, 15, 10, 10],
+                        backgroundColor: ['#e74c3c', '#f39c12', '#3498db', '#27ae60', '#9b59b6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '17.9亿美元/年社会成本细分',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    }
+                }
+            });
+
+            // AI Power Demand Chart
+            new Chart(document.getElementById('aiPowerDemandChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['2023', '2025', '2027', '2030'],
+                    datasets: [{
+                        label: '数据中心电力需求 (GW)',
+                        data: [35, 50, 75, 91],
+                        backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#f5576c']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '到2030年数据中心电力需求增长160%',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '吉瓦', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Tech Nuclear Deals Chart
+            new Chart(document.getElementById('techNuclearDealsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['谷歌 (Kairos)', '亚马逊 (X-energy)', '微软 (Constellation)', 'Meta (延寿)'],
+                    datasets: [{
+                        label: '承诺容量 (MW)',
+                        data: [500, 960, 835, 500],
+                        backgroundColor: ['#4285f4', '#ff9900', '#00a4ef', '#0866ff']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '科技公司核能协议 (2024-2025)',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '兆瓦', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // AI Energy Cost Comparison Chart
+            new Chart(document.getElementById('aiEnergyCostComparisonChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['核能（现场大规模）', '可再生能源+储能', '天然气联合循环+碳价'],
+                    datasets: [{
+                        label: '$/兆瓦时',
+                        data: [77, 87, 91],
+                        backgroundColor: ['#27ae60', '#f39c12', '#e74c3c']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '24/7可靠电力成本比较',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '$/兆瓦时', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // AI Nuclear Benefits Chart
+            new Chart(document.getElementById('aiNuclearBenefitsChart'), {
+                type: 'radar',
+                data: {
+                    labels: ['设计优化', '预测性维护', '安全监控', '许可加速', '运营效率', '成本降低'],
+                    datasets: [{
+                        label: 'AI影响潜力',
+                        data: [85, 90, 95, 75, 88, 80],
+                        backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                        borderColor: '#667eea',
+                        pointBackgroundColor: '#667eea'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // SMR Timeline Chart
+            new Chart(document.getElementById('smrTimelineChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['传统核电', '传统SMR', 'AI辅助SMR'],
+                    datasets: [{
+                        label: '部署时间线（月）',
+                        data: [108, 66, 48],
+                        backgroundColor: ['#e74c3c', '#f39c12', '#27ae60']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '核电站部署时间线比较',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: '月', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Worldwide Construction Costs Chart
+            new Chart(document.getElementById('worldwideConstructionCostsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['韩国', '中国', '日本', '法国（历史）', '英国（Hinkley C）', '美国（Vogtle）'],
+                    datasets: [{
+                        label: '建设成本 ($/kW)',
+                        data: [2200, 2230, 3900, 4500, 8500, 10000],
+                        backgroundColor: ['#003478', '#de2910', '#bc002d', '#002395', '#012169', '#3c3b6e'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '各国核电建设成本 ($/kW)',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '$/kW', font: { size: 14, weight: 'bold' } },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Worldwide LCOE Chart
+            new Chart(document.getElementById('worldwideLCOEChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['韩国', '中国', '法国（现有）', '日本', '英国', '美国'],
+                    datasets: [{
+                        label: 'LCOE ($/MWh)',
+                        data: [55, 72, 45, 85, 110, 137],
+                        backgroundColor: ['#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ff9800', '#f44336'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '各国核电LCOE ($/MWh)',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '$/MWh', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Total System Costs Chart
+            new Chart(document.getElementById('totalSystemCostsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['核能（韩国）', '核能（中国）', '核能（加州优化）', '风能+储能', '太阳能+储能', '核能（美国当前）'],
+                    datasets: [{
+                        label: '基础LCOE',
+                        data: [55, 72, 80, 45, 42, 137],
+                        backgroundColor: '#3498db'
+                    }, {
+                        label: '整合/储能成本',
+                        data: [0, 0, 0, 58, 79, 0],
+                        backgroundColor: '#e74c3c'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '总系统成本比较 ($/MWh)',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        x: { stacked: true },
+                        y: {
+                            stacked: true,
+                            title: { display: true, text: '$/MWh', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // ROI Comparison Chart
+            new Chart(document.getElementById('roiComparisonChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['中国模式', '韩国', '加州优化', '法国新建', '美国当前'],
+                    datasets: [{
+                        label: '寿命期ROI (%)',
+                        data: [640, 545, 470, 380, 275],
+                        backgroundColor: ['#2e7d32', '#388e3c', '#689f38', '#8bc34a', '#aed581'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '按建设成本情景的60年寿命期ROI',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'ROI (%)', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // California Opportunity Chart
+            new Chart(document.getElementById('californiaOpportunityChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['美国当前核能', '加州SMR目标', '太阳能+储能', '风能+储能', '国际最佳实践'],
+                    datasets: [{
+                        label: '总系统成本 ($/MWh)',
+                        data: [137, 85, 121, 103, 65],
+                        backgroundColor: ['#e74c3c', '#f39c12', '#ffc107', '#3498db', '#27ae60'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '加州能源成本比较 ($/MWh)',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '$/MWh', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // =============================================
+            // MORTALITY BUBBLE CHART TOOLTIP FUNCTIONALITY
+            // =============================================
+            const mortalityTooltip = document.getElementById('mortalityTooltip');
+            const mortalityBubbles = document.querySelectorAll('.mortality-bubble');
+            
+            mortalityBubbles.forEach(bubble => {
+                bubble.addEventListener('mouseenter', function(e) {
+                    const source = this.dataset.source;
+                    const deaths = this.dataset.deaths;
+                    const info = this.dataset.info;
+                    const comparison = this.dataset.comparison;
+                    
+                    mortalityTooltip.querySelector('.mortality-tooltip-title').textContent = source;
+                    mortalityTooltip.querySelector('.mortality-tooltip-value').textContent = deaths + ' 死亡/TWh';
+                    mortalityTooltip.querySelector('.mortality-tooltip-info').textContent = info;
+                    mortalityTooltip.querySelector('.mortality-tooltip-comparison').textContent = comparison;
+                    
+                    mortalityTooltip.style.display = 'block';
+                });
+                
+                bubble.addEventListener('mousemove', function(e) {
+                    const tooltipWidth = mortalityTooltip.offsetWidth;
+                    const tooltipHeight = mortalityTooltip.offsetHeight;
+                    const windowWidth = window.innerWidth;
+                    const windowHeight = window.innerHeight;
+                    
+                    let left = e.clientX + 15;
+                    let top = e.clientY + 15;
+                    
+                    // Prevent tooltip from going off right edge
+                    if (left + tooltipWidth > windowWidth - 20) {
+                        left = e.clientX - tooltipWidth - 15;
+                    }
+                    
+                    // Prevent tooltip from going off bottom edge
+                    if (top + tooltipHeight > windowHeight - 20) {
+                        top = e.clientY - tooltipHeight - 15;
+                    }
+                    
+                    mortalityTooltip.style.left = left + 'px';
+                    mortalityTooltip.style.top = top + 'px';
+                });
+                
+                bubble.addEventListener('mouseleave', function() {
+                    mortalityTooltip.style.display = 'none';
+                });
+            });
+
+        }); // End DOMContentLoaded
+    </script>
+</body>
+</html>

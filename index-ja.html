@@ -1,0 +1,2016 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カリフォルニア州原子力エネルギーの停滞 - 科学分析ダッシュボード</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --border-radius: 20px;
+            --shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif;
+            background: #ffffff;
+            color: var(--text-primary);
+            padding: 1rem;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* LANGUAGE SELECTOR */
+        .language-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .language-bar span {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .language-flags {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .lang-link {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.4rem 0.7rem;
+            background: rgba(255,255,255,0.15);
+            border-radius: 20px;
+            text-decoration: none;
+            color: white;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .lang-link:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        .lang-link.active {
+            background: white;
+            color: var(--primary);
+        }
+
+        .flag-icon {
+            font-size: 1.1rem;
+        }
+
+        header {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--text-primary);
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            margin-bottom: 1rem;
+        }
+
+        .disclaimer {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab-button:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .chart-container {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .chart-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+            margin-bottom: 1rem;
+        }
+
+        .chart-citation {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e0e0e0;
+            line-height: 1.4;
+        }
+
+        .chart-methodology {
+            font-size: 0.8rem;
+            color: #555;
+            font-style: italic;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            .chart-wrapper {
+                height: 300px;
+            }
+            .language-bar {
+                padding: 0.5rem;
+            }
+            .lang-link {
+                padding: 0.3rem 0.5rem;
+                font-size: 0.75rem;
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* =============================================
+           MORTALITY BUBBLE CHART STYLES
+           ============================================= */
+        .mortality-bubble-chart-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        
+        .mortality-bubble-chart {
+            position: relative;
+            width: 850px;
+            height: 580px;
+            min-width: 850px;
+        }
+        
+        .mortality-bubble {
+            position: absolute;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mortality-bubble:hover {
+            filter: brightness(1.15);
+            transform: scale(1.03);
+        }
+        
+        .mortality-bubble-coal {
+            width: 420px;
+            height: 420px;
+            background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+            top: 80px;
+            left: 20px;
+        }
+        
+        .mortality-bubble-oil {
+            width: 252px;
+            height: 252px;
+            background: linear-gradient(135deg, #c0392b 0%, #962d22 100%);
+            top: 40px;
+            left: 320px;
+        }
+        
+        .mortality-bubble-biomass {
+            width: 206px;
+            height: 206px;
+            background: linear-gradient(135deg, #d35400 0%, #a04000 100%);
+            top: 310px;
+            left: 380px;
+        }
+        
+        .mortality-bubble-gas {
+            width: 84px;
+            height: 84px;
+            background: linear-gradient(135deg, #f39c12 0%, #d68910 100%);
+            top: 450px;
+            left: 280px;
+        }
+        
+        .mortality-bubble-nuclear {
+            width: 9px;
+            height: 9px;
+            background: #27ae60;
+            top: 154px;
+            left: 150px;
+            box-shadow: 0 0 12px #27ae60, 0 0 24px #27ae60;
+            animation: mortality-pulse 2s infinite;
+        }
+        
+        .mortality-bubble-wind {
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, #ff1493 0%, #ff69b4 100%);
+            top: 173px;
+            left: 80px;
+        }
+        
+        .mortality-bubble-hydro {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            top: 447px;
+            left: 100px;
+        }
+        
+        .mortality-bubble-solar {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #f1c40f 0%, #d4ac0d 100%);
+            top: 365px;
+            left: 61px;
+        }
+        
+        @keyframes mortality-pulse {
+            0%, 100% { box-shadow: 0 0 12px #27ae60, 0 0 24px #27ae60; }
+            50% { box-shadow: 0 0 20px #27ae60, 0 0 40px #27ae60, 0 0 60px #27ae60; }
+        }
+        
+        .mortality-bubble-label {
+            position: absolute;
+            font-weight: 600;
+            pointer-events: none;
+            line-height: 1.3;
+        }
+        
+        .mortality-label-coal {
+            top: 250px;
+            left: 130px;
+            color: white;
+            font-size: 1.4rem;
+            text-align: center;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        
+        .mortality-label-oil {
+            top: 130px;
+            left: 390px;
+            color: white;
+            font-size: 1.1rem;
+            text-align: center;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        
+        .mortality-label-biomass {
+            top: 380px;
+            left: 425px;
+            color: white;
+            font-size: 1rem;
+            text-align: center;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        
+        .mortality-label-gas {
+            top: 475px;
+            left: 293px;
+            color: white;
+            font-size: 0.85rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        .mortality-label-small {
+            background: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-size: 0.85rem;
+        }
+        
+        .mortality-label-nuclear {
+            top: 110px;
+            left: 55px;
+            color: #27ae60;
+            font-weight: bold;
+            background: white;
+            border: 2px solid #27ae60;
+            font-size: 0.9rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+        }
+        
+        .mortality-label-wind { top: 192px; left: 55px; color: #ff1493; }
+        .mortality-label-hydro { top: 505px; left: 85px; color: #2980b9; }
+        .mortality-label-solar { top: 400px; left: 70px; color: #d4ac0d; }
+        
+        .mortality-tooltip {
+            position: fixed;
+            background: rgba(44, 62, 80, 0.95);
+            color: white;
+            padding: 1rem 1.25rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+            max-width: 280px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        
+        .mortality-tooltip-title {
+            font-weight: bold;
+            font-size: 1.15rem;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .mortality-tooltip-value {
+            color: #f39c12;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .mortality-tooltip-info {
+            font-size: 0.85rem;
+            line-height: 1.5;
+            opacity: 0.9;
+        }
+        
+        .mortality-tooltip-comparison {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            font-size: 0.85rem;
+            color: #2ecc71;
+            font-weight: 600;
+        }
+        
+        .mortality-insight-box {
+            background: linear-gradient(135deg, #27ae60, #1e8449);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .mortality-insight-box h3 { font-size: 1.6rem; margin-bottom: 1rem; }
+        
+        .mortality-insight-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .mortality-insight-stat { text-align: center; }
+        .mortality-insight-number { font-size: 2.5rem; font-weight: bold; }
+        .mortality-insight-label { font-size: 0.95rem; opacity: 0.9; }
+        
+        .mortality-legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.6rem;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .mortality-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.75rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            font-size: 0.8rem;
+        }
+        
+        .mortality-legend-color { width: 12px; height: 12px; border-radius: 50%; }
+        .mortality-legend-value { font-weight: bold; color: #2c3e50; }
+        
+        .mortality-methodology-box {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .mortality-methodology-box strong { color: #2c3e50; }
+        
+        .mortality-citation-box {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #ddd;
+            font-size: 0.8rem;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- LANGUAGE SELECTOR BAR -->
+        <div class="language-bar">
+            <span>🌐 言語選択:</span>
+            <div class="language-flags">
+                <a href="index.html" class="lang-link"><span class="flag-icon">🇺🇸</span> English</a>
+                <a href="index-se.html" class="lang-link"><span class="flag-icon">🇸🇪</span> Svenska</a>
+                <a href="index-fr.html" class="lang-link"><span class="flag-icon">🇫🇷</span> Français</a>
+                <a href="index-es.html" class="lang-link"><span class="flag-icon">🇪🇸</span> Español</a>
+                <a href="index-zh.html" class="lang-link"><span class="flag-icon">🇨🇳</span> 中文</a>
+                <a href="index-ko.html" class="lang-link"><span class="flag-icon">🇰🇷</span> 한국어</a>
+                <a href="index-ja.html" class="lang-link active"><span class="flag-icon">🇯🇵</span> 日本語</a>
+            </div>
+        </div>
+
+        <header>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                <!-- Nuclear Atom Icon -->
+                <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="32" cy="32" r="6" fill="#667eea"/>
+                    <ellipse cx="32" cy="32" rx="28" ry="12" stroke="#667eea" stroke-width="3" fill="none" transform="rotate(0 32 32)"/>
+                    <ellipse cx="32" cy="32" rx="28" ry="12" stroke="#764ba2" stroke-width="3" fill="none" transform="rotate(60 32 32)"/>
+                    <ellipse cx="32" cy="32" rx="28" ry="12" stroke="#43e97b" stroke-width="3" fill="none" transform="rotate(120 32 32)"/>
+                    <circle cx="32" cy="32" r="4" fill="#ffffff"/>
+                </svg>
+                
+                <h1 style="margin: 0;">カリフォルニア州原子力エネルギーの停滞</h1>
+            </div>
+            
+            <p class="subtitle">経済・健康影響分析</p>
+            
+            <!-- 2045 Carbon-Free Goal Card -->
+            <div style="display: flex; justify-content: center; margin-top: 1.5rem;">
+                <div class="stat-card" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); color: white; max-width: 400px;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">2045年カーボンフリー目標</div>
+                    <div class="stat-value" style="color: white;">達成可能</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">2030年代のSMR導入により</div>
+                </div>
+            </div>
+        </header>
+
+        <nav class="tabs" id="tabNav">
+            <button class="tab-button active" onclick="showTab(event, 'summary')">📋 概要</button>
+            <button class="tab-button" onclick="showTab(event, 'social-cost')">💵 社会的コスト</button>
+            <button class="tab-button" onclick="showTab(event, 'employment')">👷 雇用</button>
+            <button class="tab-button" onclick="showTab(event, 'health')">💚 健康・安全</button>
+            <button class="tab-button" onclick="showTab(event, 'ai')">🤖 人工知能</button>
+            <button class="tab-button" onclick="showTab(event, 'worldwide-costs')">🌍 世界のコスト</button>
+            <button class="tab-button" onclick="showTab(event, 'bibliography')">📚 参考文献</button>
+        </nav>
+
+        <!-- SUMMARY SECTION -->
+        <section id="summary" class="content-section active">
+            <!-- COLORFUL STAT CARDS AT TOP -->
+            <div class="stats-grid" style="margin-bottom: 2rem;">
+                <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">原子力モラトリアム</div>
+                    <div class="stat-value" style="color: white;">1976年</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">49年間新規建設を阻止</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">未実現の投資</div>
+                    <div class="stat-value" style="color: white;">120億ドル</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">失われた資本（2020-2040年）</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">潜在的年間経済効果</div>
+                    <div class="stat-value" style="color: white;">+41.7億ドル</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">原子力を含むエネルギー転換により</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">救われる命</div>
+                    <div class="stat-value" style="color: white;">11,300人</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">50年間（大気汚染の減少による）</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">SMR LCOE目標（2045年）</div>
+                    <div class="stat-value" style="color: white;">$50-66</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">/MWh（学習曲線を考慮）</div>
+                </div>
+            </div>
+
+            <!-- CARBON EMISSIONS CHART -->
+            <div class="chart-container">
+                <h3 class="chart-title">二酸化炭素排出削減シナリオ</h3>
+                <div class="chart-wrapper">
+                    <canvas id="emissionsChart"></canvas>
+                </div>
+                <div class="chart-methodology">
+                    <strong>方法論:</strong> 2045年カーボンニュートラル義務達成に向けたカリフォルニア州の排出量予測。SMR含有シナリオでは：2032-2033年に初のSMRユニット稼働、2045年までに20-22GW（発電量の約32%）まで段階的拡大、2040年までに天然ガス廃止を想定。再生可能エネルギーのみのシナリオでは、間欠性のため送電網の信頼性確保に天然ガスピーカー発電所の延長が必要となり、完全脱炭素化が2045年まで遅延。排出量はEIA炭素強度係数を使用：天然ガス（0.41 kg CO₂/kWh）、原子力・再エネはゼロ。
+                </div>
+                <div class="chart-citation">
+                    <strong>出典:</strong> 米国エネルギー情報局「カリフォルニア州エネルギープロファイル」2025年11月アクセス、https://www.eia.gov/state/?sid=CA；米国エネルギー省「先進原子力への道筋」（2025年）- 10-20基導入後のSMR夜間コスト$3,600/kWを予測；Britain Remade「原子力建設コスト分析」（2024年）- 韓国$3,571/kW、中国$4,174/kW；Wang, Qiang他「原子力はコスト効果的なエネルギー転換オプションか？」<em>Environmental Research</em> 223 (2023): 115290；Liu, Shangwei他「原子力発電所コスト抑制：中国、韓国、米国における学習からの証拠」<em>Nature</em>（2025年）。
+                </div>
+            </div>
+
+            <!-- MORATORIUM & POLICY IMPLICATIONS -->
+            <div class="chart-container">
+                <h2 class="chart-title">カリフォルニア州の原子力モラトリアムと政策的含意</h2>
+                
+                <div style="background: #f8f9fa; padding: 2rem; border-radius: 10px; margin-bottom: 2rem;">
+                    <p style="margin-bottom: 1rem; line-height: 1.8;">
+                        1976年以来、カリフォルニア州は新規原子力発電所建設に対するモラトリアムを維持しています。これは、激しい公開討論と環境への懸念を受けてウォーレン・アルキスト法の改正により制定されました。このモラトリアムは、カリフォルニア・エネルギー委員会が、連邦政府が核燃料再処理の実証済み技術と高レベル放射性廃棄物の恒久的処分解決策の両方を確立したと判断するまで、新規原子力施設の許可を認めないことを要求しています。約半世紀が経過しても、どちらの条件も満たされておらず、カリフォルニア州が2045年までにカーボンニュートラルを達成するという野心的な気候目標にもかかわらず、事実上すべての新規原子力開発が阻止されています。
+                    </p>
+                    
+                    <p style="margin-bottom: 1rem; line-height: 1.8;">
+                        本研究は、カリフォルニア州が上院法案100に基づく2045年カーボンフリー義務を達成するために、小型モジュール炉（SMR）を導入する際の経済的影響を分析します。カリフォルニア州最後の稼働中の原子力発電所であるディアブロキャニオンが2030年まで延長される中、政策立案者は重要な決断の時を迎えています。ブレークスルー研究所の最近の分析によると、AIデータセンター向けの信頼性の高いカーボンフリー電力を求める大手テクノロジー企業が増加する中、原子力を制限する法律により、カリフォルニア州は2020年から2040年の間に<strong>最大120億ドルの未実現資本投資</strong>を失っていると推定されています。SMRは変革的な解決策を提供します：査読済み研究により、韓国は標準化設計により<strong>$3,571/kW</strong>の原子力建設コストを達成し、中国は連続生産により<strong>$4,174/kW</strong>を達成していることが実証されています。米国エネルギー省は、アメリカのSMRが10-20基導入後に<strong>$3,600/kW</strong>に到達し、均等化コストは$50-66/MWhとなり、安定化コストを含めると太陽光・風力と競争力があると予測しています。カリフォルニア州は2032-2033年までに初の300MW SMRユニットを導入し、2045年までに20-22GWに拡大して発電量の約32%を供給できます。
+                    </p>
+                    
+                    <p style="margin-bottom: 1rem; line-height: 1.8;">
+                        経済分析により、SMRを含むエネルギー転換がカリフォルニア州の3.9兆ドル経済に大きな利益をもたらす可能性があることが示されています。Apergis & Payne（2010年）およびWolde-Rufael & Menyah（2010年）による査読済み研究は、先進国全体で原子力エネルギー消費とGDP成長の間に正の相関関係があることを文書化しています。カリフォルニア州では、2045年までに20-22GWのSMR容量を導入することで、平均年収<strong>12万5,000ドル</strong>（太陽光・風力技術者の5万5,000〜5万8,000ドルに対して）の原子力エンジニアの高給職が創出され、推定<strong>年間41.7億ドルの経済効果</strong>が生まれます。SMRの安定した調整可能なベースロード電力（設備利用率92%、太陽光の25%に対して）は、高価なエネルギー貯蔵インフラの必要性を大幅に削減します。カリフォルニア独立系統運用機関のデータによると、系統規模の蓄電池貯蔵コストは$18.92/kW-月です。さらに、The Lancetに掲載された査読済み研究によると、カリフォルニア州の天然ガス発電（現在、州内供給の35-45%）をSMRに置き換えることで、大気汚染による死亡を排除し、<strong>50年間で約11,300人の命を救う</strong>ことができます。これは、天然ガスがTWhあたり2.8人の死亡を引き起こすのに対し、原子力はTWhあたり0.07人の死亡であるためです。
+                    </p>
+                    
+                    <p style="margin-bottom: 1rem; line-height: 1.8;">
+                        原子力モラトリアムの撤廃または修正を検討しているカリフォルニア州の政策立案者に対し、本分析は関連するトレードオフに関するデータ駆動型の洞察を提供します。同州は厳しい選択に直面しています：現状を維持し、大規模な貯蔵設備と信頼性のための天然ガスへの継続的依存を必要とする間欠的な再生可能エネルギーに大きく依存するか、または<strong>小型モジュール炉（SMR）</strong>などの先進原子力技術を含む「あらゆる選択肢を活用する」クリーンエネルギー戦略を採用するかです。SMRは従来の大型原子炉に比べて大きな利点を提供します：工場製造により建設期間が9年から4-5.5年に短縮され、初期導入後の夜間コストは$3,600-4,200/kW（最近の米国大型原子炉の$5,833/kWに比べて）と予測され、モジュラースケーリングにより州の2045年カーボンフリー義務を満たすために段階的に容量を導入できます。イリノイ州を含むいくつかの州が最近、原子力制限へのSMR免除を設けており、カリフォルニア・エネルギー委員会も2024年8月に議会に同様の免除を検討するよう勧告しました。実証済みの国際経験—韓国は$3,571/kWの建設コストを達成し、中国は連続生産により$4,174/kWを達成—および原子力が比類のない設備利用率（92%対太陽光の25%）を提供することから、<strong>カリフォルニア州の2045年カーボンフリー目標と経済競争力は、エネルギー転換の礎石としてSMR導入を受け入れることを必要とする可能性があります</strong>。
+                    </p>
+                </div>
+
+                <div class="chart-citation" style="margin-top: 2rem;">
+                    <strong>出典:</strong> Breakthrough Institute「カリフォルニア州の原子力エネルギー政策は120億ドルの未実現資本投資をもたらす」（2022年）；米国エネルギー省「先進原子力への道筋」（2025年）；Britain Remade「原子力建設コスト分析：2000年以降のプロジェクトの国際比較」（2024年）- 韓国$3,571/kW、中国$4,174/kW建設コスト；Liu, Shangwei, Daniel M. Kammen他「原子力発電所コスト抑制：中国、韓国、米国における学習からの証拠」<em>Nature</em>（2025年）；Lazard「エネルギー均等化コスト+ バージョン18.0」2025年6月；カリフォルニア・エネルギー委員会、SMR免除勧告（2024年8月）；Markandya, Anil, Paul Wilkinson「発電と健康」<em>The Lancet</em> 370, no. 9591 (2007): 979-990；Apergis, N., J. Payne「原子力エネルギー消費と経済成長のパネル研究」<em>Energy Economics</em> 32, no. 3 (2010): 545-549；Wolde-Rufael, Y., Kojo Menyah「9つの先進国における原子力エネルギー消費と経済成長」<em>Energy Economics</em> 32, no. 3 (2010): 582-593；Davis, Lucas W., Catherine Hausman「原子力発電所閉鎖の市場影響」<em>American Economic Journal: Applied Economics</em> 8, no. 2 (2016): 92-122；カリフォルニア独立系統運用機関「容量認定方法論とネットCONE値」（2025年）。
+                </div>
+            </div>
+        </section>
+
+        <!-- SOCIAL COST SECTION -->
+<section id="social-cost" class="content-section">
+    <div class="chart-container">
+        <h2 class="chart-title">炭素の社会的コストと現状維持の影響</h2>
+        
+        <div style="background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%); padding: 2rem; border-radius: 10px; margin-bottom: 2rem; border-left: 5px solid #e74c3c;">
+            <h3 style="color: #c0392b; margin-bottom: 1rem;">⚠️ 化石燃料依存維持の隠れたコスト</h3>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                <strong>炭素の社会的コスト</strong>は、1トンのCO₂を追加で大気中に排出することによって引き起こされる経済的損害の総額を表します。スタンフォード大学の経済学者マーシャル・バークとローレンス・グルダーによると、この指標は「気候に何が起こるか、そしてこれらの変化が農業生産性の変化、海面上昇による被害、人間の健康と労働生産性の低下を含む経済的成果にどのように影響するか」を捉えています。2021年時点で、炭素の社会的コストは<strong>1トンあたり51ドル</strong>と推定されており、つまりCO₂排出1トンごとに社会に51ドルの損害を与えています—これらのコストは電気料金には反映されていませんが、医療費、生産性低下、財産被害、失われた命を通じて支払われています。
+            </p>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                カリフォルニア州が州内発電の35-45%を天然ガスに依存し続けることは、社会に膨大な隠れたコストを課しています。年間発電量約280TWhで、カリフォルニア州の天然ガス発電所は年間約3,500万トンのCO₂を排出しています。1トンあたり51ドルで計算すると、<strong>これは年間17.9億ドルの社会的コスト</strong>を表しています—これらのコストは大気質の悪化、医療負担の増加、熱波時の労働者の生産性低下、干ばつや山火事を含む気候変動影響の加速を通じて社会が負担しています。これらの外部性は電気料金には現れませんが、保険料、税金による災害救済、そして人々の苦しみを通じて支払われています。
+            </p>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                研究によると、これらのコストは脆弱な層に不均衡にのしかかっています。低所得コミュニティは、頻発する熱波時にエアコンなどの保護技術を購入する余裕がなく、質の高い医療へのアクセスが限られ、化石燃料燃焼による大気汚染への曝露がより大きくなっています。スタンフォード大学の研究は、「気温上昇は健康状態の悪化につながる」—熱中症、心血管機能障害、死亡率の上昇を含む—こと、そして「低所得コミュニティは気候変動によってより大きな被害を受けることが多い」ことを実証しています。研究はまた、気温上昇に伴い労働生産性が急激に低下することを示しています。これが経済全体に影響を与えると、「経済全体への影響はかなり大きくなる可能性があり」、すべての労働者、特に屋外および工業労働者のGDP成長と賃金の可能性を減少させます。
+            </p>
+        </div>
+    </div>
+
+    <div class="stats-grid" style="margin-bottom: 2rem;">
+        <div class="stat-card" style="background: linear-gradient(135deg, #ffe5e5 0%, #ffcccc 100%);">
+            <div class="stat-label">カリフォルニア州ガス発電所の年間社会的コスト</div>
+            <div class="stat-value" style="color: #c0392b;">17.9億ドル</div>
+            <div class="stat-description">CO₂1トンあたり51ドルでの隠れたコスト</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #ffe5e5 0%, #ffcccc 100%);">
+            <div class="stat-label">化石燃料による年間死亡者数</div>
+            <div class="stat-value" style="color: #c0392b;">235人以上</div>
+            <div class="stat-description">カリフォルニア州における大気汚染死亡</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #e5f5e5 0%, #ccffcc 100%);">
+            <div class="stat-label">原子力の社会的コスト</div>
+            <div class="stat-value" style="color: #27ae60;">ほぼゼロ</div>
+            <div class="stat-description">CO₂排出なし、死亡率最小</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #e5f5e5 0%, #ccffcc 100%);">
+            <div class="stat-label">50年間の回避される社会的コスト</div>
+            <div class="stat-value" style="color: #27ae60;">895億ドル</div>
+            <div class="stat-description">原子力への転換により</div>
+        </div>
+    </div>
+
+    <div class="dashboard">
+        <div class="chart-container">
+            <h3 class="chart-title">累積社会的コスト：化石燃料vs原子力（50年間）</h3>
+            <div class="chart-wrapper">
+                <canvas id="socialCostChart"></canvas>
+            </div>
+            <div class="chart-methodology">
+                <strong>方法論:</strong> 社会的コストはCO₂1トンあたり51ドルの推定値を使用して計算。現状維持は35%の天然ガス依存継続を想定（現在の発電レベルで50年間に9,800万トンのCO₂）。原子力シナリオは化石燃料発電をゼロカーボンの原子力エネルギーに置き換え。天然ガスからのCO₂排出：約0.35トンCO₂/MWh。医療費はMarkandya & Wilkinsonの死亡率から算出。気候変動による財産被害、農業損失、生態系劣化は含まれていないため、実際のコストはさらに高くなります。
+            </div>
+            <div class="chart-citation">
+                <strong>出典:</strong> Burke, Marshall, Lawrence Goulder「教授らが炭素の社会的コストを説明」Stanford News, 2021年6月, https://news.stanford.edu/stories/2021/06/professors-explain-social-cost-carbon；バイデン政権炭素社会的コスト推定（51ドル/トン、2025年）；米国EPA天然ガス発電の排出係数；Markandya, Anil, Paul Wilkinson「発電と健康」<em>The Lancet</em> 370, no. 9591 (2007): 979-990。
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h3 class="chart-title">影響カテゴリー別社会的コスト内訳（年間）</h3>
+            <div class="chart-wrapper">
+                <canvas id="socialCostBreakdownChart"></canvas>
+            </div>
+            <div class="chart-methodology">
+                <strong>方法論:</strong> 年間社会的コストをスタンフォード大学の分析とEPAガイドラインに基づき影響カテゴリーに配分。健康影響には死亡（EPA統計的生命価値1,170万ドル）、罹患、医療費を含む。生産性損失は熱曝露による労働産出への影響。財産被害は海面上昇と異常気象から。農業損失は降水量と気温の変化から。気候被害には長期的な温暖化影響、生態系の破壊、不可逆的変化を含む。
+            </div>
+            <div class="chart-citation">
+                <strong>出典:</strong> Burke, Marshall, Lawrence Goulder, Stanford News (2021)；米国環境保護庁「経済分析作成ガイドライン」（2024年）；気候変動に関する政府間パネル（IPCC）気候被害に関する評価報告書。
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <h3 class="chart-title">🌟 原子力の優位性：ゼロカーボン、最小限の社会的コスト</h3>
+        
+        <div style="background: linear-gradient(135deg, #e8f8f5 0%, #d5f4e6 100%); padding: 2rem; border-radius: 10px; margin-top: 2rem; border-left: 5px solid #27ae60;">
+            <h3 style="color: #27ae60; margin-bottom: 1rem;">✓ 原子力エネルギーが社会的コストを排除する理由</h3>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                <strong>ゼロ炭素排出:</strong> 原子力発電所は運転中にCO₂を排出せず、社会的コストの最大の要素を完全に排除します。45%原子力への50年間の移行により、カリフォルニア州は天然ガス発電所から排出されるはずだった約9,800万トンのCO₂の排出を回避できます—現在の社会的コスト推定で<strong>500億ドルの気候被害を回避</strong>することになります。この利益は回避された排出が不可逆的な温暖化、海面上昇、生態系崩壊を防ぐため、時間とともに複利で増加します。
+            </p>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                <strong>卓越した安全記録:</strong> 原子力エネルギーは、TWhあたりわずか0.07人の死亡という、主要なエネルギー源の中で最も低い死亡率を持っています—太陽光パネル（最大0.44人/TWh、設置事故からの0.02人の死亡を除いても、サプライチェーンを含めると同等）よりも低く、天然ガス（2.8人/TWh）の40倍安全です。この死亡率には、チェルノブイリ、福島、スリーマイル島を含むすべての歴史的原子力事故が含まれています。天然ガスの代わりに45%原子力で稼働するカリフォルニア州は、<strong>毎年約226人の命を救い</strong>、50年間で11,300人の命を救うことになります。EPAの統計的生命価値（1人あたり1,170万ドル）で計算すると、これは1,327億ドルの価値を表します—救われた命の医療費削減、苦しみの軽減、維持される生産性を含めないでも。
+            </p>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                <strong>安定した信頼性の高い電力が経済的混乱を防止:</strong> 大規模なバッテリー貯蔵と信頼性のための継続的なガス「ピーカー」発電所を必要とする間欠的な再生可能エネルギーとは異なり、原子力は92%の設備利用率で一定のベースロード電力を提供します。これにより、送電網の不安定性、計画停電、電力不足による経済的混乱という隠れた社会的コストが排除されます。2020年の熱波時のカリフォルニア州の計画停電は、再生可能エネルギーの間欠性が最も必要とされるとき—需要がピークに達し、日没後に太陽光発電が終了するまさにそのとき—にいかに失敗するかを示しました。スタンフォード大学の経済学者ローレンス・グルダーは、炭素価格設定は「生産と消費の決定」を考慮しなければならないと指摘しており、安定した原子力は月額$18.92/kWの貯蔵コストや継続的な化石燃料バックアップを必要とせずに両方を可能にします。
+            </p>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                <strong>環境正義の利益:</strong> 原子力エネルギーは、化石燃料汚染の矢面に立つ低所得者層や不利なコミュニティに特に恩恵をもたらします。スタンフォード大学の経済学者マーシャル・バークは、「低所得コミュニティは気候変動によってより大きな被害を受けることが多い」こと、そして「保護技術を簡単に購入できない可能性がある」ことを強調しています。化石燃料からの大気汚染を排除し、気候変動の加速を回避することで、原子力エネルギーは環境正義コミュニティに不均衡な利益を提供します。さらに、原子力発電所は高給の組合職（原子力エンジニアの平均12万5,000ドル対再生可能エネルギー技術者の5万5,000〜5万8,000ドル）を創出し、これらの施設を受け入れるコミュニティに経済的上昇の機会を提供します。
+            </p>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                <strong>長期的な持続可能性と資源効率:</strong> 原子力発電所は60-80年間稼働し、土地使用は最小限（GWあたり1平方マイル対太陽光の75平方マイル）、資源採取も最小限、廃棄物発生も最小限です。指先大のウラン燃料ペレット1個は、石炭1トン、天然ガス17,000立方フィート、または石油1,780ポンドと同等のエネルギーを含んでいます。米国史上生産されたすべての原子力廃棄物は、深さ10ヤードのサッカー場1面に収まります—そして使用済み燃料の96%はリサイクル可能です。フランスは、原子力発電による電力が手頃（カリフォルニア州の0.28ドル/kWhに対して0.18ドル/kWh）かつクリーン（カリフォルニア州の200g CO₂/kWhに対して炭素強度60g CO₂/kWh）であることを実証しており、このモデルが大規模に機能することを証明しています。
+            </p>
+        </div>
+    </div>
+
+    <div class="stats-grid" style="margin-top: 2rem;">
+        <div class="stat-card" style="background: linear-gradient(135deg, #e8f8f5 0%, #d5f4e6 100%);">
+            <div class="stat-label">カーボンフリー発電</div>
+            <div class="stat-value" style="color: #27ae60;">100%</div>
+            <div class="stat-description">原子力からのCO₂排出なし</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #e8f8f5 0%, #d5f4e6 100%);">
+            <div class="stat-label">安全記録</div>
+            <div class="stat-value" style="color: #27ae60;">0.07</div>
+            <div class="stat-description">死亡/TWh（チェルノブイリ含む）</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #e8f8f5 0%, #d5f4e6 100%);">
+            <div class="stat-label">設備利用率</div>
+            <div class="stat-value" style="color: #27ae60;">92%</div>
+            <div class="stat-description">太陽光25%、風力35%に対して</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #e8f8f5 0%, #d5f4e6 100%);">
+            <div class="stat-label">土地利用効率</div>
+            <div class="stat-value" style="color: #27ae60;">75倍</div>
+            <div class="stat-description">GWあたり太陽光より少ない土地</div>
+        </div>
+    </div>
+
+    <div class="chart-citation" style="margin-top: 2rem; font-size: 0.85rem;">
+        <strong>主要出典:</strong> Burke, Marshall, Lawrence Goulder「教授らが炭素の社会的コストを説明」Stanford News, 2021年6月。https://news.stanford.edu/stories/2021/06/professors-explain-social-cost-carbon。バークはスタンフォード大学地球システム科学准教授、グルダーは西原修三環境・資源経済学教授。記事では社会的コストの方法論、計算方法、政策適用、環境正義への影響について説明。1トンあたり51ドルの推定値が全体で参照されています。
+    </div>
+</section>
+
+        <!-- EMPLOYMENT SECTION -->
+        <section id="employment" class="content-section">
+            <div class="dashboard">
+                <div class="chart-container">
+                    <h3 class="chart-title">エネルギーセクター別雇用創出（MW当たり雇用数）</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="jobsChart"></canvas>
+                    </div>
+                    <div class="chart-methodology">
+                        <strong>方法論:</strong> 雇用推定値は設置容量MW当たりで計算され、建設フェーズ（一時的）と運用フェーズ（常時）の雇用を含む。原子力の数値には建設、運用、保守、燃料サイクルの雇用を含む。再生可能エネルギーの推定値には製造、設置、保守を含む。
+                    </div>
+                    <div class="chart-citation">
+                        <strong>出典:</strong> Kim, Hana, E. Jeon「韓国のエネルギー転換政策に起因する原子力エネルギー産業の構造変化と経済効果」<em>Energies</em> 13, no. 7 (2020): 1806；カリフォルニア州知事室「トランプが汚れた化石燃料を受け入れる中、カリフォルニアは主要なクリーンエネルギーのマイルストーンを達成」2025年10月9日、https://www.energy.ca.gov/news/2025-10/。
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3 class="chart-title">セクター別平均年収（米ドル）</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="salariesChart"></canvas>
+                    </div>
+                    <div class="chart-methodology">
+                        <strong>方法論:</strong> 給与推定値は各エネルギーセクターのエンジニア、技術者、オペレーターを含む熟練技術職の中央値賃金を表す。値はCPIを使用して2025年ドルに調整。
+                    </div>
+                    <div class="chart-citation">
+                        <strong>出典:</strong> 米国労働統計局「職業別雇用・賃金統計」2024年；カリフォルニア・エネルギー委員会の総システム発電報告書2023-2024年からの雇用データ。
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3 class="chart-title">労働者再訓練プログラム配分（%）</h3>
+                <div class="chart-wrapper">
+                    <canvas id="retrainingChart"></canvas>
+                </div>
+                <div class="chart-methodology">
+                    <strong>方法論:</strong> 配分割合は化石燃料セクターとクリーンエネルギーセクター間のスキル移転可能性の投入産出分析に基づく。技術訓練カテゴリーには原子力、太陽光設置、風力技術者プログラムを含む。管理には プロジェクト管理と安全監督の役割を含む。
+                </div>
+                <div class="chart-citation">
+                    <strong>出典:</strong> Kim, Hana, E. Jeon「韓国のエネルギー転換政策に起因する原子力エネルギー産業の構造変化と経済効果」<em>Energies</em> 13, no. 7 (2020): 1806；カリフォルニア州労働力移行プログラム分析。
+                </div>
+            </div>
+        </section>
+
+        <!-- HEALTH & SAFETY SECTION -->
+        <section id="health" class="content-section">
+            <!-- NEW BUBBLE CHART FOR MORTALITY -->
+            <div class="chart-container">
+                <h3 class="chart-title">エネルギー源別死亡率（TWh当たり死亡数）</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem; text-align: center;">
+                    円の面積は死亡率に比例。バブルにマウスを合わせると詳細情報が表示されます。
+                </p>
+                
+                <div class="mortality-bubble-chart-wrapper">
+                    <div class="mortality-bubble-chart">
+                        <!-- Fossil Fuels -->
+                        <div class="mortality-bubble mortality-bubble-coal" 
+                             data-source="石炭" 
+                             data-deaths="100" 
+                             data-info="粒子状物質、SO₂、NOₓによる大気汚染；採掘事故；じん肺"
+                             data-comparison="原子力は石炭より2,500倍安全"></div>
+                        
+                        <div class="mortality-bubble mortality-bubble-oil" 
+                             data-source="石油" 
+                             data-deaths="36" 
+                             data-info="燃焼排出、精製所事故、輸送流出、採掘危険"
+                             data-comparison="原子力は石油より900倍安全"></div>
+                        
+                        <div class="mortality-bubble mortality-bubble-biomass" 
+                             data-source="バイオマス" 
+                             data-deaths="24" 
+                             data-info="木材・木炭燃焼による室内大気汚染、収穫・加工事故"
+                             data-comparison="原子力はバイオマスより600倍安全"></div>
+                        
+                        <div class="mortality-bubble mortality-bubble-gas" 
+                             data-source="天然ガス" 
+                             data-deaths="4" 
+                             data-info="最もクリーンな化石燃料だがNOₓとメタンを排出；パイプラインと爆発リスク"
+                             data-comparison="原子力は天然ガスより100倍安全"></div>
+                        
+                        <!-- Clean energy at clock positions around coal -->
+                        <div class="mortality-bubble mortality-bubble-nuclear" 
+                             data-source="原子力" 
+                             data-deaths="0.04" 
+                             data-info="チェルノブイリ、福島、スリーマイル島からのすべての死亡＋職業上の死亡＋理論的放射線曝露（線形閾値なしモデル）を含む"
+                             data-comparison="発電量単位あたり最も安全なエネルギー源"></div>
+                        
+                        <div class="mortality-bubble mortality-bubble-wind" 
+                             data-source="風力" 
+                             data-deaths="0.15" 
+                             data-info="設置・保守事故、ヘリコプター衝突、洋上溺死"
+                             data-comparison="原子力は風力より4倍安全"></div>
+                        
+                        <div class="mortality-bubble mortality-bubble-hydro" 
+                             data-source="水力" 
+                             data-deaths="1.4" 
+                             data-info="1975年の板橋ダム決壊（17万1,000人死亡）が率を支配；それ以外は0.04/TWhで非常に安全"
+                             data-comparison="原子力は水力より35倍安全（ダム決壊含む）"></div>
+                        
+                        <div class="mortality-bubble mortality-bubble-solar" 
+                             data-source="太陽光" 
+                             data-deaths="0.44" 
+                             data-info="製造（シリコン加工）、屋根設置での落下、サプライチェーン事故"
+                             data-comparison="原子力は太陽光より11倍安全"></div>
+                        
+                        <!-- Static Labels for large bubbles -->
+                        <div class="mortality-bubble-label mortality-label-coal">石炭<br>100死亡/TWh</div>
+                        <div class="mortality-bubble-label mortality-label-oil">石油<br>36</div>
+                        <div class="mortality-bubble-label mortality-label-biomass">バイオマス<br>24</div>
+                        <div class="mortality-bubble-label mortality-label-gas">ガス 4</div>
+                        
+                        <!-- Static Labels for small bubbles -->
+                        <div class="mortality-bubble-label mortality-label-nuclear">原子力 0.04 ⭐</div>
+                        <div class="mortality-bubble-label mortality-label-small mortality-label-wind">風力 0.15</div>
+                        <div class="mortality-bubble-label mortality-label-small mortality-label-hydro">水力 1.4</div>
+                        <div class="mortality-bubble-label mortality-label-small mortality-label-solar">太陽光 0.44</div>
+                    </div>
+                </div>
+                
+                <div class="mortality-insight-box">
+                    <h3>⚛️ 原子力：最も安全なエネルギー源</h3>
+                    <div class="mortality-insight-stats">
+                        <div class="mortality-insight-stat">
+                            <div class="mortality-insight-number">2,500倍</div>
+                            <div class="mortality-insight-label">石炭より安全</div>
+                        </div>
+                        <div class="mortality-insight-stat">
+                            <div class="mortality-insight-number">900倍</div>
+                            <div class="mortality-insight-label">石油より安全</div>
+                        </div>
+                        <div class="mortality-insight-stat">
+                            <div class="mortality-insight-number">11倍</div>
+                            <div class="mortality-insight-label">太陽光より安全</div>
+                        </div>
+                        <div class="mortality-insight-stat">
+                            <div class="mortality-insight-number">4倍</div>
+                            <div class="mortality-insight-label">風力より安全</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mortality-legend">
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #2c3e50;"></div>
+                        <span>石炭: <span class="mortality-legend-value">100</span></span>
+                    </div>
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #c0392b;"></div>
+                        <span>石油: <span class="mortality-legend-value">36</span></span>
+                    </div>
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #d35400;"></div>
+                        <span>バイオマス: <span class="mortality-legend-value">24</span></span>
+                    </div>
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #f39c12;"></div>
+                        <span>ガス: <span class="mortality-legend-value">4</span></span>
+                    </div>
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #3498db;"></div>
+                        <span>水力: <span class="mortality-legend-value">1.4</span></span>
+                    </div>
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #f1c40f;"></div>
+                        <span>太陽光: <span class="mortality-legend-value">0.44</span></span>
+                    </div>
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #ff1493;"></div>
+                        <span>風力: <span class="mortality-legend-value">0.15</span></span>
+                    </div>
+                    <div class="mortality-legend-item" style="background: linear-gradient(135deg, #27ae60, #1e8449); color: white;">
+                        <div class="mortality-legend-color" style="background: #27ae60; box-shadow: 0 0 8px #27ae60;"></div>
+                        <span>原子力: <span class="mortality-legend-value" style="color: white;">0.04</span> ⭐</span>
+                    </div>
+                </div>
+                
+                <div class="mortality-methodology-box">
+                    <strong>方法論:</strong> 円の面積は死亡率に比例（面積 = π × r²、死亡/TWhにスケーリング）。死亡には燃料サイクル全体にわたる直接事故（職業上および公衆）と大気汚染による死亡の両方を含む。原子力の率（0.04死亡/TWh）には、チェルノブイリ、福島、スリーマイル島を含むすべての歴史的事故、および保守的な線形閾値なしモデルを使用した職業上の死亡と理論的放射線曝露を含む。太陽光の死亡（0.44/TWh）には製造、サプライチェーン、設置事故を含む。化石燃料の死亡は大気汚染（粒子状物質、NOₓ、SO₂）によって支配されている。
+                    
+                    <div class="mortality-citation-box">
+                        <strong>出典:</strong> 世界保健機関（WHO）、エネルギー源別世界死亡率。データは以下から編集：Markandya, A., Wilkinson, P.「発電と健康」<em>The Lancet</em> 370 (2007): 979-990；Sovacool, B.他「安全性と持続可能性のバランス」<em>Energy Research & Social Science</em> (2016)；Our World in Data「最も安全でクリーンなエネルギー源は何か？」（2022年更新）。ResearchGate編集で報告されたWHO数値：「生産される10億kWhあたりの各エネルギー源の死亡率」
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard">
+                <div class="chart-container">
+                    <h3 class="chart-title">救われる命：原子力転換vs現状維持（累積50年間）</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="livesSavedChart"></canvas>
+                    </div>
+                    <div class="chart-methodology">
+                        <strong>方法論:</strong> 救われる命は、現在の化石燃料ミックス（主に天然ガス）からの大気汚染死亡と原子力含有シナリオを比較して計算。カリフォルニア州の年間発電量は280TWhを想定。現状維持：280TWh × 30%天然ガス × 2.8死亡/TWh = 年間235人の死亡。原子力シナリオ：280TWh × 45%原子力 × 0.07死亡/TWh = 年間9人の死亡。差：年間226人の命が救われる × 50年 = 11,300人の命（保守的な推定で11,000人に丸め）。
+                    </div>
+                    <div class="chart-citation">
+                        <strong>出典:</strong> Markandya, Anil, Paul Wilkinson「発電と健康」<em>The Lancet</em> 370, no. 9591 (2007): 979-990；カリフォルニア・エネルギー委員会「2024年総システム発電」；カリフォルニア州固有の発電予測に適用された査読済み死亡率に基づく計算。
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3 class="chart-title">50年間の医療費削減（10億米ドル）</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="healthcareSavingsChart"></canvas>
+                    </div>
+                    <div class="chart-methodology">
+                        <strong>方法論:</strong> 医療費はEPA統計的生命価値（2025年ドルで1,170万ドル/人）と予防された疾病の直接医療費を使用して計算。がん治療費は1件あたり平均15万ドル。呼吸器疾患費は1件あたり平均8,000ドル。心血管治療費は1エピソードあたり平均4万5,000ドル。すべての値は年率3%で割引され、インフレ調整済み。
+                    </div>
+                    <div class="chart-citation">
+                        <strong>出典:</strong> Markandya, Anil, Paul Wilkinson「発電と健康」<em>The Lancet</em> 370, no. 9591 (2007)；米国環境保護庁「経済分析作成ガイドライン」2024年；大気汚染健康影響に関するCDCおよび医学文献からの医療費推定。
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- MORTALITY BUBBLE TOOLTIP -->
+        <div class="mortality-tooltip" id="mortalityTooltip">
+            <div class="mortality-tooltip-title"></div>
+            <div class="mortality-tooltip-value"></div>
+            <div class="mortality-tooltip-info"></div>
+            <div class="mortality-tooltip-comparison"></div>
+        </div>
+
+        
+        <!-- ARTIFICIAL INTELLIGENCE SECTION -->
+        <section id="ai" class="content-section">
+            <div class="chart-container">
+                <h2 class="chart-title">🤖 人工知能と原子力エネルギー</h2>
+                
+                <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 1.5rem; margin: 2rem 0; border-radius: 8px;">
+                    <p style="font-size: 1.1rem; margin: 0;"><strong>注記:</strong> 人工知能（AI）は本研究の他の分析には含まれていません。しかし、AIは原子力に大きな推進力を与えます。完璧な安全基準と効率的なシステムの可能性を提供します。以下はAIが原子力技術を支援した場合に何が可能かを示しています。</p>
+                </div>
+
+                <h3>共生関係：AIには原子力が必要、原子力にはAIが必要</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    人工知能と原子力エネルギーの関係は双方向的かつ変革的です。AIの膨大なエネルギー需要は原子力をデータセンターの理想的な解決策にし、AIの分析能力は原子力発電所の設計、運用、安全性、許認可を革新できます。
+                </p>
+
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                        <div class="stat-label" style="color: white;">データセンター電力需要成長</div>
+                        <div class="stat-value" style="color: white;">160%</div>
+                        <div class="stat-label" style="color: white;">2030年まで（2023年比）</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                        <div class="stat-label" style="color: white;">必要な原子力容量</div>
+                        <div class="stat-value" style="color: white;">85-90GW</div>
+                        <div class="stat-label" style="color: white;">2030年までにAI成長に電力供給</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                        <div class="stat-label" style="color: white;">コスト削減可能性</div>
+                        <div class="stat-value" style="color: white;">1,000億ドル以上</div>
+                        <div class="stat-label" style="color: white;">原子力インフラにおけるAIにより</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                        <div class="stat-label" style="color: white;">許認可期間短縮</div>
+                        <div class="stat-value" style="color: white;">50%</div>
+                        <div class="stat-label" style="color: white;">AIツールによる可能性</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">⚡ AIデータセンター電力需要予測</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    大手テクノロジー企業（Google、Microsoft、Amazon、Meta）は、AIデータセンターの膨大かつ増大するエネルギー需要を満たすために原子力発電契約を締結しています。原子力は間欠的な再生可能エネルギーでは実現できない24時間365日の信頼性の高いカーボンフリー電力を提供します。
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="aiPowerDemandChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>出典:</strong> Singer, Brian, Jim Schneider, Carly Davenport「データセンター電力需要と原子力エネルギー」Goldman Sachs Research, 2024年。https://www.goldmansachs.com/insights/articles/is-nuclear-energy-the-answer-to-ai-data-centers-power-consumption.
+                </div>
+
+                <div class="chart-methodology">
+                    <strong>計算:</strong> データはGoldman Sachs Researchによる2023年ベースラインから2030年までのデータセンター電力消費成長予測に基づき、AIワークロードの増加、効率改善、インフラ拡大を考慮。
+                </div>
+
+                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1.5rem; margin: 2rem 0; border-radius: 8px;">
+                    <h4 style="margin-top: 0;">重要な洞察：「グリーン信頼性プレミアム」</h4>
+                    <p>24時間365日のカーボンフリー電力には、ソースの組み合わせまたはコストプレミアムの受け入れが必要です。原子力はベースロード電力を$77/MWh（オンサイト大規模）で提供し、蓄電を伴うほぼ100%再生可能エネルギーソリューションの$87/MWh、炭素価格100ドル/トンの天然ガスコンバインドサイクルの$91/MWhと比較して競争力があります。</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">🏢 大手テクノロジー企業の原子力契約（2024-2025年）</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    主要AI企業は電力購入契約と直接投資を通じて10GW以上の原子力容量にコミットしており、AI革命の電力供給における原子力の重要な役割を示しています。
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="techNuclearDealsChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>出典:</strong> MIT Technology Review「原子力はAIの台頭に本当に電力を供給できるか？」2025年5月。https://www.technologyreview.com/2025/05/20/1116339/ai-nuclear-power-energy-reactors/.
+                </div>
+
+                <div class="dashboard">
+                    <div style="background: #e8f5e9; border-radius: 8px; padding: 1.5rem;">
+                        <h4>Google + Kairos Power</h4>
+                        <ul>
+                            <li><strong>契約:</strong> 2035年までに最大500MW</li>
+                            <li><strong>技術:</strong> 小型溶融塩冷却炉</li>
+                            <li><strong>初号機:</strong> 2030年目標</li>
+                            <li><strong>状況:</strong> NRC建設承認取得済み</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: #fff3e0; border-radius: 8px; padding: 1.5rem;">
+                        <h4>Amazon + X-energy</h4>
+                        <ul>
+                            <li><strong>契約:</strong> 320-960MW（拡張可能）</li>
+                            <li><strong>技術:</strong> 小型モジュール炉</li>
+                            <li><strong>タイムライン:</strong> 2030年代初頭</li>
+                            <li><strong>場所:</strong> ワシントン州</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: #e3f2fd; border-radius: 8px; padding: 1.5rem;">
+                        <h4>Microsoft + Constellation</h4>
+                        <ul>
+                            <li><strong>契約:</strong> スリーマイル島1号機</li>
+                            <li><strong>容量:</strong> 約835MW</li>
+                            <li><strong>タイムライン:</strong> 2028年再開</li>
+                            <li><strong>名称:</strong> Crane Clean Energy Center</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: #f3e5f5; border-radius: 8px; padding: 1.5rem;">
+                        <h4>Metaの原子力戦略</h4>
+                        <ul>
+                            <li><strong>焦点:</strong> 既存発電所の再許可支援</li>
+                            <li><strong>期間:</strong> 20年延長</li>
+                            <li><strong>理由:</strong> 新規建設より迅速</li>
+                            <li><strong>目標:</strong> 24時間365日カーボンフリー電力</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">💰 費用対効果分析：AI向け原子力vs代替案</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    24時間365日の信頼性要件を考慮すると、原子力は蓄電を必要とする間欠的再生可能エネルギーや炭素価格付きの天然ガスと比較して、データセンター電力の総システムコストが最も低くなります。
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="aiEnergyCostComparisonChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>出典:</strong> Singer, Brian, Jim Schneider, Carly Davenport「データセンター電力需要と原子力エネルギー」Goldman Sachs Research, 2024年。化石燃料に100ドル/トンの炭素価格を適用した米国市場条件に基づく計算。
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">🔬 AIの原子力運用への変革的影響</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    AIと機械学習は原子力発電所の設計、運用、保守、安全性を革新しています。これらの技術は、数千億ドルのコスト削減と導入スケジュールの加速を約束しています。
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="aiNuclearBenefitsChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>出典:</strong> Laurin-Kovitz, Kirsten, Rick Stevens「エネルギーのためのAIレポート」Argonne National Laboratory, 2024年4月。https://www.anl.gov/ai/reference/ai-for-energy-report-2024；Ngoy Kubelwa, Nelly「人工知能による原子力発電強化」International Atomic Energy Agency Bulletin, 2024年。https://www.iaea.org/bulletin/enhancing-nuclear-power-production-with-artificial-intelligence.
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">⏱️ AI支援によるSMR導入タイムライン</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    AIはより高速な設計反復、合理化された許認可、最適化された建設プロセスを通じて小型モジュール炉の導入を迅速化しています。IAEAはSMR導入のためのAIに関する協調研究を主導しています。
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="smrTimelineChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>出典:</strong> Gencturk, Merve, Karim Ahmed「原子力エネルギーはAIの未来に電力を供給できる」Texas A&M University Engineering, 2025年8月。https://engineering.tamu.edu/news/2025/08/nuclear-energy-could-power-the-future-of-ai.html；International Atomic Energy Agency「SMR導入のためのAIに関する協調研究プロジェクト」2024年。
+                </div>
+            </div>
+        </section>
+
+<!-- WORLDWIDE COSTS SECTION -->
+        <section id="worldwide-costs" class="content-section">
+            <div class="chart-container">
+                <h2 class="chart-title">🌍 世界の原子力建設コスト</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    主要原子力国の原子力発電所建設コストの分析により、原子力経済に関する仮定に挑戦する劇的な変動が明らかになります。中国、韓国、その他のアジア諸国は、最近の米国プロジェクトの3分の1から5分の1のコストで一貫して原子力発電所を建設しています。
+                </p>
+
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #de2910, #ff6b6b);">
+                        <div class="stat-label" style="color: white;">中国建設コスト</div>
+                        <div class="stat-value" style="color: white;">$2,230/kW</div>
+                        <div class="stat-label" style="color: white;">55基の稼働中原子炉</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #003478, #0066cc);">
+                        <div class="stat-label" style="color: white;">韓国コスト</div>
+                        <div class="stat-value" style="color: white;">$2,200/kW</div>
+                        <div class="stat-label" style="color: white;">世界最低</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #3c3b6e, #b22234);">
+                        <div class="stat-label" style="color: white;">米国コスト（Vogtle）</div>
+                        <div class="stat-value" style="color: white;">$10,000/kW</div>
+                        <div class="stat-label" style="color: white;">4-5倍高い</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #4caf50, #8bc34a);">
+                        <div class="stat-label" style="color: white;">カリフォルニアSMR目標</div>
+                        <div class="stat-value" style="color: white;">$3,600/kW</div>
+                        <div class="stat-label" style="color: white;">10-20基後のDOE予測</div>
+                    </div>
+                </div>
+
+                <div class="chart-wrapper">
+                    <canvas id="worldwideConstructionCostsChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>出典:</strong> Anthropocene Institute (2024) - 中国の原子力発電とコスト分析；World Nuclear Association (2024)；IEA/OECD NEA発電コスト予測2020；Britain Remade (2024)；Johns Hopkins University Nature Study (2025)
+                </div>
+
+                <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 1.5rem; margin: 2rem 0; border-radius: 8px;">
+                    <h3 style="margin-top: 0;">重要な洞察：コストは原子力技術に固有のものではない</h3>
+                    <p>世界の建設コストの450%の変動（$2,200/kW〜$10,000/kW）は、高コストが基本的な技術的制限ではなく、政策、規制、産業組織の要因を反映していることを示しています。継続的な建設プログラム、標準化された設計、有利な資金調達を持つ国は、再生可能エネルギーの代替案と同等またはそれ以下のコストを達成しています。</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">💰 世界の原子力LCOE比較</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    均等化発電コスト（LCOE）は、建設コスト、資金調達、運用効率に基づいて劇的に変動します。アジアのコストレベルでは、原子力は最も経済的なゼロカーボンベースロードオプションになります。
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="worldwideLCOEChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>出典:</strong> IEA発電コスト予測2020；韓国エネルギー経済研究院2024；フランスCRE予測2023；欧州委員会LCOE分析2020；米国EIA AEO 2025
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">📊 総システムコスト：全体像</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    基本LCOEのみの比較は誤解を招きます。変動性再生可能エネルギーは高価な蓄電とバックアップ発電を必要とします。これらのシステムレベルのコストを含めると、最適化価格の原子力は非常に競争力があります。
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="totalSystemCostsChart"></canvas>
+                </div>
+
+                <div style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 1.5rem; margin: 2rem 0; border-radius: 8px;">
+                    <h3 style="margin-top: 0;">最適化コストでは、原子力が総システム経済性で勝利</h3>
+                    <ul style="margin: 0.5rem 0 0 1.5rem;">
+                        <li><strong>原子力（中国コスト）:</strong> $72/MWh総システムコスト</li>
+                        <li><strong>原子力（韓国）:</strong> $55-75/MWh総システムコスト</li>
+                        <li><strong>原子力（カリフォルニア最適化）:</strong> $80-95/MWh総システムコスト</li>
+                        <li><strong>風力＋蓄電:</strong> $103/MWh総システムコスト</li>
+                        <li><strong>太陽光＋蓄電:</strong> $121/MWh総システムコスト</li>
+                        <li><strong>原子力（米国現状）:</strong> $137/MWh総システムコスト</li>
+                    </ul>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>出典:</strong> IEA発電コスト予測2020；CSIRO GenCost 2024；米国EIA AEO 2025；NREL Annual Technology Baseline 2024；Lazard LCOE+ 2025
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">💵 投資収益率分析</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    原子力のROIは建設コストに基づいて劇的に変動します。アジアのコストレベルでは、原子力は60年の運用寿命にわたって卓越したリターンを提供します。
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="roiComparisonChart"></canvas>
+                </div>
+
+                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1.5rem; margin: 2rem 0; border-radius: 8px;">
+                    <h3 style="margin-top: 0;">ROI分析サマリー（60年寿命）</h3>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+                        <thead style="background: #f8f9fa;">
+                            <tr>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid #dee2e6;">シナリオ</th>
+                                <th style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">GWあたり資本</th>
+                                <th style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">回収期間</th>
+                                <th style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">生涯ROI</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 0.75rem; border: 1px solid #dee2e6;">中国モデル</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">22.3億ドル</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">9.5年</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6; font-weight: bold; color: #2e7d32;">640%</td>
+                            </tr>
+                            <tr style="background: #f8f9fa;">
+                                <td style="padding: 0.75rem; border: 1px solid #dee2e6;">韓国</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">22.0億ドル</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">12.5年</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6; font-weight: bold; color: #388e3c;">545%</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.75rem; border: 1px solid #dee2e6;">カリフォルニア最適化</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">35.0億ドル</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">13年</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6; font-weight: bold; color: #689f38;">470%</td>
+                            </tr>
+                            <tr style="background: #f8f9fa;">
+                                <td style="padding: 0.75rem; border: 1px solid #dee2e6;">フランス新規</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">57.0億ドル</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">16年</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6; font-weight: bold; color: #8bc34a;">380%</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.75rem; border: 1px solid #dee2e6;">米国現状</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">100.0億ドル</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">22.5年</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6; font-weight: bold;">275%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p style="margin-top: 1rem; font-size: 0.9rem;"><strong>すべてのシナリオが経済的に実行可能です。</strong>アジアモデルは、建設コストの低減と最適化された運用により、卓越したリターンを提供します。</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">🎯 カリフォルニアの原子力機会</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    カリフォルニア州は世界の原子力成功事例から学び、経済的に競争力のあるクリーンエネルギーを導入できます。国際的なベストプラクティスを使用した小型モジュール炉（SMR）フリートプログラムは、$70-90/MWhのLCOEを達成できます—すべての代替案と競争力があります。
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="californiaOpportunityChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>出典:</strong> カリフォルニア・エネルギー委員会2024；CAISO容量研究；米国DOE先進炉実証プログラム；NREL SMRコスト分析；カリフォルニアAB 1632分析；国際ベストプラクティスに基づく著者予測
+                </div>
+            </div>
+        </section>
+
+        <!-- BIBLIOGRAPHY SECTION -->
+        <section id="bibliography" class="content-section">
+            <div class="chart-container">
+<div class="bibliography-content">
+    <h2 class="chart-title">参考文献</h2>
+    <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--primary);">査読済み学術論文</h3>
+    <div class="bibliography-entries">
+        <div class="bib-entry">
+            <span class="bib-authors">Apergis, N., J. Payne.</span> <span class="bib-title">「原子力エネルギー消費と経済成長のパネル研究」</span> <em>Energy Economics</em> 32, no. 3 (2010): 545-549. <a href="https://doi.org/10.1016/j.eneco.2009.09.015" target="_blank" class="bib-link">https://doi.org/10.1016/j.eneco.2009.09.015</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Davis, Lucas W., Catherine Hausman.</span> <span class="bib-title">「原子力発電所閉鎖の市場影響」</span> <em>American Economic Journal: Applied Economics</em> 8, no. 2 (2016): 92-122. <a href="https://doi.org/10.1257/app.20140473" target="_blank" class="bib-link">https://doi.org/10.1257/app.20140473</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Fazeli, R., T. Longden, F. J. Beck.</span> <span class="bib-title">「クリーンテクノロジーエネルギープロジェクト：投資と均等化コスト（太陽光、風力、バッテリー）および水素」</span> <em>Nature Scientific Data</em> (2025). <a href="https://doi.org/10.1038/s41597-025-05951-4" target="_blank" class="bib-link">https://doi.org/10.1038/s41597-025-05951-4</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Markandya, Anil, Paul Wilkinson.</span> <span class="bib-title">「発電と健康」</span> <em>The Lancet</em> 370 (2007): 979-990. <a href="https://doi.org/10.1016/S0140-6736(07)61253-7" target="_blank" class="bib-link">https://doi.org/10.1016/S0140-6736(07)61253-7</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Wolde-Rufael, Y., Kojo Menyah.</span> <span class="bib-title">「原子力エネルギー消費と経済成長」</span> <em>Energy Policy</em> (2010): 582-593. <a href="https://doi.org/10.1016/j.enpol.2010.01.004" target="_blank" class="bib-link">https://doi.org/10.1016/j.enpol.2010.01.004</a>
+        </div>
+    </div>
+    <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--primary);">報告書・技術文書</h3>
+    <div class="bibliography-entries">
+        <div class="bib-entry">
+            <span class="bib-authors">Burke, Marshall, Lawrence Goulder.</span> <span class="bib-title">「教授らが炭素の社会的コストを説明」</span> <em>Stanford News</em> (2021). <a href="https://news.stanford.edu/stories/2021/06/professors-explain-social-cost-carbon" target="_blank" class="bib-link">https://news.stanford.edu/stories/2021/06/professors-explain-social-cost-carbon</a><br><span class="bib-note">社会的コスト方法論と連邦政策分析で使用される1トンあたり51ドルの推定値の包括的説明</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">「先進原子炉導入経路」</span> <span class="bib-organization">CATF（Clean Air Task Force）</span> (2024). <br><span class="bib-note">コスト削減可能性を示すモデル化された導入曲線</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">「エネルギー均等化コスト分析18.0」</span> <span class="bib-organization">Lazard</span> (2024). <a href="https://www.lazard.com/research-insights/levelized-cost-of-energyplus/" target="_blank" class="bib-link">https://www.lazard.com/research-insights/levelized-cost-of-energyplus/</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">「エネルギー源別世界死亡率」</span> <span class="bib-organization">世界保健機関（WHO）</span> Markandya & Wilkinson (2007)、Sovacool他 (2016)、Our World in Dataエネルギー安全分析を含む複数の査読済み出典からデータ編集。<a href="https://www.who.int/" target="_blank" class="bib-link">https://www.who.int/</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.bibliography-content {
+    line-height: 1.8;
+}
+
+.bibliography-entries {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.bib-entry {
+    padding: 1rem;
+    background: #f8f9fa;
+    border-left: 3px solid var(--primary);
+    border-radius: 4px;
+}
+
+.bib-authors {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.bib-title {
+    color: var(--text-primary);
+}
+
+.bib-organization {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.bib-institution {
+    font-style: italic;
+    color: var(--text-secondary);
+}
+
+.bib-link {
+    color: var(--primary);
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.bib-link:hover {
+    text-decoration: underline;
+}
+
+.bib-note {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    display: block;
+    margin-top: 0.5rem;
+}
+</style>
+            </div>
+        </section>
+
+        <footer>
+            <p><strong>免責事項:</strong> このダッシュボードは教育および分析目的で経済・健康影響予測を提示しています。すべてのデータは査読済み研究および政府機関から取得しています。予測には仮定が含まれており、予測ではなくシナリオとして解釈されるべきです。</p>
+            <p style="margin-top: 1rem;">© 2025 カリフォルニア・エネルギー転換分析 | すべての出典はシカゴ・マニュアル・オブ・スタイルに従って引用</p>
+            <p style="margin-top: 0.5rem; font-size: 0.8rem;">ダッシュボード作成日：2025年11月9日 | 最終更新：2025年12月</p>
+        </footer>
+    </div><!-- end container -->
+
+<script>
+        // Tab functionality
+        function showTab(event, tabId) {
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(s => s.classList.remove('active'));
+            
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // Initialize all charts
+        document.addEventListener('DOMContentLoaded', function() {
+            const isMobile = window.innerWidth < 768;
+            
+            // Set Chart.js defaults
+            Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", sans-serif';
+            Chart.defaults.responsive = true;
+            Chart.defaults.maintainAspectRatio = false;
+
+            // Carbon Emissions Chart
+            new Chart(document.getElementById('emissionsChart'), {
+                type: 'line',
+                data: {
+                    labels: ['2025', '2030', '2035', '2040', '2045'],
+                    datasets: [{
+                        label: '再エネのみ（原子力なし）',
+                        data: [100, 92, 78, 52, 18],
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4
+                    }, {
+                        label: 'SMR含有（2045年目標）',
+                        data: [100, 85, 58, 22, 0],
+                        borderColor: '#27ae60',
+                        backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { font: { size: isMobile ? 11 : 14 } }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: '年', font: { size: 14, weight: 'bold' } }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: { display: true, text: '排出量（2025年基準の%）', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Jobs Chart
+            new Chart(document.getElementById('jobsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['原子力', '太陽光', '風力', '天然ガス'],
+                    datasets: [{
+                        label: 'MW当たり雇用数',
+                        data: [0.75, 3.5, 2.8, 0.25],
+                        backgroundColor: ['#9b59b6', '#f39c12', '#3498db', '#95a5a6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'エネルギーセクター', font: { size: 14, weight: 'bold' } }
+                        },
+                        y: {
+                            title: { display: true, text: 'MW当たり創出雇用数', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Salaries Chart
+            new Chart(document.getElementById('salariesChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['原子力エンジニア', '太陽光技術者', '風力技術者', 'ガス発電所オペレーター'],
+                    datasets: [{
+                        label: '平均年収',
+                        data: [125000, 55000, 58000, 72000],
+                        backgroundColor: ['#9b59b6', '#f39c12', '#3498db', '#95a5a6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            title: { display: true, text: '職種', font: { size: 14, weight: 'bold' } }
+                        },
+                        y: {
+                            title: { display: true, text: '年収（米ドル）', font: { size: 14, weight: 'bold' } },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Retraining Chart
+            new Chart(document.getElementById('retrainingChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['技術訓練 (35%)', '管理 (25%)', '安全監督 (20%)', '事務 (15%)', 'その他 (5%)'],
+                    datasets: [{
+                        data: [35, 25, 20, 15, 5],
+                        backgroundColor: ['#9b59b6', '#3498db', '#f39c12', '#27ae60', '#95a5a6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { font: { size: isMobile ? 11 : 13 } }
+                        }
+                    }
+                }
+            });
+
+            // Lives Saved Chart
+            new Chart(document.getElementById('livesSavedChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['10年', '20年', '30年', '40年', '50年'],
+                    datasets: [{
+                        label: '累積救われた命',
+                        data: [2260, 4520, 6780, 9040, 11300],
+                        backgroundColor: '#27ae60'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            title: { display: true, text: '期間', font: { size: 14, weight: 'bold' } }
+                        },
+                        y: {
+                            title: { display: true, text: '救われた命', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Healthcare Savings Chart
+            new Chart(document.getElementById('healthcareSavingsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['死亡回避', 'がん治療', '呼吸器疾患', '心血管疾患'],
+                    datasets: [{
+                        label: '50年間の削減額（10億ドル）',
+                        data: [132.7, 15.2, 8.4, 12.1],
+                        backgroundColor: ['#27ae60', '#3498db', '#f39c12', '#e74c3c']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'カテゴリー', font: { size: 14, weight: 'bold' } }
+                        },
+                        y: {
+                            title: { display: true, text: '10億ドル', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Social Cost Chart
+            new Chart(document.getElementById('socialCostChart'), {
+                type: 'line',
+                data: {
+                    labels: ['0', '10年', '20年', '30年', '40年', '50年'],
+                    datasets: [{
+                        label: '化石燃料（累積社会的コスト）',
+                        data: [0, 17.9, 35.8, 53.7, 71.6, 89.5],
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        fill: true
+                    }, {
+                        label: '原子力（累積社会的コスト）',
+                        data: [0, 0.5, 1, 1.5, 2, 2.5],
+                        borderColor: '#27ae60',
+                        backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            title: { display: true, text: '10億ドル', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Social Cost Breakdown Chart
+            new Chart(document.getElementById('socialCostBreakdownChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['健康影響 (40%)', '生産性損失 (25%)', '財産被害 (15%)', '農業損失 (12%)', '気候被害 (8%)'],
+                    datasets: [{
+                        data: [40, 25, 15, 12, 8],
+                        backgroundColor: ['#e74c3c', '#f39c12', '#3498db', '#27ae60', '#9b59b6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // AI Power Demand Chart
+            new Chart(document.getElementById('aiPowerDemandChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['2023', '2025', '2027', '2030'],
+                    datasets: [{
+                        label: 'データセンター電力需要 (GW)',
+                        data: [50, 75, 100, 130],
+                        backgroundColor: '#667eea'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            title: { display: true, text: 'GW', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Tech Nuclear Deals Chart
+            new Chart(document.getElementById('techNuclearDealsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Google/Kairos', 'Amazon/X-energy', 'Microsoft/Constellation', 'Meta（既存支援）'],
+                    datasets: [{
+                        label: '容量 (MW)',
+                        data: [500, 640, 835, 500],
+                        backgroundColor: ['#4285f4', '#ff9900', '#00a4ef', '#1877f2']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            title: { display: true, text: 'MW', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // AI Energy Cost Comparison Chart
+            new Chart(document.getElementById('aiEnergyCostComparisonChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['原子力（オンサイト大規模）', '再エネ+蓄電（100%）', '天然ガス（炭素価格込）'],
+                    datasets: [{
+                        label: '$/MWh',
+                        data: [77, 87, 91],
+                        backgroundColor: ['#27ae60', '#3498db', '#e74c3c']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            title: { display: true, text: '$/MWh', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // AI Nuclear Benefits Chart
+            new Chart(document.getElementById('aiNuclearBenefitsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['設計最適化', '予知保全', '安全監視', '許認可効率化'],
+                    datasets: [{
+                        label: 'コスト削減可能性（10億ドル）',
+                        data: [35, 28, 22, 15],
+                        backgroundColor: ['#667eea', '#764ba2', '#43e97b', '#f39c12']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            title: { display: true, text: '10億ドル', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // SMR Timeline Chart
+            new Chart(document.getElementById('smrTimelineChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['従来型（AI支援なし）', 'AI支援型'],
+                    datasets: [{
+                        label: '月数',
+                        data: [108, 54],
+                        backgroundColor: ['#e74c3c', '#27ae60']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            title: { display: true, text: '月数', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Worldwide Construction Costs Chart
+            new Chart(document.getElementById('worldwideConstructionCostsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['韓国', '中国', '日本', 'フランス（過去）', '英国（Hinkley C）', '米国（Vogtle）'],
+                    datasets: [{
+                        label: '建設コスト ($/kW)',
+                        data: [2200, 2230, 3900, 4500, 8500, 10000],
+                        backgroundColor: ['#003478', '#de2910', '#bc002d', '#002395', '#012169', '#3c3b6e'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '国別原子力建設コスト ($/kW)',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '$/kW', font: { size: 14, weight: 'bold' } },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Worldwide LCOE Chart
+            new Chart(document.getElementById('worldwideLCOEChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['韓国', '中国', 'フランス（既存）', '日本', '英国', '米国'],
+                    datasets: [{
+                        label: 'LCOE ($/MWh)',
+                        data: [55, 72, 45, 85, 110, 137],
+                        backgroundColor: ['#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ff9800', '#f44336'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '国別原子力LCOE ($/MWh)',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '$/MWh', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Total System Costs Chart
+            new Chart(document.getElementById('totalSystemCostsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['原子力（韓国）', '原子力（中国）', '原子力（CA最適）', '風力+蓄電', '太陽光+蓄電', '原子力（米国現状）'],
+                    datasets: [{
+                        label: '基本LCOE',
+                        data: [55, 72, 80, 45, 42, 137],
+                        backgroundColor: '#3498db'
+                    }, {
+                        label: '統合/蓄電コスト',
+                        data: [0, 0, 0, 58, 79, 0],
+                        backgroundColor: '#e74c3c'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '総システムコスト比較 ($/MWh)',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        x: { stacked: true },
+                        y: {
+                            stacked: true,
+                            title: { display: true, text: '$/MWh', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // ROI Comparison Chart
+            new Chart(document.getElementById('roiComparisonChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['中国モデル', '韓国', 'カリフォルニア最適化', 'フランス新規', '米国現状'],
+                    datasets: [{
+                        label: '生涯ROI (%)',
+                        data: [640, 545, 470, 380, 275],
+                        backgroundColor: ['#2e7d32', '#388e3c', '#689f38', '#8bc34a', '#aed581'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '建設コストシナリオ別60年生涯ROI',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'ROI (%)', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // California Opportunity Chart
+            new Chart(document.getElementById('californiaOpportunityChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['現状米国原子力', 'カリフォルニアSMR目標', '太陽光+蓄電', '風力+蓄電', '国際ベストプラクティス'],
+                    datasets: [{
+                        label: '総システムコスト ($/MWh)',
+                        data: [137, 85, 121, 103, 65],
+                        backgroundColor: ['#e74c3c', '#f39c12', '#ffc107', '#3498db', '#27ae60'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'カリフォルニア・エネルギーコスト比較 ($/MWh)',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '$/MWh', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // =============================================
+            // MORTALITY BUBBLE CHART TOOLTIP FUNCTIONALITY
+            // =============================================
+            const mortalityTooltip = document.getElementById('mortalityTooltip');
+            const mortalityBubbles = document.querySelectorAll('.mortality-bubble');
+            
+            mortalityBubbles.forEach(bubble => {
+                bubble.addEventListener('mouseenter', function(e) {
+                    const source = this.dataset.source;
+                    const deaths = this.dataset.deaths;
+                    const info = this.dataset.info;
+                    const comparison = this.dataset.comparison;
+                    
+                    mortalityTooltip.querySelector('.mortality-tooltip-title').textContent = source;
+                    mortalityTooltip.querySelector('.mortality-tooltip-value').textContent = deaths + ' 死亡/TWh';
+                    mortalityTooltip.querySelector('.mortality-tooltip-info').textContent = info;
+                    mortalityTooltip.querySelector('.mortality-tooltip-comparison').textContent = comparison;
+                    
+                    mortalityTooltip.style.display = 'block';
+                });
+                
+                bubble.addEventListener('mousemove', function(e) {
+                    const tooltipWidth = mortalityTooltip.offsetWidth;
+                    const tooltipHeight = mortalityTooltip.offsetHeight;
+                    const windowWidth = window.innerWidth;
+                    const windowHeight = window.innerHeight;
+                    
+                    let left = e.clientX + 15;
+                    let top = e.clientY + 15;
+                    
+                    // Prevent tooltip from going off right edge
+                    if (left + tooltipWidth > windowWidth - 20) {
+                        left = e.clientX - tooltipWidth - 15;
+                    }
+                    
+                    // Prevent tooltip from going off bottom edge
+                    if (top + tooltipHeight > windowHeight - 20) {
+                        top = e.clientY - tooltipHeight - 15;
+                    }
+                    
+                    mortalityTooltip.style.left = left + 'px';
+                    mortalityTooltip.style.top = top + 'px';
+                });
+                
+                bubble.addEventListener('mouseleave', function() {
+                    mortalityTooltip.style.display = 'none';
+                });
+            });
+
+        }); // End DOMContentLoaded
+    </script>
+</body>
+</html>

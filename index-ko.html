@@ -1,0 +1,2410 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>캘리포니아 원자력 에너지 정체 - 과학적 분석 대시보드</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --border-radius: 20px;
+            --shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+            background: #ffffff;
+            color: var(--text-primary);
+            padding: 1rem;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* LANGUAGE SELECTOR */
+        .language-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .language-bar span {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .language-flags {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .lang-link {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.4rem 0.7rem;
+            background: rgba(255,255,255,0.15);
+            border-radius: 20px;
+            text-decoration: none;
+            color: white;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .lang-link:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        .lang-link.active {
+            background: white;
+            color: var(--primary);
+        }
+
+        .flag-icon {
+            font-size: 1.1rem;
+        }
+
+        header {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--text-primary);
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            margin-bottom: 1rem;
+        }
+
+        .disclaimer {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab-button:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .chart-container {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .chart-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+            margin-bottom: 1rem;
+        }
+
+        .chart-citation {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e0e0e0;
+            line-height: 1.4;
+        }
+
+        .chart-methodology {
+            font-size: 0.8rem;
+            color: #555;
+            font-style: italic;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            .chart-wrapper {
+                height: 300px;
+            }
+            .language-bar {
+                padding: 0.5rem;
+            }
+            .lang-link {
+                padding: 0.3rem 0.5rem;
+                font-size: 0.75rem;
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* =============================================
+           MORTALITY BUBBLE CHART STYLES
+           ============================================= */
+        .mortality-bubble-chart-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        
+        .mortality-bubble-chart {
+            position: relative;
+            width: 850px;
+            height: 580px;
+            min-width: 850px;
+        }
+        
+        .mortality-bubble {
+            position: absolute;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mortality-bubble:hover {
+            filter: brightness(1.15);
+            transform: scale(1.03);
+        }
+        
+        .mortality-bubble-coal {
+            width: 420px;
+            height: 420px;
+            background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+            top: 80px;
+            left: 20px;
+        }
+        
+        .mortality-bubble-oil {
+            width: 252px;
+            height: 252px;
+            background: linear-gradient(135deg, #c0392b 0%, #962d22 100%);
+            top: 40px;
+            left: 320px;
+        }
+        
+        .mortality-bubble-biomass {
+            width: 206px;
+            height: 206px;
+            background: linear-gradient(135deg, #d35400 0%, #a04000 100%);
+            top: 310px;
+            left: 380px;
+        }
+        
+        .mortality-bubble-gas {
+            width: 84px;
+            height: 84px;
+            background: linear-gradient(135deg, #f39c12 0%, #d68910 100%);
+            top: 450px;
+            left: 280px;
+        }
+        
+        .mortality-bubble-nuclear {
+            width: 9px;
+            height: 9px;
+            background: #27ae60;
+            top: 154px;
+            left: 150px;
+            box-shadow: 0 0 12px #27ae60, 0 0 24px #27ae60;
+            animation: mortality-pulse 2s infinite;
+        }
+        
+        .mortality-bubble-wind {
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, #ff1493 0%, #ff69b4 100%);
+            top: 173px;
+            left: 80px;
+        }
+        
+        .mortality-bubble-hydro {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            top: 447px;
+            left: 100px;
+        }
+        
+        .mortality-bubble-solar {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #f1c40f 0%, #d4ac0d 100%);
+            top: 365px;
+            left: 61px;
+        }
+        
+        @keyframes mortality-pulse {
+            0%, 100% { box-shadow: 0 0 12px #27ae60, 0 0 24px #27ae60; }
+            50% { box-shadow: 0 0 20px #27ae60, 0 0 40px #27ae60, 0 0 60px #27ae60; }
+        }
+        
+        .mortality-bubble-label {
+            position: absolute;
+            font-weight: 600;
+            pointer-events: none;
+            line-height: 1.3;
+        }
+        
+        .mortality-label-coal {
+            top: 250px;
+            left: 130px;
+            color: white;
+            font-size: 1.4rem;
+            text-align: center;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        
+        .mortality-label-oil {
+            top: 130px;
+            left: 390px;
+            color: white;
+            font-size: 1.1rem;
+            text-align: center;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        
+        .mortality-label-biomass {
+            top: 380px;
+            left: 425px;
+            color: white;
+            font-size: 1rem;
+            text-align: center;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        
+        .mortality-label-gas {
+            top: 475px;
+            left: 293px;
+            color: white;
+            font-size: 0.85rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        .mortality-label-small {
+            background: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-size: 0.85rem;
+        }
+        
+        .mortality-label-nuclear {
+            top: 110px;
+            left: 55px;
+            color: #27ae60;
+            font-weight: bold;
+            background: white;
+            border: 2px solid #27ae60;
+            font-size: 0.9rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+        }
+        
+        .mortality-label-wind { top: 192px; left: 55px; color: #ff1493; }
+        .mortality-label-hydro { top: 505px; left: 85px; color: #2980b9; }
+        .mortality-label-solar { top: 400px; left: 70px; color: #d4ac0d; }
+        
+        .mortality-tooltip {
+            position: fixed;
+            background: rgba(44, 62, 80, 0.95);
+            color: white;
+            padding: 1rem 1.25rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+            max-width: 280px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        
+        .mortality-tooltip-title {
+            font-weight: bold;
+            font-size: 1.15rem;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .mortality-tooltip-value {
+            color: #f39c12;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .mortality-tooltip-info {
+            font-size: 0.85rem;
+            line-height: 1.5;
+            opacity: 0.9;
+        }
+        
+        .mortality-tooltip-comparison {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            font-size: 0.85rem;
+            color: #2ecc71;
+            font-weight: 600;
+        }
+        
+        .mortality-insight-box {
+            background: linear-gradient(135deg, #27ae60, #1e8449);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .mortality-insight-box h3 { font-size: 1.6rem; margin-bottom: 1rem; }
+        
+        .mortality-insight-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .mortality-insight-stat { text-align: center; }
+        .mortality-insight-number { font-size: 2.5rem; font-weight: bold; }
+        .mortality-insight-label { font-size: 0.95rem; opacity: 0.9; }
+        
+        .mortality-legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.6rem;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .mortality-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.75rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            font-size: 0.8rem;
+        }
+        
+        .mortality-legend-color { width: 12px; height: 12px; border-radius: 50%; }
+        .mortality-legend-value { font-weight: bold; color: #2c3e50; }
+        
+        .mortality-methodology-box {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .mortality-methodology-box strong { color: #2c3e50; }
+        
+        .mortality-citation-box {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #ddd;
+            font-size: 0.8rem;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- LANGUAGE SELECTOR BAR -->
+        <div class="language-bar">
+            <span>🌐 지원 언어:</span>
+            <div class="language-flags">
+                <a href="index.html" class="lang-link"><span class="flag-icon">🇺🇸</span> English</a>
+                <a href="index-se.html" class="lang-link"><span class="flag-icon">🇸🇪</span> Svenska</a>
+                <a href="index-fr.html" class="lang-link"><span class="flag-icon">🇫🇷</span> Français</a>
+                <a href="index-es.html" class="lang-link"><span class="flag-icon">🇪🇸</span> Español</a>
+                <a href="index-zh.html" class="lang-link"><span class="flag-icon">🇨🇳</span> 中文</a>
+                <a href="index-ko.html" class="lang-link active"><span class="flag-icon">🇰🇷</span> 한국어</a>
+                <a href="index-ja.html" class="lang-link"><span class="flag-icon">🇯🇵</span> 日本語</a>
+            </div>
+        </div>
+
+        <header>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                <!-- Nuclear Atom Icon -->
+                <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="32" cy="32" r="6" fill="#667eea"/>
+                    <ellipse cx="32" cy="32" rx="28" ry="12" stroke="#667eea" stroke-width="3" fill="none" transform="rotate(0 32 32)"/>
+                    <ellipse cx="32" cy="32" rx="28" ry="12" stroke="#764ba2" stroke-width="3" fill="none" transform="rotate(60 32 32)"/>
+                    <ellipse cx="32" cy="32" rx="28" ry="12" stroke="#43e97b" stroke-width="3" fill="none" transform="rotate(120 32 32)"/>
+                    <circle cx="32" cy="32" r="4" fill="#ffffff"/>
+                </svg>
+                
+                <h1 style="margin: 0;">캘리포니아 원자력 에너지 정체</h1>
+            </div>
+            
+            <p class="subtitle">경제 및 건강 영향 분석</p>
+            
+            <!-- 2045 Carbon-Free Goal Card -->
+            <div style="display: flex; justify-content: center; margin-top: 1.5rem;">
+                <div class="stat-card" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); color: white; max-width: 400px;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">2045 탄소중립 목표</div>
+                    <div class="stat-value" style="color: white;">달성 가능</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">2030년대 SMR 도입 시</div>
+                </div>
+            </div>
+        </header>
+
+        <nav class="tabs" id="tabNav">
+            <button class="tab-button active" onclick="showTab(event, 'summary')">📋 요약</button>
+            <button class="tab-button" onclick="showTab(event, 'social-cost')">💵 사회적 비용</button>
+            <button class="tab-button" onclick="showTab(event, 'employment')">👷 고용</button>
+            <button class="tab-button" onclick="showTab(event, 'health')">💚 건강 및 안전</button>
+            <button class="tab-button" onclick="showTab(event, 'ai')">🤖 인공지능</button>
+            <button class="tab-button" onclick="showTab(event, 'worldwide-costs')">🌍 세계 비용</button>
+            <button class="tab-button" onclick="showTab(event, 'bibliography')">📚 참고문헌</button>
+        </nav>
+
+        <!-- SUMMARY SECTION -->
+        <section id="summary" class="content-section active">
+            <!-- COLORFUL STAT CARDS AT TOP -->
+            <div class="stats-grid" style="margin-bottom: 2rem;">
+                <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">원자력 모라토리엄</div>
+                    <div class="stat-value" style="color: white;">1976</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">49년간 신규 건설 금지</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">미실현 투자</div>
+                    <div class="stat-value" style="color: white;">$120억</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">손실 자본 (2020-2040)</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">잠재적 연간 경제 효과</div>
+                    <div class="stat-value" style="color: white;">+$41.7억</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">원자력 포함 전환 시</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">구한 생명</div>
+                    <div class="stat-value" style="color: white;">11,300</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">50년간 (대기오염 감소)</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white;">
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">SMR LCOE 목표 (2045)</div>
+                    <div class="stat-value" style="color: white;">$50-66</div>
+                    <div class="stat-description" style="color: rgba(255,255,255,0.85);">/MWh 학습곡선 적용</div>
+                </div>
+            </div>
+
+            <!-- CARBON EMISSIONS CHART -->
+            <div class="chart-container">
+                <h3 class="chart-title">탄소 배출량 감소 시나리오</h3>
+                <div class="chart-wrapper">
+                    <canvas id="emissionsChart"></canvas>
+                </div>
+                <div class="chart-methodology">
+                    <strong>방법론:</strong> 캘리포니아 2045 탄소중립 의무 달성을 위한 배출량 예측. SMR 포함 시나리오 가정: 2032-2033년 첫 SMR 유닛 가동, 2045년까지 20-22 GW로 점진적 확대(발전량의 약 32%), 2040년까지 천연가스 폐지. 재생에너지 전용 시나리오는 간헐성으로 인해 2045년까지 계통 안정성을 위한 천연가스 피크 발전소의 연장 운영이 필요하여 완전 탈탄소화가 지연됨. 배출량은 EIA 탄소 집약도 계수 사용: 천연가스 (0.41 kg CO₂/kWh), 원자력/재생에너지 제로.
+                </div>
+                <div class="chart-citation">
+                    <strong>출처:</strong> U.S. Energy Information Administration, "California State Energy Profile," 2025년 11월 접속, https://www.eia.gov/state/?sid=CA; U.S. Department of Energy, "Pathways to Commercial Liftoff: Advanced Nuclear" (2025) - 10-20기 배치 후 SMR 야간비용 $3,600/kW 전망; Britain Remade, "Nuclear Construction Cost Analysis" (2024) - 한국 $3,571/kW, 중국 $4,174/kW; Wang, Qiang 외, "Is Nuclear Power a Cost-Effective Energy Transition Option?" <em>Environmental Research</em> 223 (2023): 115290; Liu, Shangwei 외, "Curbing Nuclear Power Plant Costs: Evidence from Learning in China, South Korea, and the United States," <em>Nature</em> (2025).
+                </div>
+            </div>
+
+            <!-- MORATORIUM & POLICY IMPLICATIONS -->
+            <div class="chart-container">
+                <h2 class="chart-title">캘리포니아의 원자력 모라토리엄 및 정책적 시사점</h2>
+                
+                <div style="background: #f8f9fa; padding: 2rem; border-radius: 10px; margin-bottom: 2rem;">
+                    <p style="margin-bottom: 1rem; line-height: 1.8;">
+                        1976년부터 캘리포니아는 격렬한 공개 토론과 환경 우려에 따른 워렌-앨퀴스트 법 개정을 통해 신규 원자력 발전소 건설에 대한 모라토리엄을 유지해 왔습니다. 이 모라토리엄은 캘리포니아 에너지 위원회가 연방 정부가 핵연료 재처리를 위한 입증된 기술과 고준위 방사성 폐기물 처리를 위한 영구적 해결책을 모두 확립했다고 판단한 후에야 새로운 원자력 시설의 인허가가 가능하도록 요구합니다. 거의 50년이 지난 지금, 캘리포니아의 야심찬 2045년 탄소중립 목표에도 불구하고 어느 조건도 충족되지 않아 주 내 모든 신규 원자력 개발이 사실상 차단되어 있습니다.
+                    </p>
+                    
+                    <p style="margin-bottom: 1rem; line-height: 1.8;">
+                        본 연구는 상원법안 100에 따른 캘리포니아 2045년 탄소중립 의무 달성을 위해 소형모듈원자로(SMR)를 배치할 경우의 경제적 영향을 분석합니다. 캘리포니아 마지막 운영 원전인 디아블로 캐년이 2030년까지 연장된 상황에서, 정책 입안자들은 중요한 결정 시점에 직면해 있습니다. Breakthrough Institute의 최근 분석에 따르면 캘리포니아는 원자력을 제한하는 법률로 인해 2020년부터 2040년 사이에 최대 <strong>$120억의 미실현 자본 투자</strong>를 잃고 있으며, 이는 주요 기술 기업들이 AI 데이터 센터를 위한 안정적이고 탄소가 없는 전력을 점점 더 찾고 있기 때문입니다. SMR은 혁신적인 해결책을 제공합니다: 동료 심사 연구에 따르면 한국은 표준화된 설계를 통해 <strong>$3,571/kW</strong>의 원자력 건설 비용을 달성하고, 중국은 대량 생산을 통해 <strong>$4,174/kW</strong>에 도달합니다. 미국 에너지부는 미국 SMR이 10-20기 배치 후 <strong>$3,600/kW</strong>에 도달할 수 있으며, 균등화 비용은 $50-66/MWh로 안정화 비용을 포함한 태양광 및 풍력과 경쟁력이 있을 것으로 전망합니다. 캘리포니아는 2032-2033년까지 초기 300MW SMR 유닛을 배치하고, 2045년까지 20-22 GW로 확대하여 발전량의 약 32%를 제공할 수 있습니다.
+                    </p>
+                    
+                    <p style="margin-bottom: 1rem; line-height: 1.8;">
+                        경제 분석에 따르면 SMR 포함 에너지 전환은 캘리포니아의 $3.9조 경제에 상당한 이익을 창출할 수 있습니다. Apergis & Payne (2010)과 Wolde-Rufael & Menyah (2010)의 동료 심사 연구는 선진국 전반에서 원자력 에너지 소비와 GDP 성장 사이의 양의 상관관계를 기록합니다. 캘리포니아의 경우 2045년까지 20-22 GW의 SMR 용량을 배치하면 원자력 엔지니어의 평균 연봉 <strong>$125,000</strong>(태양광 및 풍력 기술자 $55,000-$58,000 대비) 고임금 일자리를 창출하여 연간 약 <strong>$41.7억의 경제 효과</strong>를 발생시킬 것입니다. SMR의 안정적이고 급전 가능한 기저부하 전력(용량계수 92% vs 태양광 25%)은 비용이 많이 드는 에너지 저장 인프라의 필요성을 획기적으로 줄입니다 - 캘리포니아 독립 시스템 운영자 데이터에 따르면 계통 규모 배터리 저장장치 비용은 월 $18.92/kW입니다. 또한 The Lancet에 발표된 동료 심사 연구에 따르면 캘리포니아의 천연가스 발전(현재 주 내 공급의 35-45%)을 SMR로 대체하면 대기오염 사망을 제거하여 <strong>50년간 약 11,300명의 생명을 구할</strong> 수 있습니다. 천연가스는 TWh당 2.8명의 사망을 유발하는 반면 원자력은 TWh당 0.07명에 불과합니다.
+                    </p>
+                    
+                    <p style="margin-bottom: 1rem; line-height: 1.8;">
+                        원자력 모라토리엄 해제 또는 수정을 고려하는 캘리포니아 정책 입안자들을 위해, 본 분석은 관련 절충점에 대한 데이터 기반 통찰력을 제공합니다. 주정부는 분명한 선택에 직면해 있습니다: 현상을 유지하고 신뢰성을 위해 대규모 저장장치 구축과 천연가스에 대한 지속적인 의존이 필요한 간헐적 재생에너지에 크게 의존하거나, <strong>소형모듈원자로(SMR)</strong>와 같은 첨단 원자력 기술을 포함하는 "모든 옵션" 청정에너지 전략을 수용하는 것입니다. SMR은 기존 대형 원자로에 비해 상당한 장점을 제공합니다: 공장 제작으로 건설 기간이 9년에서 4-5.5년으로 단축되고, 초기 배치 후 예상 야간비용은 $3,600-4,200/kW(최근 미국 대형 원자로의 $5,833/kW 대비)이며, 모듈식 확장을 통해 캘리포니아가 주의 2045년 탄소중립 의무를 충족하기 위해 점진적으로 용량을 배치할 수 있습니다. 일리노이를 포함한 여러 주에서 최근 원자력 제한에 대한 SMR 예외를 만들었으며, 캘리포니아 자체 에너지 위원회도 2024년 8월에 의회가 유사한 예외를 고려할 것을 권고했습니다. 입증된 국제적 경험 - 한국은 $3,571/kW 건설 비용을 달성하고 중국은 대량 생산을 통해 $4,174/kW에 도달 - 과 원자력이 제공하는 비교할 수 없는 용량계수(92% vs 태양광 25%)를 고려할 때, <strong>캘리포니아의 2045년 탄소중립 목표와 경제적 경쟁력은 SMR 배치를 전환의 초석으로 수용해야 할 수 있습니다</strong>.
+                    </p>
+                </div>
+
+                <div class="chart-citation" style="margin-top: 2rem;">
+                    <strong>출처:</strong> Breakthrough Institute, "California's Nuclear Energy Policies Cost $12 Billion in Unrealized Capital Investments" (2022); U.S. Department of Energy, "Pathways to Commercial Liftoff: Advanced Nuclear" (2025); Britain Remade, "Nuclear Construction Cost Analysis: International Comparison of Post-2000 Projects" (2024) - 한국 $3,571/kW, 중국 $4,174/kW 건설 비용; Liu, Shangwei, Daniel M. Kammen 외, "Curbing Nuclear Power Plant Costs: Evidence from Learning in China, South Korea, and the United States," <em>Nature</em> (2025); Lazard, "Levelized Cost of Energy+ Version 18.0," 2025년 6월; California Energy Commission, SMR 예외 권고안 (2024년 8월); Markandya, Anil 및 Paul Wilkinson, "Electricity Generation and Health," <em>The Lancet</em> 370, no. 9591 (2007): 979-990; Apergis, N. 및 J. Payne, "A Panel Study of Nuclear Energy Consumption and Economic Growth," <em>Energy Economics</em> 32, no. 3 (2010): 545-549; Wolde-Rufael, Y. 및 Kojo Menyah, "Nuclear Energy Consumption and Economic Growth in Nine Developed Countries," <em>Energy Economics</em> 32, no. 3 (2010): 582-593; Davis, Lucas W. 및 Catherine Hausman, "Market Impacts of a Nuclear Power Plant Closure," <em>American Economic Journal: Applied Economics</em> 8, no. 2 (2016): 92-122; California Independent System Operator, "Capacity Accreditation Methodology and Net CONE Values" (2025).
+                </div>
+            </div>
+        </section>
+
+        <!-- SOCIAL COST SECTION -->
+<section id="social-cost" class="content-section">
+    <div class="chart-container">
+        <h2 class="chart-title">탄소의 사회적 비용 및 현상 유지의 영향</h2>
+        
+        <div style="background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%); padding: 2rem; border-radius: 10px; margin-bottom: 2rem; border-left: 5px solid #e74c3c;">
+            <h3 style="color: #c0392b; margin-bottom: 1rem;">⚠️ 화석연료 의존 유지의 숨겨진 비용</h3>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                <strong>탄소의 사회적 비용</strong>은 대기 중 CO₂ 1톤을 추가로 배출함으로써 발생하는 총 경제적 피해를 나타냅니다. 스탠포드 경제학자 마샬 버크와 로렌스 굴더에 따르면, 이 지표는 "기후에 무슨 일이 일어나는지, 그리고 이러한 변화가 농업 생산성 변화, 해수면 상승으로 인한 피해, 인간 건강 및 노동 생산성 저하를 포함한 경제적 결과에 어떻게 영향을 미치는지"를 포착합니다. 2021년 기준으로 탄소의 사회적 비용은 <strong>톤당 $51</strong>로 추정되며, 이는 CO₂ 배출 1톤마다 사회에 $51의 피해가 발생함을 의미합니다—이 비용은 전기 요금에 반영되지 않지만 의료비, 생산성 감소, 재산 피해, 인명 손실을 통해 지불됩니다.
+            </p>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                캘리포니아가 주 내 발전의 35-45%를 천연가스에 지속적으로 의존하는 것은 사회에 막대한 숨겨진 비용을 부과합니다. 연간 발전량이 약 280 TWh인 상황에서 캘리포니아의 천연가스 발전소는 연간 약 3,500만 톤의 CO₂를 배출합니다. 톤당 $51로 계산하면 <strong>연간 $17.9억의 사회적 비용</strong>이 발생합니다—이 비용은 대기질 저하, 의료비 증가, 폭염 시 근로자 생산성 감소, 가뭄과 산불을 포함한 기후변화 영향 가속화를 통해 사회가 부담합니다. 이러한 외부효과는 전기요금에 나타나지 않지만 보험료, 세금 지원 재난 구호, 인간의 고통을 통해 지불됩니다.
+            </p>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                연구에 따르면 이러한 비용은 취약 계층에 불균형적으로 부담됩니다. 저소득 지역사회는 점점 빈번해지는 폭염 동안 에어컨과 같은 보호 기술을 감당할 수 없는 경우가 많고, 양질의 의료서비스에 대한 접근이 부족하며, 화석연료 연소로 인한 대기오염에 더 많이 노출됩니다. 스탠포드 연구에 따르면 "더운 온도는 더 나쁜 건강 결과를 초래하며"—열사병, 심혈관 기능 장애, 사망률 증가를 포함하여—"저소득 지역사회는 종종 기후변화로 인해 더 큰 피해를 받습니다." 연구에 따르면 기온이 상승하면 노동 생산성이 급격히 감소하며, 이것이 전체 경제에 영향을 미치면 "경제 전체 효과가 상당히 클 수 있어" 모든 근로자, 특히 야외 및 산업 근로자의 GDP 성장과 임금 잠재력을 감소시킵니다.
+            </p>
+        </div>
+    </div>
+
+    <div class="stats-grid" style="margin-bottom: 2rem;">
+        <div class="stat-card" style="background: linear-gradient(135deg, #ffe5e5 0%, #ffcccc 100%);">
+            <div class="stat-label">캘리포니아 가스 발전소 연간 사회적 비용</div>
+            <div class="stat-value" style="color: #c0392b;">$17.9억</div>
+            <div class="stat-description">CO₂ 톤당 $51 기준 숨겨진 비용</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #ffe5e5 0%, #ffcccc 100%);">
+            <div class="stat-label">화석연료로 인한 연간 사망자</div>
+            <div class="stat-value" style="color: #c0392b;">235+</div>
+            <div class="stat-description">캘리포니아 대기오염 사망</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #e5f5e5 0%, #ccffcc 100%);">
+            <div class="stat-label">원자력 사회적 비용</div>
+            <div class="stat-value" style="color: #27ae60;">거의 제로</div>
+            <div class="stat-description">탄소 배출 없음, 최소 사망률</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #e5f5e5 0%, #ccffcc 100%);">
+            <div class="stat-label">50년간 회피된 사회적 비용</div>
+            <div class="stat-value" style="color: #27ae60;">$895억</div>
+            <div class="stat-description">원자력 전환 시</div>
+        </div>
+    </div>
+
+    <div class="dashboard">
+        <div class="chart-container">
+            <h3 class="chart-title">누적 사회적 비용: 화석연료 vs 원자력 (50년)</h3>
+            <div class="chart-wrapper">
+                <canvas id="socialCostChart"></canvas>
+            </div>
+            <div class="chart-methodology">
+                <strong>방법론:</strong> 사회적 비용은 CO₂ 톤당 $51 추정치를 사용하여 계산. 현상 유지는 35% 천연가스 의존 지속 가정(현재 발전 수준에서 50년간 9,800만 톤 CO₂). 원자력 시나리오는 화석연료 발전을 탄소 제로 원자력 에너지로 대체. 천연가스의 탄소 배출량: 약 0.35톤 CO₂/MWh. Markandya & Wilkinson 사망률에 따른 의료비. 기후변화로 인한 재산 피해, 농업 손실, 생태계 파괴는 포함되지 않음—실제 비용은 더 높음.
+            </div>
+            <div class="chart-citation">
+                <strong>출처:</strong> Burke, Marshall 및 Lawrence Goulder, "Professors Explain the Social Cost of Carbon," Stanford News, 2021년 6월, https://news.stanford.edu/stories/2021/06/professors-explain-social-cost-carbon; 바이든 행정부 탄소의 사회적 비용 추정치 (톤당 $51, 2025년); U.S. EPA 천연가스 발전 배출 계수; Markandya, Anil 및 Paul Wilkinson, "Electricity Generation and Health," <em>The Lancet</em> 370, no. 9591 (2007): 979-990.
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h3 class="chart-title">영향 범주별 사회적 비용 분류 (연간)</h3>
+            <div class="chart-wrapper">
+                <canvas id="socialCostBreakdownChart"></canvas>
+            </div>
+            <div class="chart-methodology">
+                <strong>방법론:</strong> 연간 사회적 비용은 스탠포드 분석 및 EPA 지침에 따라 영향 범주별로 배분. 건강 영향은 사망(EPA 통계적 생명 가치 $1,170만), 이환율, 의료비 포함. 열 노출로 인한 노동 생산성 손실. 해수면 상승 및 극한 기상으로 인한 재산 피해. 강수량 및 온도 변화로 인한 농업 손실. 기후 피해는 장기 온난화 영향, 생태계 교란, 비가역적 변화 포함.
+            </div>
+            <div class="chart-citation">
+                <strong>출처:</strong> Burke, Marshall 및 Lawrence Goulder, Stanford News (2021); U.S. Environmental Protection Agency, "Guidelines for Preparing Economic Analyses" (2024); 기후 피해에 관한 기후변화에 관한 정부간 협의체(IPCC) 평가 보고서.
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <h3 class="chart-title">🌟 원자력의 장점: 탄소 제로, 최소 사회적 비용</h3>
+        
+        <div style="background: linear-gradient(135deg, #e8f8f5 0%, #d5f4e6 100%); padding: 2rem; border-radius: 10px; margin-top: 2rem; border-left: 5px solid #27ae60;">
+            <h3 style="color: #27ae60; margin-bottom: 1rem;">✓ 원자력 에너지가 사회적 비용을 제거하는 이유</h3>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                <strong>탄소 배출 제로:</strong> 원자력 발전소는 운영 중 CO₂를 배출하지 않아 사회적 비용의 가장 큰 구성요소를 완전히 제거합니다. 50년에 걸쳐 45% 원자력으로 전환하면 캘리포니아는 천연가스 발전소에서 발생했을 약 9,800만 톤의 CO₂ 배출을 피하게 됩니다—현재 사회적 비용 추정치로 <strong>$500억의 기후 피해 회피</strong>를 나타냅니다. 이 이점은 회피된 배출이 비가역적 온난화, 해수면 상승, 생태계 붕괴를 방지하므로 시간이 지남에 따라 복리로 증가합니다.
+            </p>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                <strong>탁월한 안전 기록:</strong> 원자력 에너지는 TWh당 0.07명으로 모든 주요 에너지원 중 가장 낮은 사망률을 보입니다—태양광 패널(최대 0.44 사망/TWh, 공급망 포함 시 비슷한 0.02 사망/TWh의 설치 사고 제외)보다 낮고 천연가스(2.8 사망/TWh)보다 40배 더 안전합니다. 이 사망률은 체르노빌, 후쿠시마, 스리마일 섬 등 모든 역사적 원자력 사고를 포함합니다. 천연가스 대신 45% 원자력으로 구동되는 캘리포니아는 <strong>매년 약 226명의 생명을 구할</strong> 것이며, 50년간 11,300명입니다. EPA의 통계적 생명 가치(생명당 $1,170만)로 계산하면 이는 $1,327억의 가치를 나타내며—구해진 생명의 의료비 절감, 고통 감소, 유지된 생산성은 포함하지 않습니다.
+            </p>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                <strong>안정적이고 신뢰할 수 있는 전력이 경제적 혼란을 방지:</strong> 대규모 배터리 저장장치와 신뢰성을 위한 가스 "피크" 발전소의 지속이 필요한 간헐적 재생에너지와 달리, 원자력은 92% 용량계수로 일정한 기저부하 전력을 제공합니다. 이는 계통 불안정, 순환 정전, 전력 부족으로 인한 경제적 혼란의 숨겨진 사회적 비용을 제거합니다. 폭염 동안 발생한 캘리포니아의 2020년 순환 정전은 재생에너지 간헐성이 가장 필요할 때—수요가 최고조에 달하고 일몰 시 태양광 생산이 끝날 때—어떻게 실패할 수 있는지를 보여주었습니다. 스탠포드 경제학자 로렌스 굴더는 탄소 가격이 "생산 및 소비 결정"을 고려해야 한다고 지적하며, 안정적인 원자력 전력은 월 $18.92/kW의 저장 비용이나 지속적인 화석연료 백업 없이 둘 다 가능하게 합니다.
+            </p>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                <strong>환경정의 혜택:</strong> 원자력 에너지는 화석연료 오염의 피해를 가장 많이 받는 저소득 및 불이익 지역사회에 특히 혜택을 줍니다. 스탠포드 경제학자 마샬 버크는 "저소득 지역사회가 종종 기후변화로 인해 더 큰 피해를 받으며" "보호 기술을 쉽게 감당하지 못할 수 있다"고 강조합니다. 화석연료로 인한 대기오염을 제거하고 기후변화 가속화를 피함으로써, 원자력 에너지는 환경정의 지역사회에 불균형적인 혜택을 제공합니다. 또한 원자력 발전소는 고임금 노조 일자리(원자력 엔지니어 평균 $125,000 vs 재생에너지 기술자 $55,000-$58,000)를 창출하여 이러한 시설을 호스팅하는 지역사회에 경제적 상향 이동 기회를 제공합니다.
+            </p>
+            
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                <strong>장기적 지속가능성 및 자원 효율성:</strong> 원자력 발전소는 최소한의 토지 사용(GW당 1 평방마일 vs 태양광 75 평방마일), 최소한의 자원 추출, 최소한의 폐기물 발생으로 60-80년간 운영됩니다. 손가락 끝 크기의 우라늄 연료 펠릿 하나는 석탄 1톤, 천연가스 17,000 입방피트, 석유 1,780 파운드와 같은 에너지를 포함합니다. 미국 역사상 생산된 모든 핵폐기물은 10야드 깊이의 축구장 하나에 들어갈 수 있으며—사용후핵연료의 96%는 재활용될 수 있습니다. 프랑스는 원자력 발전 전기가 저렴하고(kWh당 $0.18 vs 캘리포니아 $0.28) 청정할 수 있음을 입증했습니다(탄소 집약도 60g CO₂/kWh vs 캘리포니아 200g CO₂/kWh), 이 모델이 대규모로 작동함을 증명합니다.
+            </p>
+        </div>
+    </div>
+
+    <div class="stats-grid" style="margin-top: 2rem;">
+        <div class="stat-card" style="background: linear-gradient(135deg, #e8f8f5 0%, #d5f4e6 100%);">
+            <div class="stat-label">탄소 없는 발전</div>
+            <div class="stat-value" style="color: #27ae60;">100%</div>
+            <div class="stat-description">원자력에서 CO₂ 배출 없음</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #e8f8f5 0%, #d5f4e6 100%);">
+            <div class="stat-label">안전 기록</div>
+            <div class="stat-value" style="color: #27ae60;">0.07</div>
+            <div class="stat-description">사망/TWh (체르노빌 포함)</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #e8f8f5 0%, #d5f4e6 100%);">
+            <div class="stat-label">용량계수</div>
+            <div class="stat-value" style="color: #27ae60;">92%</div>
+            <div class="stat-description">vs 태양광 25%, 풍력 35%</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #e8f8f5 0%, #d5f4e6 100%);">
+            <div class="stat-label">토지 사용 효율성</div>
+            <div class="stat-value" style="color: #27ae60;">75배</div>
+            <div class="stat-description">GW당 태양광보다 적은 토지</div>
+        </div>
+    </div>
+
+    <div class="chart-citation" style="margin-top: 2rem; font-size: 0.85rem;">
+        <strong>주요 출처:</strong> Burke, Marshall 및 Lawrence Goulder. "Professors Explain the Social Cost of Carbon." Stanford News, 2021년 6월. https://news.stanford.edu/stories/2021/06/professors-explain-social-cost-carbon. 버크는 스탠포드 지구시스템과학 부교수이고, 굴더는 환경자원경제학 니시하라 석좌교수입니다. 기사는 사회적 비용 방법론, 계산 방법, 정책 응용, 환경정의 함의를 설명합니다. 전체적으로 참조된 톤당 $51 추정치.
+    </div>
+</section>
+
+        <!-- EMPLOYMENT SECTION -->
+        <section id="employment" class="content-section">
+            <div class="dashboard">
+                <div class="chart-container">
+                    <h3 class="chart-title">에너지 부문별 일자리 창출 (MW당 일자리)</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="jobsChart"></canvas>
+                    </div>
+                    <div class="chart-methodology">
+                        <strong>방법론:</strong> 일자리 추정치는 건설 단계(임시) 및 운영 단계(영구) 고용을 포함한 설치 용량 메가와트당으로 계산. 원자력 수치는 건설, 운영, 유지보수, 연료 주기 일자리 포함. 재생에너지 추정치는 제조, 설치, 유지보수 포함.
+                    </div>
+                    <div class="chart-citation">
+                        <strong>출처:</strong> Kim, Hana 및 E. Jeon, "Structural Changes to Nuclear Energy Industries and the Economic Effects Resulting from Energy Transition Policies in South Korea," <em>Energies</em> 13, no. 7 (2020): 1806; California Governor's Office, "As Trump Embraces Dirty Fossil Fuels, California Hits Major Clean Energy Milestone," 2025년 10월 9일, https://www.energy.ca.gov/news/2025-10/.
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3 class="chart-title">부문별 평균 연봉 (USD)</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="salariesChart"></canvas>
+                    </div>
+                    <div class="chart-methodology">
+                        <strong>방법론:</strong> 급여 추정치는 엔지니어, 기술자, 운영자를 포함한 각 에너지 부문의 숙련 기술직 중간 임금을 나타냅니다. 소비자물가지수(CPI)를 사용하여 2025년 달러로 조정됨.
+                    </div>
+                    <div class="chart-citation">
+                        <strong>출처:</strong> U.S. Bureau of Labor Statistics, "Occupational Employment and Wage Statistics," 2024; California Energy Commission 2023-2024년 총 시스템 발전 보고서 고용 데이터.
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3 class="chart-title">근로자 재교육 프로그램 분포 (%)</h3>
+                <div class="chart-wrapper">
+                    <canvas id="retrainingChart"></canvas>
+                </div>
+                <div class="chart-methodology">
+                    <strong>방법론:</strong> 분포 비율은 화석연료 부문과 청정에너지 부문 간 기술 전환 가능성의 투입산출 분석을 기반으로 함. 기술 훈련 범주는 원자력, 태양광 설치, 풍력 기술자 프로그램 포함. 관리는 프로젝트 관리 및 안전 감독 역할 포함.
+                </div>
+                <div class="chart-citation">
+                    <strong>출처:</strong> Kim, Hana 및 E. Jeon, "Structural Changes to Nuclear Energy Industries and the Economic Effects Resulting from Energy Transition Policies in South Korea," <em>Energies</em> 13, no. 7 (2020): 1806; 캘리포니아 인력 전환 프로그램 분석.
+                </div>
+            </div>
+        </section>
+
+        <!-- HEALTH & SAFETY SECTION -->
+        <section id="health" class="content-section">
+            <!-- NEW BUBBLE CHART FOR MORTALITY -->
+            <div class="chart-container">
+                <h3 class="chart-title">에너지원별 사망률 (TWh당 사망자)</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem; text-align: center;">
+                    원의 면적은 사망률에 비례합니다. 버블 위에 마우스를 올리면 자세한 정보를 볼 수 있습니다.
+                </p>
+                
+                <div class="mortality-bubble-chart-wrapper">
+                    <div class="mortality-bubble-chart">
+                        <!-- Fossil Fuels -->
+                        <div class="mortality-bubble mortality-bubble-coal" 
+                             data-source="석탄" 
+                             data-deaths="100" 
+                             data-info="미세먼지, SO₂, NOₓ로 인한 대기오염; 광산 사고; 진폐증"
+                             data-comparison="원자력은 석탄보다 2,500배 더 안전"></div>
+                        
+                        <div class="mortality-bubble mortality-bubble-oil" 
+                             data-source="석유" 
+                             data-deaths="36" 
+                             data-info="연소 배출, 정유소 사고, 운송 유출, 추출 위험"
+                             data-comparison="원자력은 석유보다 900배 더 안전"></div>
+                        
+                        <div class="mortality-bubble mortality-bubble-biomass" 
+                             data-source="바이오매스" 
+                             data-deaths="24" 
+                             data-info="나무/숯 연소로 인한 실내 공기오염, 수확 및 가공 사고"
+                             data-comparison="원자력은 바이오매스보다 600배 더 안전"></div>
+                        
+                        <div class="mortality-bubble mortality-bubble-gas" 
+                             data-source="천연가스" 
+                             data-deaths="4" 
+                             data-info="가장 깨끗한 화석연료지만 여전히 NOₓ와 메탄 배출; 파이프라인 및 폭발 위험"
+                             data-comparison="원자력은 천연가스보다 100배 더 안전"></div>
+                        
+                        <!-- Clean energy at clock positions around coal -->
+                        <div class="mortality-bubble mortality-bubble-nuclear" 
+                             data-source="원자력" 
+                             data-deaths="0.04" 
+                             data-info="체르노빌, 후쿠시마, 스리마일 섬의 모든 사망 + 직업상 사망 + 이론적 방사선 노출(선형 무역치 모델) 포함"
+                             data-comparison="단위 전력 생산당 가장 안전한 에너지원"></div>
+                        
+                        <div class="mortality-bubble mortality-bubble-wind" 
+                             data-source="풍력" 
+                             data-deaths="0.15" 
+                             data-info="설치 및 유지보수 사고, 헬리콥터 충돌, 해상 익사"
+                             data-comparison="원자력은 풍력보다 4배 더 안전"></div>
+                        
+                        <div class="mortality-bubble mortality-bubble-hydro" 
+                             data-source="수력" 
+                             data-deaths="1.4" 
+                             data-info="1975년 반차오 댐 붕괴(171,000명 사망)가 지배적; 그 외에는 0.04/TWh로 매우 안전"
+                             data-comparison="원자력은 수력보다 35배 더 안전 (댐 붕괴 포함)"></div>
+                        
+                        <div class="mortality-bubble mortality-bubble-solar" 
+                             data-source="태양광" 
+                             data-deaths="0.44" 
+                             data-info="제조(실리콘 가공), 옥상 설치 추락, 공급망 사고"
+                             data-comparison="원자력은 태양광보다 11배 더 안전"></div>
+                        
+                        <!-- Static Labels for large bubbles -->
+                        <div class="mortality-bubble-label mortality-label-coal">석탄<br>100 사망/TWh</div>
+                        <div class="mortality-bubble-label mortality-label-oil">석유<br>36</div>
+                        <div class="mortality-bubble-label mortality-label-biomass">바이오매스<br>24</div>
+                        <div class="mortality-bubble-label mortality-label-gas">가스 4</div>
+                        
+                        <!-- Static Labels for small bubbles -->
+                        <div class="mortality-bubble-label mortality-label-nuclear">원자력 0.04 ⭐</div>
+                        <div class="mortality-bubble-label mortality-label-small mortality-label-wind">풍력 0.15</div>
+                        <div class="mortality-bubble-label mortality-label-small mortality-label-hydro">수력 1.4</div>
+                        <div class="mortality-bubble-label mortality-label-small mortality-label-solar">태양광 0.44</div>
+                    </div>
+                </div>
+                
+                <div class="mortality-insight-box">
+                    <h3>⚛️ 원자력: 가장 안전한 에너지원</h3>
+                    <div class="mortality-insight-stats">
+                        <div class="mortality-insight-stat">
+                            <div class="mortality-insight-number">2,500배</div>
+                            <div class="mortality-insight-label">석탄보다 안전</div>
+                        </div>
+                        <div class="mortality-insight-stat">
+                            <div class="mortality-insight-number">900배</div>
+                            <div class="mortality-insight-label">석유보다 안전</div>
+                        </div>
+                        <div class="mortality-insight-stat">
+                            <div class="mortality-insight-number">11배</div>
+                            <div class="mortality-insight-label">태양광보다 안전</div>
+                        </div>
+                        <div class="mortality-insight-stat">
+                            <div class="mortality-insight-number">4배</div>
+                            <div class="mortality-insight-label">풍력보다 안전</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mortality-legend">
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #2c3e50;"></div>
+                        <span>석탄: <span class="mortality-legend-value">100</span></span>
+                    </div>
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #c0392b;"></div>
+                        <span>석유: <span class="mortality-legend-value">36</span></span>
+                    </div>
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #d35400;"></div>
+                        <span>바이오매스: <span class="mortality-legend-value">24</span></span>
+                    </div>
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #f39c12;"></div>
+                        <span>가스: <span class="mortality-legend-value">4</span></span>
+                    </div>
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #3498db;"></div>
+                        <span>수력: <span class="mortality-legend-value">1.4</span></span>
+                    </div>
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #f1c40f;"></div>
+                        <span>태양광: <span class="mortality-legend-value">0.44</span></span>
+                    </div>
+                    <div class="mortality-legend-item">
+                        <div class="mortality-legend-color" style="background: #ff1493;"></div>
+                        <span>풍력: <span class="mortality-legend-value">0.15</span></span>
+                    </div>
+                    <div class="mortality-legend-item" style="background: linear-gradient(135deg, #27ae60, #1e8449); color: white;">
+                        <div class="mortality-legend-color" style="background: #27ae60; box-shadow: 0 0 8px #27ae60;"></div>
+                        <span>원자력: <span class="mortality-legend-value" style="color: white;">0.04</span> ⭐</span>
+                    </div>
+                </div>
+                
+                <div class="mortality-methodology-box">
+                    <strong>방법론:</strong> 원 면적은 사망률에 비례합니다 (면적 = π × r², 사망/TWh에 맞춰 스케일 조정). 사망에는 전체 연료 주기에 걸친 직접 사고(직업상 및 공공)와 대기오염 사망이 모두 포함됩니다. 원자력 사망률(0.04 사망/TWh)은 체르노빌, 후쿠시마, 스리마일 섬을 포함한 모든 역사적 사고와 직업상 사망 및 보수적인 선형 무역치 모델을 사용한 이론적 방사선 노출을 포함합니다. 태양광 사망(0.44/TWh)은 제조, 공급망, 설치 사고를 포함합니다. 화석연료 사망은 대기오염(미세먼지, NOₓ, SO₂)이 지배적입니다.
+                    
+                    <div class="mortality-citation-box">
+                        <strong>출처:</strong> 세계보건기구(WHO), 에너지원별 글로벌 사망률. 다음 자료에서 편집된 데이터: Markandya, A. 및 Wilkinson, P., "Electricity Generation and Health," <em>The Lancet</em> 370 (2007): 979-990; Sovacool, B. 외, "Balancing Safety with Sustainability," <em>Energy Research & Social Science</em> (2016); Our World in Data, "What are the safest and cleanest sources of energy?" (2022년 업데이트). WHO 수치는 ResearchGate 편집에서 보고됨: "Mortality rates for each energy source in deaths per billion kWh produced."
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard">
+                <div class="chart-container">
+                    <h3 class="chart-title">구한 생명: 원자력 전환 vs 현상 유지 (50년 누적)</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="livesSavedChart"></canvas>
+                    </div>
+                    <div class="chart-methodology">
+                        <strong>방법론:</strong> 구한 생명은 현재 화석연료 믹스(주로 천연가스) 대비 원자력 포함 시나리오의 대기오염 사망률 비교를 통해 계산됨. 캘리포니아 연간 발전량 280 TWh 가정. 현상 유지: 280 TWh × 30% 천연가스 × 2.8 사망/TWh = 연간 235명 사망. 원자력 시나리오: 280 TWh × 45% 원자력 × 0.07 사망/TWh = 연간 9명 사망. 차이: 연간 226명 구함 × 50년 = 11,300명 (보수적 추정을 위해 11,000명으로 반올림).
+                    </div>
+                    <div class="chart-citation">
+                        <strong>출처:</strong> Markandya, Anil 및 Paul Wilkinson, "Electricity Generation and Health," <em>The Lancet</em> 370, no. 9591 (2007): 979-990; California Energy Commission, "2024 Total System Electric Generation"; 캘리포니아별 발전 예측에 적용된 동료 심사 사망률 기반 계산.
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3 class="chart-title">50년간 의료비 절감 (10억 달러)</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="healthcareSavingsChart"></canvas>
+                    </div>
+                    <div class="chart-methodology">
+                        <strong>방법론:</strong> 의료비는 EPA 통계적 생명 가치(2025년 달러 기준 $1,170만)와 예방된 질병에 대한 직접 의료비를 사용하여 계산됨. 암 치료비 평균 건당 $150,000. 호흡기 질환 비용 평균 건당 $8,000. 심혈관 치료비 평균 에피소드당 $45,000. 모든 값은 연 3%로 할인되고 인플레이션에 맞춰 조정됨.
+                    </div>
+                    <div class="chart-citation">
+                        <strong>출처:</strong> Markandya, Anil 및 Paul Wilkinson, "Electricity Generation and Health," <em>The Lancet</em> 370, no. 9591 (2007); U.S. Environmental Protection Agency, "Guidelines for Preparing Economic Analyses," 2024; CDC 및 대기오염 건강 영향에 관한 의학 문헌의 의료비 추정치.
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- MORTALITY BUBBLE TOOLTIP -->
+        <div class="mortality-tooltip" id="mortalityTooltip">
+            <div class="mortality-tooltip-title"></div>
+            <div class="mortality-tooltip-value"></div>
+            <div class="mortality-tooltip-info"></div>
+            <div class="mortality-tooltip-comparison"></div>
+        </div>
+
+        
+        <!-- ARTIFICIAL INTELLIGENCE SECTION -->
+        <section id="ai" class="content-section">
+            <div class="chart-container">
+                <h2 class="chart-title">🤖 인공지능과 원자력 에너지</h2>
+                
+                <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 1.5rem; margin: 2rem 0; border-radius: 8px;">
+                    <p style="font-size: 1.1rem; margin: 0;"><strong>참고:</strong> 인공지능(AI)은 본 연구의 다른 분석에는 포함되지 않습니다. 그러나 AI는 원자력에 큰 부양책이 될 것입니다. AI는 완벽한 안전 기준과 효율적인 시스템을 위한 잠재력을 제공합니다. 다음은 AI가 원자력 기술을 지원할 때 가능한 것들입니다.</p>
+                </div>
+
+                <h3>공생 관계: AI는 원자력이 필요하고, 원자력은 AI가 필요합니다</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    인공지능과 원자력 에너지의 관계는 양방향이며 혁신적입니다. AI의 막대한 에너지 수요는 원자력을 데이터 센터의 이상적인 솔루션으로 만들고, AI의 분석 능력은 원자력 발전소 설계, 운영, 안전, 인허가를 혁신할 수 있습니다.
+                </p>
+
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                        <div class="stat-label" style="color: white;">데이터 센터 전력 수요 증가</div>
+                        <div class="stat-value" style="color: white;">160%</div>
+                        <div class="stat-label" style="color: white;">2030년까지 (2023년 대비)</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                        <div class="stat-label" style="color: white;">필요한 원자력 용량</div>
+                        <div class="stat-value" style="color: white;">85-90 GW</div>
+                        <div class="stat-label" style="color: white;">2030년까지 AI 성장을 위해</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                        <div class="stat-label" style="color: white;">비용 절감 잠재력</div>
+                        <div class="stat-value" style="color: white;">$1,000억+</div>
+                        <div class="stat-label" style="color: white;">원자력 인프라에서 AI를 통해</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                        <div class="stat-label" style="color: white;">인허가 시간 단축</div>
+                        <div class="stat-value" style="color: white;">50%</div>
+                        <div class="stat-label" style="color: white;">AI 도구로 잠재적</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">⚡ AI 데이터 센터 전력 수요 예측</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    주요 기술 기업(Google, Microsoft, Amazon, Meta)들이 AI 데이터 센터의 막대하고 증가하는 에너지 수요를 충족하기 위해 원자력 전력 계약을 체결하고 있습니다. 원자력은 간헐적 재생에너지가 매칭할 수 없는 24/7 신뢰할 수 있는 탄소 없는 전력을 제공합니다.
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="aiPowerDemandChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>출처:</strong> Singer, Brian, Jim Schneider 및 Carly Davenport. "Data Center Power Demand and Nuclear Energy." Goldman Sachs Research, 2024. https://www.goldmansachs.com/insights/articles/is-nuclear-energy-the-answer-to-ai-data-centers-power-consumption.
+                </div>
+
+                <div class="chart-methodology">
+                    <strong>계산:</strong> Goldman Sachs Research의 2023년 기준에서 2030년까지 데이터 센터 전력 소비 성장 예측을 기반으로 하며, AI 워크로드 증가, 효율성 향상, 인프라 확장을 고려함.
+                </div>
+
+                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1.5rem; margin: 2rem 0; border-radius: 8px;">
+                    <h4 style="margin-top: 0;">핵심 통찰: "친환경 신뢰성 프리미엄"</h4>
+                    <p>24시간 탄소 없는 전력은 소스 결합이나 비용 프리미엄 수용이 필요합니다. 원자력은 $77/MWh(현장 대규모)로 기저부하 전력을 제공하며, 저장장치를 갖춘 거의 100% 재생에너지 솔루션 $87/MWh, 탄소세 $100/톤이 적용된 천연가스 복합화력 $91/MWh와 비교됩니다.</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">🏢 주요 기술 기업 원자력 계약 (2024-2025)</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    선도적인 AI 기업들이 전력 구매 계약 및 직접 투자를 통해 10 GW 이상의 원자력 용량을 약정하여, AI 혁명을 지원하는 원자력의 중요한 역할을 시사합니다.
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="techNuclearDealsChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>출처:</strong> MIT Technology Review. "Can Nuclear Power Really Fuel the Rise of AI?" 2025년 5월. https://www.technologyreview.com/2025/05/20/1116339/ai-nuclear-power-energy-reactors/.
+                </div>
+
+                <div class="dashboard">
+                    <div style="background: #e8f5e9; border-radius: 8px; padding: 1.5rem;">
+                        <h4>Google + Kairos Power</h4>
+                        <ul>
+                            <li><strong>계약:</strong> 2035년까지 최대 500 MW</li>
+                            <li><strong>기술:</strong> 소형 용융염 냉각 원자로</li>
+                            <li><strong>첫 유닛:</strong> 2030년 목표</li>
+                            <li><strong>상태:</strong> NRC 건설 승인 획득</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: #fff3e0; border-radius: 8px; padding: 1.5rem;">
+                        <h4>Amazon + X-energy</h4>
+                        <ul>
+                            <li><strong>계약:</strong> 320-960 MW (확장 가능)</li>
+                            <li><strong>기술:</strong> 소형모듈원자로</li>
+                            <li><strong>일정:</strong> 2030년대 초</li>
+                            <li><strong>위치:</strong> 워싱턴 주</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: #e3f2fd; border-radius: 8px; padding: 1.5rem;">
+                        <h4>Microsoft + Constellation</h4>
+                        <ul>
+                            <li><strong>계약:</strong> 스리마일 섬 1호기</li>
+                            <li><strong>용량:</strong> ~835 MW</li>
+                            <li><strong>일정:</strong> 2028년 재가동</li>
+                            <li><strong>명칭:</strong> Crane Clean Energy Center</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: #f3e5f5; border-radius: 8px; padding: 1.5rem;">
+                        <h4>Meta의 원자력 전략</h4>
+                        <ul>
+                            <li><strong>초점:</strong> 기존 발전소 재허가 지원</li>
+                            <li><strong>기간:</strong> 20년 연장</li>
+                            <li><strong>이유:</strong> 신규 건설보다 빠름</li>
+                            <li><strong>목표:</strong> 24/7 탄소 없는 전력</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">💰 비용-편익 분석: AI를 위한 원자력 vs 대안</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    24/7 신뢰성 요구 사항을 고려할 때, 원자력은 저장장치가 필요한 간헐적 재생에너지나 탄소 가격이 적용된 천연가스에 비해 데이터 센터 전력에 대해 가장 낮은 총 시스템 비용을 제공합니다.
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="aiEnergyCostComparisonChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>출처:</strong> Singer, Brian, Jim Schneider 및 Carly Davenport. "Data Center Power Demand and Nuclear Energy." Goldman Sachs Research, 2024. 탄소세 $100/톤이 화석연료에 적용된 미국 시장 조건 기반 계산.
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">🔬 원자력 운영에 대한 AI의 혁신적 영향</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    AI와 머신러닝은 원자력 발전소 설계, 운영, 유지보수, 안전을 혁신하고 있습니다. 이러한 기술들은 수천억 달러의 비용 절감과 배치 일정 단축을 약속합니다.
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="aiNuclearBenefitsChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>출처:</strong> Laurin-Kovitz, Kirsten 및 Rick Stevens. "AI for Energy Report." Argonne National Laboratory, 2024년 4월. https://www.anl.gov/ai/reference/ai-for-energy-report-2024; Ngoy Kubelwa, Nelly. "Enhancing Nuclear Power Production with Artificial Intelligence." International Atomic Energy Agency Bulletin, 2024. https://www.iaea.org/bulletin/enhancing-nuclear-power-production-with-artificial-intelligence.
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">⏱️ AI 지원을 통한 SMR 배치 일정</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    AI는 더 빠른 설계 반복, 간소화된 인허가, 최적화된 건설 프로세스를 통해 소형모듈원자로 배치를 가속화하고 있습니다. IAEA가 SMR 배치를 위한 AI에 관한 조정된 연구를 주도합니다.
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="smrTimelineChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>출처:</strong> Gencturk, Merve 및 Karim Ahmed. "Nuclear Energy Could Power the Future of AI." Texas A&M University Engineering, 2025년 8월. https://engineering.tamu.edu/news/2025/08/nuclear-energy-could-power-the-future-of-ai.html; International Atomic Energy Agency. "Coordinated Research Project on AI for SMR Deployment," 2024.
+                </div>
+            </div>
+        </section>
+
+<!-- WORLDWIDE COSTS SECTION -->
+        <section id="worldwide-costs" class="content-section">
+            <div class="chart-container">
+                <h2 class="chart-title">🌍 전 세계 원자력 건설 비용</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    주요 원자력 국가들의 원자력 발전소 건설 비용 분석은 원자력 경제에 대한 가정에 도전하는 극적인 변동을 보여줍니다. 중국, 한국 및 기타 아시아 국가들은 최근 미국 프로젝트의 1/3에서 1/5 비용으로 일관되게 원자력 발전소를 건설합니다.
+                </p>
+
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #de2910, #ff6b6b);">
+                        <div class="stat-label" style="color: white;">중국 건설 비용</div>
+                        <div class="stat-value" style="color: white;">$2,230/kW</div>
+                        <div class="stat-label" style="color: white;">55기 운영 원자로</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #003478, #0066cc);">
+                        <div class="stat-label" style="color: white;">한국 비용</div>
+                        <div class="stat-value" style="color: white;">$2,200/kW</div>
+                        <div class="stat-label" style="color: white;">전 세계 최저</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #3c3b6e, #b22234);">
+                        <div class="stat-label" style="color: white;">미국 비용 (Vogtle)</div>
+                        <div class="stat-value" style="color: white;">$10,000/kW</div>
+                        <div class="stat-label" style="color: white;">4-5배 더 높음</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #4caf50, #8bc34a);">
+                        <div class="stat-label" style="color: white;">캘리포니아 SMR 목표</div>
+                        <div class="stat-value" style="color: white;">$3,600/kW</div>
+                        <div class="stat-label" style="color: white;">10-20기 이후 DOE 전망</div>
+                    </div>
+                </div>
+
+                <div class="chart-wrapper">
+                    <canvas id="worldwideConstructionCostsChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>출처:</strong> Anthropocene Institute (2024) - 중국 원자력 발전 및 비용 분석; 
+                    World Nuclear Association (2024); IEA/OECD NEA Projected Costs of Generating Electricity 2020; 
+                    Britain Remade (2024); Johns Hopkins University Nature Study (2025)
+                </div>
+
+                <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 1.5rem; margin: 2rem 0; border-radius: 8px;">
+                    <h3 style="margin-top: 0;">핵심 통찰: 비용은 원자력 기술에 내재된 것이 아님</h3>
+                    <p>전 세계적으로 건설 비용의 450% 변동($2,200/kW에서 $10,000/kW)은 높은 비용이 근본적인 기술 한계가 아닌 정책, 규제, 산업 조직 요인을 반영함을 보여줍니다. 지속적인 건설 프로그램, 표준화된 설계, 유리한 금융을 갖춘 국가들은 재생에너지 대안과 비슷하거나 더 낮은 비용을 달성합니다.</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">💰 전 세계 원자력 LCOE 비교</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    균등화 발전비용(LCOE)은 건설 비용, 금융, 운영 효율성에 따라 크게 달라집니다. 아시아 비용 수준에서 원자력은 가장 경제적인 탄소 제로 기저부하 옵션이 됩니다.
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="worldwideLCOEChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>출처:</strong> IEA Projected Costs 2020; 한국에너지경제연구원 2024; 
+                    프랑스 CRE 전망 2023; 유럽위원회 LCOE 분석 2020; U.S. EIA AEO 2025
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">📊 총 시스템 비용: 전체 그림</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    기본 LCOE만 비교하는 것은 오해의 소지가 있습니다. 변동성 재생에너지는 비용이 많이 드는 저장장치와 백업 발전이 필요합니다. 이러한 시스템 수준 비용을 포함하면 최적화된 가격의 원자력은 매우 경쟁력 있게 됩니다.
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="totalSystemCostsChart"></canvas>
+                </div>
+
+                <div style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 1.5rem; margin: 2rem 0; border-radius: 8px;">
+                    <h3 style="margin-top: 0;">최적화된 비용에서 원자력이 총 시스템 경제에서 승리</h3>
+                    <ul style="margin: 0.5rem 0 0 1.5rem;">
+                        <li><strong>원자력 (중국 비용):</strong> 총 시스템 비용 $72/MWh</li>
+                        <li><strong>원자력 (한국):</strong> 총 시스템 비용 $55-75/MWh</li>
+                        <li><strong>원자력 (캘리포니아 최적화):</strong> 총 시스템 비용 $80-95/MWh</li>
+                        <li><strong>풍력 + 저장장치:</strong> 총 시스템 비용 $103/MWh</li>
+                        <li><strong>태양광 + 저장장치:</strong> 총 시스템 비용 $121/MWh</li>
+                        <li><strong>원자력 (미국 현재):</strong> 총 시스템 비용 $137/MWh</li>
+                    </ul>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>출처:</strong> IEA Projected Costs 2020; CSIRO GenCost 2024; U.S. EIA AEO 2025; 
+                    NREL Annual Technology Baseline 2024; Lazard LCOE+ 2025
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">💵 투자수익률 분석</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    원자력의 ROI는 건설 비용에 따라 극적으로 달라집니다. 아시아 비용 수준에서 원자력은 60년 운영 수명 동안 탁월한 수익을 제공합니다.
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="roiComparisonChart"></canvas>
+                </div>
+
+                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1.5rem; margin: 2rem 0; border-radius: 8px;">
+                    <h3 style="margin-top: 0;">ROI 분석 요약 (60년 수명)</h3>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+                        <thead style="background: #f8f9fa;">
+                            <tr>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid #dee2e6;">시나리오</th>
+                                <th style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">자본/GW</th>
+                                <th style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">회수기간</th>
+                                <th style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">수명 ROI</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 0.75rem; border: 1px solid #dee2e6;">중국 모델</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">$22.3억</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">9.5년</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6; font-weight: bold; color: #2e7d32;">640%</td>
+                            </tr>
+                            <tr style="background: #f8f9fa;">
+                                <td style="padding: 0.75rem; border: 1px solid #dee2e6;">한국</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">$22.0억</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">12.5년</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6; font-weight: bold; color: #388e3c;">545%</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.75rem; border: 1px solid #dee2e6;">캘리포니아 최적화</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">$35.0억</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">13년</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6; font-weight: bold; color: #689f38;">470%</td>
+                            </tr>
+                            <tr style="background: #f8f9fa;">
+                                <td style="padding: 0.75rem; border: 1px solid #dee2e6;">프랑스 신규</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">$57.0억</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">16년</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6; font-weight: bold; color: #8bc34a;">380%</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.75rem; border: 1px solid #dee2e6;">미국 현재</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">$100.0억</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6;">22.5년</td>
+                                <td style="padding: 0.75rem; text-align: right; border: 1px solid #dee2e6; font-weight: bold;">275%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p style="margin-top: 1rem; font-size: 0.9rem;"><strong>모든 시나리오가 경제적으로 실행 가능합니다.</strong> 
+                    아시아 모델은 낮은 건설 비용과 최적화된 운영으로 탁월한 수익을 제공합니다.</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">🎯 캘리포니아의 원자력 기회</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    캘리포니아는 글로벌 원자력 성공 사례에서 배워 경제적으로 경쟁력 있는 청정 에너지를 배치할 수 있습니다.
+                    국제적 모범 사례를 활용한 소형모듈원자로(SMR) 함대 프로그램은 $70-90/MWh LCOE를 달성할 수 있습니다—모든 대안과 경쟁력 있습니다.
+                </p>
+
+                <div class="chart-wrapper">
+                    <canvas id="californiaOpportunityChart"></canvas>
+                </div>
+
+                <div class="chart-citation">
+                    <strong>출처:</strong> California Energy Commission 2024; CAISO 용량 연구; 
+                    U.S. DOE Advanced Reactor Demonstration Program; NREL SMR 비용 분석; 
+                    California AB 1632 분석; 국제 모범 사례 기반 저자 예측
+                </div>
+            </div>
+        </section>
+
+        <!-- BIBLIOGRAPHY SECTION -->
+        <section id="bibliography" class="content-section">
+            <div class="chart-container">
+<div class="bibliography-content">
+    <h2 class="chart-title">참고문헌</h2>
+    <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--primary);">동료 심사 학술지 논문</h3>
+    <div class="bibliography-entries">
+        <div class="bib-entry">
+            <span class="bib-authors">Apergis, N. 및 J. Payne.</span> <span class="bib-title">"A Panel Study of Nuclear Energy Consumption and Economic Growth."</span> <em>Energy Economics</em> 32, no. 3 (2010): 545-549. <a href="https://doi.org/10.1016/j.eneco.2009.09.015" target="_blank" class="bib-link">https://doi.org/10.1016/j.eneco.2009.09.015</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Davis, Lucas W. 및 Catherine Hausman.</span> <span class="bib-title">"Market Impacts of a Nuclear Power Plant Closure."</span> <em>American Economic Journal: Applied Economics</em> 8, no. 2 (2016): 92-122. <a href="https://doi.org/10.1257/app.20140473" target="_blank" class="bib-link">https://doi.org/10.1257/app.20140473</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Markandya, Anil 및 Paul Wilkinson.</span> <span class="bib-title">"Electricity Generation and Health."</span> <em>The Lancet</em> 370 (2007): 979-990. <a href="https://doi.org/10.1016/S0140-6736(07)61253-7" target="_blank" class="bib-link">https://doi.org/10.1016/S0140-6736(07)61253-7</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Wang, Qi, Jiale Guo, Rongrong Li 등.</span> <span class="bib-title">"Comparative Analysis of Coal, Oil, Gas, Renewable Energy and Carbon Emissions."</span> <em>Environmental Research</em> (2023). <a href="https://doi.org/10.1016/j.envres.2023.115290" target="_blank" class="bib-link">https://doi.org/10.1016/j.envres.2023.115290</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-authors">Wolde-Rufael, Y. 및 Kojo Menyah.</span> <span class="bib-title">"Nuclear Energy Consumption and Economic Growth."</span> <em>Energy Policy</em> (2010): 582-593. <a href="https://doi.org/10.1016/j.enpol.2010.01.004" target="_blank" class="bib-link">https://doi.org/10.1016/j.enpol.2010.01.004</a>
+        </div>
+    </div>
+    <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--primary);">보고서 및 기술 문서</h3>
+    <div class="bibliography-entries">
+        <div class="bib-entry">
+            <span class="bib-authors">Burke, Marshall 및 Lawrence Goulder.</span> <span class="bib-title">"Professors Explain the Social Cost of Carbon."</span> <em>Stanford News</em> (2021). <a href="https://news.stanford.edu/stories/2021/06/professors-explain-social-cost-carbon" target="_blank" class="bib-link">https://news.stanford.edu/stories/2021/06/professors-explain-social-cost-carbon</a><br><span class="bib-note">사회적 비용 방법론과 연방 정책 분석에 사용된 톤당 $51 추정치에 대한 종합적 설명</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Liftoff Report: Advanced Nuclear."</span> <span class="bib-organization">U.S. Department of Energy.</span> (2024). <br><span class="bib-note">전망: 배치 후 10-20년 내 비용 감소, 최초 유형 비용에서 하락</span>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Levelized Cost of Energy Analysis 18.0."</span> <span class="bib-organization">Lazard.</span> (2024). <a href="https://www.lazard.com/research-insights/levelized-cost-of-energyplus/" target="_blank" class="bib-link">https://www.lazard.com/research-insights/levelized-cost-of-energyplus/</a>
+        </div>
+        <div class="bib-entry">
+            <span class="bib-title">"Global Mortality Rates by Energy Source."</span> <span class="bib-organization">World Health Organization (WHO).</span> Markandya & Wilkinson (2007), Sovacool 등 (2016), Our World in Data 에너지 안전성 분석을 포함한 다수의 동료 심사 출처에서 편집된 데이터. <a href="https://www.who.int/" target="_blank" class="bib-link">https://www.who.int/</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.bibliography-content {
+    line-height: 1.8;
+}
+
+.bibliography-entries {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.bib-entry {
+    padding: 1rem;
+    background: #f8f9fa;
+    border-left: 3px solid var(--primary);
+    border-radius: 4px;
+}
+
+.bib-authors {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.bib-title {
+    color: var(--text-primary);
+}
+
+.bib-organization {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.bib-institution {
+    font-style: italic;
+    color: var(--text-secondary);
+}
+
+.bib-link {
+    color: var(--primary);
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.bib-link:hover {
+    text-decoration: underline;
+}
+
+.bib-note {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    display: block;
+    margin-top: 0.5rem;
+}
+</style>
+            </div>
+        </section>
+
+        <footer>
+            <p><strong>면책조항:</strong> 이 대시보드는 교육 및 분석 목적으로 경제 및 건강 영향 예측을 제시합니다. 모든 데이터는 동료 심사 연구 및 정부 기관에서 출처합니다. 예측에는 가정이 포함되어 있으며 예측이 아닌 시나리오로 해석되어야 합니다.</p>
+            <p style="margin-top: 1rem;">© 2025 캘리포니아 에너지 전환 분석 | 모든 출처는 시카고 매뉴얼 스타일을 사용하여 인용됨</p>
+            <p style="margin-top: 0.5rem; font-size: 0.8rem;">대시보드 생성: 2025년 11월 9일 | 최종 업데이트: 2025년 12월</p>
+        </footer>
+    </div><!-- end container -->
+
+<script>
+        // Tab functionality
+        function showTab(event, tabId) {
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(s => s.classList.remove('active'));
+            
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // Initialize all charts
+        document.addEventListener('DOMContentLoaded', function() {
+            const isMobile = window.innerWidth < 768;
+            
+            // Set Chart.js defaults
+            Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif';
+            Chart.defaults.responsive = true;
+            Chart.defaults.maintainAspectRatio = false;
+
+            // Carbon Emissions Chart
+            new Chart(document.getElementById('emissionsChart'), {
+                type: 'line',
+                data: {
+                    labels: ['2025', '2030', '2035', '2040', '2045'],
+                    datasets: [{
+                        label: '재생에너지 전용 (원자력 제외)',
+                        data: [100, 92, 78, 52, 18],
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4
+                    }, {
+                        label: 'SMR 포함 (2045 목표)',
+                        data: [100, 85, 58, 22, 0],
+                        borderColor: '#27ae60',
+                        backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { font: { size: isMobile ? 11 : 14 } }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: '연도', font: { size: 14, weight: 'bold' } }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: { display: true, text: '배출량 (2025년 대비 %)', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Jobs Chart
+            new Chart(document.getElementById('jobsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['원자력', '태양광', '풍력', '천연가스'],
+                    datasets: [{
+                        label: 'MW당 일자리',
+                        data: [0.75, 3.5, 2.8, 0.25],
+                        backgroundColor: ['#9b59b6', '#f39c12', '#3498db', '#95a5a6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            title: { display: true, text: '에너지 부문', font: { size: 14, weight: 'bold' } }
+                        },
+                        y: {
+                            title: { display: true, text: 'MW당 창출 일자리', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Salaries Chart
+            new Chart(document.getElementById('salariesChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['원자력 엔지니어', '태양광 기술자', '풍력 기술자', '가스 발전소 운영자'],
+                    datasets: [{
+                        label: '평균 연봉',
+                        data: [125000, 55000, 58000, 72000],
+                        backgroundColor: ['#9b59b6', '#f39c12', '#3498db', '#95a5a6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            title: { display: true, text: '직종 범주', font: { size: 14, weight: 'bold' } }
+                        },
+                        y: {
+                            title: { display: true, text: '연봉 (USD)', font: { size: 14, weight: 'bold' } },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Retraining Chart
+            new Chart(document.getElementById('retrainingChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['기술 훈련 (35%)', '관리 (25%)', '안전 감독 (20%)', '행정 (15%)', '기타 (5%)'],
+                    datasets: [{
+                        data: [35, 25, 20, 15, 5],
+                        backgroundColor: ['#9b59b6', '#3498db', '#f39c12', '#27ae60', '#95a5a6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { font: { size: isMobile ? 11 : 13 } }
+                        }
+                    }
+                }
+            });
+
+            // Lives Saved Chart
+            new Chart(document.getElementById('livesSavedChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['현상 유지\n(가스 중심 믹스)', '원자력 전환\n(45% 원자력)'],
+                    datasets: [{
+                        label: '예상 사망자',
+                        data: [11750, 450],
+                        backgroundColor: ['#e74c3c', '#27ae60']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    if (context.dataIndex === 0) {
+                                        return '차이: ~11,300명 생명 구함';
+                                    }
+                                    return '';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: '시나리오', font: { size: 14, weight: 'bold' } }
+                        },
+                        y: {
+                            title: { display: true, text: '총 사망자 (50년 기간)', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Healthcare Savings Chart
+            new Chart(document.getElementById('healthcareSavingsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['구한 생명의 가치', '회피된 암 치료', '회피된 호흡기 질환', '회피된 심혈관 질환'],
+                    datasets: [{
+                        label: '절감액 (10억 달러)',
+                        data: [132.7, 35.2, 8.9, 12.4],
+                        backgroundColor: ['#27ae60', '#e74c3c', '#3498db', '#9b59b6'],
+                        borderColor: '#2c3e50',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '총 절감액: 50년간 $1,892억',
+                            font: { size: 15, weight: 'bold' },
+                            color: '#27ae60'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: '의료 범주', font: { size: 14, weight: 'bold' } },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value + 'B';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Social Cost Cumulative Chart
+            new Chart(document.getElementById('socialCostChart'), {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 51}, (_, i) => 2025 + i),
+                    datasets: [{
+                        label: '현상 유지 (화석연료)',
+                        data: Array.from({length: 51}, (_, i) => 1.79 * i),
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: '원자력 전환',
+                        data: Array.from({length: 51}, (_, i) => 0),
+                        borderColor: '#27ae60',
+                        backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '회피된 사회적 비용: 50년간 $895억',
+                            font: { size: 15, weight: 'bold' },
+                            color: '#27ae60'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: '연도', font: { size: 14, weight: 'bold' } },
+                            ticks: {
+                                callback: function(value, index) {
+                                    return index % 5 === 0 ? this.getLabelForValue(value) : '';
+                                }
+                            }
+                        },
+                        y: {
+                            title: { display: true, text: '누적 사회적 비용 (10억 달러)', font: { size: 14, weight: 'bold' } },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value + 'B';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Social Cost Breakdown Chart
+            new Chart(document.getElementById('socialCostBreakdownChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: [
+                        '건강 영향 (사망 및 이환)',
+                        '생산성 손실 (열 영향)',
+                        '재산 피해 (기후 재해)',
+                        '농업 손실',
+                        '장기 기후 피해'
+                    ],
+                    datasets: [{
+                        data: [42, 18, 15, 12, 13],
+                        backgroundColor: ['#e74c3c', '#f39c12', '#3498db', '#2ecc71', '#9b59b6'],
+                        borderColor: '#fff',
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '연간 총 사회적 비용: $17.9억 (현재 가스 의존도)',
+                            font: { size: 14, weight: 'bold' },
+                            color: '#e74c3c'
+                        },
+                        legend: {
+                            display: true,
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+
+            // AI Power Demand Chart
+            new Chart(document.getElementById('aiPowerDemandChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030'],
+                    datasets: [{
+                        label: '데이터 센터 전력 수요 (TWh)',
+                        data: [147, 173, 206, 245, 291, 327, 361, 390],
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                        borderColor: '#667eea',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '미국 데이터 센터 전력 소비 전망',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'TWh/년', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Tech Nuclear Deals Chart
+            new Chart(document.getElementById('techNuclearDealsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Google + Kairos', 'Amazon + X-energy', 'Microsoft + Constellation', 'Meta (연장)'],
+                    datasets: [{
+                        label: '약정 용량 (MW)',
+                        data: [500, 640, 835, 2000],
+                        backgroundColor: ['#4285f4', '#ff9900', '#00a4ef', '#1877f2'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '주요 기술 기업 원자력 약정 (MW)',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '용량 (MW)', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // AI Energy Cost Comparison Chart
+            new Chart(document.getElementById('aiEnergyCostComparisonChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['원자력 (현장)', '재생에너지 + 저장장치', '천연가스 + 탄소세', '계통 믹스'],
+                    datasets: [{
+                        label: 'LCOE ($/MWh)',
+                        data: [77, 87, 91, 95],
+                        backgroundColor: ['#27ae60', '#f39c12', '#e74c3c', '#95a5a6'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '24/7 탄소 없는 전력 비용 비교',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '$/MWh', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // AI Nuclear Benefits Chart
+            new Chart(document.getElementById('aiNuclearBenefitsChart'), {
+                type: 'radar',
+                data: {
+                    labels: ['비용 절감', '안전성 향상', '효율성 향상', '인허가 속도', '유지보수 최적화', '설계 혁신'],
+                    datasets: [{
+                        label: 'AI 영향 잠재력 (%)',
+                        data: [50, 40, 35, 50, 40, 45],
+                        backgroundColor: 'rgba(102, 126, 234, 0.3)',
+                        borderColor: '#667eea',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#667eea'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '원자력 운영에 대한 AI 잠재적 영향',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 60,
+                            ticks: { stepSize: 20 }
+                        }
+                    }
+                }
+            });
+
+            // SMR Timeline Chart
+            new Chart(document.getElementById('smrTimelineChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['기존 프로세스', 'AI 지원'],
+                    datasets: [{
+                        label: '설계 단계 (개월)',
+                        data: [48, 24],
+                        backgroundColor: '#667eea'
+                    }, {
+                        label: '인허가 (개월)',
+                        data: [42, 21],
+                        backgroundColor: '#764ba2'
+                    }, {
+                        label: '건설 (개월)',
+                        data: [60, 42],
+                        backgroundColor: '#43e97b'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'SMR 배치 일정: 기존 vs AI 지원',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        x: { stacked: true },
+                        y: {
+                            stacked: true,
+                            title: { display: true, text: '개월', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Worldwide Construction Costs Chart
+            new Chart(document.getElementById('worldwideConstructionCostsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['한국', '중국', '일본', '프랑스 (과거)', '영국 (Hinkley C)', '미국 (Vogtle)'],
+                    datasets: [{
+                        label: '건설 비용 ($/kW)',
+                        data: [2200, 2230, 3900, 4500, 8500, 10000],
+                        backgroundColor: ['#003478', '#de2910', '#bc002d', '#002395', '#012169', '#3c3b6e'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '국가별 원자력 건설 비용 ($/kW)',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '$/kW', font: { size: 14, weight: 'bold' } },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Worldwide LCOE Chart
+            new Chart(document.getElementById('worldwideLCOEChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['한국', '중국', '프랑스 (기존)', '일본', '영국', '미국'],
+                    datasets: [{
+                        label: 'LCOE ($/MWh)',
+                        data: [55, 72, 45, 85, 110, 137],
+                        backgroundColor: ['#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ff9800', '#f44336'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '국가별 원자력 LCOE ($/MWh)',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '$/MWh', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Total System Costs Chart
+            new Chart(document.getElementById('totalSystemCostsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['원자력 (한국)', '원자력 (중국)', '원자력 (캘리포니아 최적화)', '풍력 + 저장장치', '태양광 + 저장장치', '원자력 (미국 현재)'],
+                    datasets: [{
+                        label: '기본 LCOE',
+                        data: [55, 72, 80, 45, 42, 137],
+                        backgroundColor: '#3498db'
+                    }, {
+                        label: '통합/저장 비용',
+                        data: [0, 0, 0, 58, 79, 0],
+                        backgroundColor: '#e74c3c'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '총 시스템 비용 비교 ($/MWh)',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        x: { stacked: true },
+                        y: {
+                            stacked: true,
+                            title: { display: true, text: '$/MWh', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // ROI Comparison Chart
+            new Chart(document.getElementById('roiComparisonChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['중국 모델', '한국', '캘리포니아 최적화', '프랑스 신규', '미국 현재'],
+                    datasets: [{
+                        label: '수명 ROI (%)',
+                        data: [640, 545, 470, 380, 275],
+                        backgroundColor: ['#2e7d32', '#388e3c', '#689f38', '#8bc34a', '#aed581'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '건설 비용 시나리오별 60년 수명 ROI',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'ROI (%)', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // California Opportunity Chart
+            new Chart(document.getElementById('californiaOpportunityChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['현재 미국 원자력', '캘리포니아 SMR 목표', '태양광 + 저장장치', '풍력 + 저장장치', '국제 모범 사례'],
+                    datasets: [{
+                        label: '총 시스템 비용 ($/MWh)',
+                        data: [137, 85, 121, 103, 65],
+                        backgroundColor: ['#e74c3c', '#f39c12', '#ffc107', '#3498db', '#27ae60'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '캘리포니아 에너지 비용 비교 ($/MWh)',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '$/MWh', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // =============================================
+            // MORTALITY BUBBLE CHART TOOLTIP FUNCTIONALITY
+            // =============================================
+            const mortalityTooltip = document.getElementById('mortalityTooltip');
+            const mortalityBubbles = document.querySelectorAll('.mortality-bubble');
+            
+            mortalityBubbles.forEach(bubble => {
+                bubble.addEventListener('mouseenter', function(e) {
+                    const source = this.dataset.source;
+                    const deaths = this.dataset.deaths;
+                    const info = this.dataset.info;
+                    const comparison = this.dataset.comparison;
+                    
+                    mortalityTooltip.querySelector('.mortality-tooltip-title').textContent = source;
+                    mortalityTooltip.querySelector('.mortality-tooltip-value').textContent = deaths + ' 사망/TWh';
+                    mortalityTooltip.querySelector('.mortality-tooltip-info').textContent = info;
+                    mortalityTooltip.querySelector('.mortality-tooltip-comparison').textContent = comparison;
+                    
+                    mortalityTooltip.style.display = 'block';
+                });
+                
+                bubble.addEventListener('mousemove', function(e) {
+                    const tooltipWidth = mortalityTooltip.offsetWidth;
+                    const tooltipHeight = mortalityTooltip.offsetHeight;
+                    const windowWidth = window.innerWidth;
+                    const windowHeight = window.innerHeight;
+                    
+                    let left = e.clientX + 15;
+                    let top = e.clientY + 15;
+                    
+                    // Prevent tooltip from going off right edge
+                    if (left + tooltipWidth > windowWidth - 20) {
+                        left = e.clientX - tooltipWidth - 15;
+                    }
+                    
+                    // Prevent tooltip from going off bottom edge
+                    if (top + tooltipHeight > windowHeight - 20) {
+                        top = e.clientY - tooltipHeight - 15;
+                    }
+                    
+                    mortalityTooltip.style.left = left + 'px';
+                    mortalityTooltip.style.top = top + 'px';
+                });
+                
+                bubble.addEventListener('mouseleave', function() {
+                    mortalityTooltip.style.display = 'none';
+                });
+            });
+
+        }); // End DOMContentLoaded
+    </script>
+</body>
+</html>
+                    }
+                }
+            });
+
+            // SMR Timeline Chart
+            new Chart(document.getElementById('smrTimelineChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['기존 대형 원자로', 'SMR (전통)', 'SMR + AI'],
+                    datasets: [{
+                        label: '배치 기간 (개월)',
+                        data: [108, 66, 48],
+                        backgroundColor: ['#e74c3c', '#f39c12', '#27ae60'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '원자로 유형별 배치 일정',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '개월', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Worldwide Construction Costs Chart
+            new Chart(document.getElementById('worldwideConstructionCostsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['한국', '중국', '일본', '프랑스 (역사적)', '영국 (Hinkley C)', '미국 (Vogtle)'],
+                    datasets: [{
+                        label: '건설 비용 ($/kW)',
+                        data: [2200, 2230, 3900, 4500, 8500, 10000],
+                        backgroundColor: ['#003478', '#de2910', '#bc002d', '#002395', '#012169', '#3c3b6e'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '국가별 원자력 건설 비용 ($/kW)',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '$/kW', font: { size: 14, weight: 'bold' } },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Worldwide LCOE Chart
+            new Chart(document.getElementById('worldwideLCOEChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['한국', '중국', '프랑스 (기존)', '일본', '영국', '미국'],
+                    datasets: [{
+                        label: 'LCOE ($/MWh)',
+                        data: [55, 72, 45, 85, 110, 137],
+                        backgroundColor: ['#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ff9800', '#f44336'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '국가별 원자력 LCOE ($/MWh)',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '$/MWh', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // Total System Costs Chart
+            new Chart(document.getElementById('totalSystemCostsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['원자력 (한국)', '원자력 (중국)', '원자력 (CA 최적화)', '풍력 + 저장', '태양광 + 저장', '원자력 (현재 미국)'],
+                    datasets: [{
+                        label: '기본 LCOE',
+                        data: [55, 72, 80, 45, 42, 137],
+                        backgroundColor: '#3498db'
+                    }, {
+                        label: '통합/저장 비용',
+                        data: [0, 0, 0, 58, 79, 0],
+                        backgroundColor: '#e74c3c'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '총 시스템 비용 비교 ($/MWh)',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        x: { stacked: true },
+                        y: {
+                            stacked: true,
+                            title: { display: true, text: '$/MWh', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // ROI Comparison Chart
+            new Chart(document.getElementById('roiComparisonChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['중국 모델', '한국', '캘리포니아 최적화', '프랑스 신규', '현재 미국'],
+                    datasets: [{
+                        label: '수명 ROI (%)',
+                        data: [640, 545, 470, 380, 275],
+                        backgroundColor: ['#2e7d32', '#388e3c', '#689f38', '#8bc34a', '#aed581'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '건설 비용 시나리오별 60년 수명 ROI',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'ROI (%)', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // California Opportunity Chart
+            new Chart(document.getElementById('californiaOpportunityChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['현재 미국 원자력', '캘리포니아 SMR 목표', '태양광 + 저장', '풍력 + 저장', '국제 모범 사례'],
+                    datasets: [{
+                        label: '총 시스템 비용 ($/MWh)',
+                        data: [137, 85, 121, 103, 65],
+                        backgroundColor: ['#e74c3c', '#f39c12', '#ffc107', '#3498db', '#27ae60'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '캘리포니아 에너지 비용 비교 ($/MWh)',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '$/MWh', font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+
+            // =============================================
+            // MORTALITY BUBBLE CHART TOOLTIP FUNCTIONALITY
+            // =============================================
+            const mortalityTooltip = document.getElementById('mortalityTooltip');
+            const mortalityBubbles = document.querySelectorAll('.mortality-bubble');
+            
+            mortalityBubbles.forEach(bubble => {
+                bubble.addEventListener('mouseenter', function(e) {
+                    const source = this.dataset.source;
+                    const deaths = this.dataset.deaths;
+                    const info = this.dataset.info;
+                    const comparison = this.dataset.comparison;
+                    
+                    mortalityTooltip.querySelector('.mortality-tooltip-title').textContent = source;
+                    mortalityTooltip.querySelector('.mortality-tooltip-value').textContent = deaths + ' 사망/TWh';
+                    mortalityTooltip.querySelector('.mortality-tooltip-info').textContent = info;
+                    mortalityTooltip.querySelector('.mortality-tooltip-comparison').textContent = comparison;
+                    
+                    mortalityTooltip.style.display = 'block';
+                });
+                
+                bubble.addEventListener('mousemove', function(e) {
+                    const tooltipWidth = mortalityTooltip.offsetWidth;
+                    const tooltipHeight = mortalityTooltip.offsetHeight;
+                    const windowWidth = window.innerWidth;
+                    const windowHeight = window.innerHeight;
+                    
+                    let left = e.clientX + 15;
+                    let top = e.clientY + 15;
+                    
+                    // Prevent tooltip from going off right edge
+                    if (left + tooltipWidth > windowWidth - 20) {
+                        left = e.clientX - tooltipWidth - 15;
+                    }
+                    
+                    // Prevent tooltip from going off bottom edge
+                    if (top + tooltipHeight > windowHeight - 20) {
+                        top = e.clientY - tooltipHeight - 15;
+                    }
+                    
+                    mortalityTooltip.style.left = left + 'px';
+                    mortalityTooltip.style.top = top + 'px';
+                });
+                
+                bubble.addEventListener('mouseleave', function() {
+                    mortalityTooltip.style.display = 'none';
+                });
+            });
+
+        }); // End DOMContentLoaded
+    </script>
+</body>
+</html>
